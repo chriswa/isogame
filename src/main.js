@@ -1,7 +1,7 @@
-import * as gfx from './gfx.js'
-import * as battle from './battle.js'
+import * as gfx from './gfx/gfx.js'
+import * as battleBuilder from './battle/battleBuilder.js'
 
-const battle1 = battle.generate()
+const battle1 = battleBuilder.build()
 
 gfx.startLoop(dt => {
 

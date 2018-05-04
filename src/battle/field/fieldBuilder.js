@@ -1,19 +1,30 @@
 import Field from './Field.js'
+import FBM from '../../util/FBM.js'
 
-export function generate() {
+function quantize(v) {
+	//return Math.floor(v * 8) / 3
+	return (v * 5 - 3)
+}
+
+export function build(fieldDescriptor) {
+
+	const { type, seed } = fieldDescriptor
+	if (type !== 'randomwoods') { throw new Error(`field type unsupported`) }
+
+	const fbm = new FBM(seed, 6, 2, 0.2, 2, 0.07)
 
 	const fieldWidth = 32 // max is 104?
 	const tileData = []
 	for (let z = 0; z < fieldWidth; z += 1) {
 		for (let x = 0; x < fieldWidth; x += 1) {
-			const baseHeight = Math.floor(Math.random() * 4) / 4
 			const cornerHeights = {
-				ne: baseHeight + Math.floor(Math.random() * 3 - 1) / 4,
-				se: baseHeight + Math.floor(Math.random() * 3 - 1) / 4,
-				sw: baseHeight + Math.floor(Math.random() * 3 - 1) / 4,
-				nw: baseHeight + Math.floor(Math.random() * 3 - 1) / 4,
+				ne: quantize(fbm.sample(x + 0.5, z - 0.5)),
+				se: quantize(fbm.sample(x + 0.5, z + 0.5)),
+				sw: quantize(fbm.sample(x - 0.5, z + 0.5)),
+				nw: quantize(fbm.sample(x - 0.5, z - 0.5)),
 			}
-			const midHeight = (cornerHeights.nw + cornerHeights.se) / 2
+			const midHeight = quantize(fbm.sample(x, z))
+			//const midHeight = (cornerHeights.nw + cornerHeights.se) / 2
 			tileData.push({
 				x: x,
 				z: z,
@@ -23,10 +34,10 @@ export function generate() {
 				midHeight: midHeight,
 				edgeSlopeHeights: { n: 4.5, s: 4, e: undefined, w: undefined }, // undefined may signify a step or a jump
 				overlayQuadId: 0, // used to detemine which triangles to enable for rendering an overlay for this tile
-				west: undefined, // set below
-				east: undefined, // set below
-				north: undefined, // set below
-				south: undefined, // set below
+				west: undefined,  // pointers to neighboring tiles; set below
+				east: undefined,  // pointers to neighboring tiles; set below
+				north: undefined, // pointers to neighboring tiles; set below
+				south: undefined, // pointers to neighboring tiles; set below
 
 				cornerHeights, // cornerHeights is not used outside of fieldGenerator
 			})

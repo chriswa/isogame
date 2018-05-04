@@ -15,12 +15,12 @@ export function intersectTriangle(origin, direction, a, b, c) {
 	let DdN = twgl.v3.dot(direction, normal)
 	let sign
 	if (DdN > 0) {
-		//return null // backface culling?
 		sign = 1
 	}
 	else if (DdN < 0) {
-		sign = -1
-		DdN = -DdN
+		return null // backface culling?
+		//sign = -1
+		//DdN = -DdN
 	}
 	else {
 		return null // ray is parallel to plane, no intersection

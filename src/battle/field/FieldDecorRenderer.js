@@ -1,4 +1,4 @@
-import * as gfx from '../gfx.js'
+import * as gfx from '../../gfx/gfx.js'
 const gl = gfx.gl
 
 

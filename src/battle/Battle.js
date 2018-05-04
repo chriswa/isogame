@@ -1,31 +1,19 @@
-import * as input from './input.js'
-import * as camera from './camera.js'
-import * as cameraController from './cameraController.js'
-import * as FieldGenerator from './field/FieldGenerator.js'
-import BillboardGroup from './billboardGroup.js'
-import SpriteData from '../assets/sprites.js'
+import * as input from '../util/input.js'
+import * as camera from '../gfx/camera.js'
+import * as cameraController from '../gfx/cameraController.js'
+import * as fieldBuilder from './field/fieldBuilder.js'
+import BillboardGroup from '../gfx/BillboardGroup.js'
+import SpriteData from '../../assets/sprites.js'
+import { addRemovableEventListener } from '../util/domUtils.js'
 
-
-function addRemovableEventListener(target, eventType, listener) {
-	target.addEventListener(eventType, listener)
-	return () => {
-		target.removeEventListener(eventType, listener)
-	}
-}
-
-
-export function generate() {
-	return new Battle()
-}
-
-class Battle {
+export default class Battle {
 
 	constructor() {
 		this.tt = 0
 		this.destroyCallbacks = []
 
 		// sample field
-		this.field1 = FieldGenerator.generate()
+		this.field1 = fieldBuilder.build({ type: "randomwoods", seed: 123 })
 
 		// sample billboard(s)
 		this.bbgroup1 = new BillboardGroup("assets/sprites.png", 10, SpriteData)
@@ -34,6 +22,8 @@ class Battle {
 		const y = 0
 		this.bb2.setPosition(twgl.v3.create(x + .5, this.field1.tileData[this.field1.size * y + x].midHeight, y + .5))
 		this.bb2.setGlow(1.0)
+
+		this.initEventHandlers()
 	}
 
 	destroy() {
