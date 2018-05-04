@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>isogame</title>
+
+		<style>
+			body {
+				margin: 0;
+			}
+
+			#mainCanvas {
+				width: 100vw;
+				height: 100vh;
+				display: block;
+			}
+		</style>
+	</head>
+	<body>
+		<!-- page content -->
+		<canvas id="mainCanvas"></canvas>
+
+		<!-- libs -->
+		<!--<script src="//unpkg.com/lodash@4.17.4/lodash.js"></script>-->
+		<script src="//unpkg.com/twgl.js@3.8.0/dist/3.x/twgl-full.js"></script>
+		<!--<script src="//unpkg.com/noisejs@2.1.0/index.js"></script>-->
+
+		<!-- mrdoob stats -->
+		<script>
+			(function () {
+				var script = document.createElement('script')
+				script.onload = function () {
+					var stats = new Stats()
+					document.body.appendChild(stats.dom)
+					requestAnimationFrame(function loop() {
+						stats.update()
+						requestAnimationFrame(loop)
+					})
+				}
+				script.src = '//rawgit.com/mrdoob/stats.js/master/build/stats.min.js'
+				document.head.appendChild(script)
+			})()
+		</script>
+
+		<!-- main -->
+		<script type="module" src="main.js"></script>
+		<script nomodule>
+			alert('Sorry!\n\nYour browser does not support <script type="module">.\n\nTry Chrome?')
+		</script>
+	</body>
+</html>

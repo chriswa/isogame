@@ -1,0 +1,270 @@
+<!doctype html>
+<html><head><style>
+	img, canvas {
+		border: 1px solid black;
+		margin: 1px;
+		background-image: linear-gradient(45deg, #eeeeee 25%, transparent 25%), linear-gradient(-45deg, #eeeeee 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #eeeeee 75%), linear-gradient(-45deg, transparent 75%, #eeeeee 75%);
+		background-size: 20px 20px;
+		background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+	}
+</style></head><body>
+<img data-gridSize="64" data-offset="32,48" data-namePrefix="human_red-"     src="sprites/human_red.png"     data-nameSuffixes="idle-s,walk1-s,walk2-s,cast-s,act-s,idle-e,walk1-e,walk2-e,cast-e,act-e,idle-n,walk1-n,walk2-n,cast-n,act-n,idle-w,walk1-w,walk2-w,cast-w,act-w">
+<img data-gridSize="64" data-offset="32,48" data-namePrefix="human_green-"   src="sprites/human_green.png"   data-nameSuffixes="idle-s,walk1-s,walk2-s,cast-s,act-s,idle-e,walk1-e,walk2-e,cast-e,act-e,idle-n,walk1-n,walk2-n,cast-n,act-n,idle-w,walk1-w,walk2-w,cast-w,act-w">
+<img data-gridSize="64" data-offset="32,48" data-namePrefix="human_purple-"  src="sprites/human_purple.png"  data-nameSuffixes="idle-s,walk1-s,walk2-s,cast-s,act-s,idle-e,walk1-e,walk2-e,cast-e,act-e,idle-n,walk1-n,walk2-n,cast-n,act-n,idle-w,walk1-w,walk2-w,cast-w,act-w">
+<img data-gridSize="64" data-offset="32,48" data-namePrefix="human_blue-"    src="sprites/human_blue.png"    data-nameSuffixes="idle-s,walk1-s,walk2-s,cast-s,act-s,idle-e,walk1-e,walk2-e,cast-e,act-e,idle-n,walk1-n,walk2-n,cast-n,act-n,idle-w,walk1-w,walk2-w,cast-w,act-w">
+<img data-gridSize="64" data-offset="32,48" data-namePrefix="goblin_red-"    src="sprites/goblin_red.png"    data-nameSuffixes="idle-s,walk1-s,walk2-s,cast-s,act-s,idle-e,walk1-e,walk2-e,cast-e,act-e,idle-n,walk1-n,walk2-n,cast-n,act-n,idle-w,walk1-w,walk2-w,cast-w,act-w">
+<img data-gridSize="64" data-offset="32,48" data-namePrefix="goblin_green-"  src="sprites/goblin_green.png"  data-nameSuffixes="idle-s,walk1-s,walk2-s,cast-s,act-s,idle-e,walk1-e,walk2-e,cast-e,act-e,idle-n,walk1-n,walk2-n,cast-n,act-n,idle-w,walk1-w,walk2-w,cast-w,act-w">
+<img data-gridSize="64" data-offset="32,48" data-namePrefix="goblin_purple-" src="sprites/goblin_purple.png" data-nameSuffixes="idle-s,walk1-s,walk2-s,cast-s,act-s,idle-e,walk1-e,walk2-e,cast-e,act-e,idle-n,walk1-n,walk2-n,cast-n,act-n,idle-w,walk1-w,walk2-w,cast-w,act-w">
+<img data-gridSize="64" data-offset="32,48" data-namePrefix="goblin_blue-"   src="sprites/goblin_blue.png"   data-nameSuffixes="idle-s,walk1-s,walk2-s,cast-s,act-s,idle-e,walk1-e,walk2-e,cast-e,act-e,idle-n,walk1-n,walk2-n,cast-n,act-n,idle-w,walk1-w,walk2-w,cast-w,act-w">
+<script>
+	const sourceImages = Array.prototype.slice.call( document.getElementsByTagName('img') )
+
+	const atlasSize = 1024
+	const atlasCanvas = createCanvas(atlasSize, atlasSize)
+	const atlas = {
+		x: 0,
+		y0: 0,
+		y1: 0,
+		data: {},
+		add(name, spriteCanvas, sprite_x0, sprite_y0, sprite_w, sprite_h, sprite_xoff, sprite_yoff) {
+			if (this.x + sprite_w >= atlasSize) {
+				this.x = 0
+				this.y0 = this.y1 + 1
+			}
+			if (this.y1 >= atlasSize) {
+				throw new Error("atlas is not large enough!")
+			}
+			this.y1 = Math.max(this.y1, this.y0 + sprite_h)
+			atlasCanvas.ctx.drawImage(spriteCanvas.canvas, sprite_x0, sprite_y0, sprite_w, sprite_h, this.x, this.y0, sprite_w, sprite_h)
+
+			this.data[name] = {
+				x: this.x,
+				y: this.y0,
+				w: sprite_w,
+				h: sprite_h,
+				ox: sprite_xoff,
+				oy: sprite_yoff,
+			}
+
+			this.x += sprite_w
+		},
+	}
+
+	function createCanvas(w, h) {
+		const canvas = document.createElement('canvas')
+		const ctx = canvas.getContext('2d')
+		document.body.appendChild(canvas)
+		canvas.width = w
+		canvas.height = h
+		const destroy = () => {
+			document.body.removeChild(canvas)
+		}
+		return { canvas, ctx, destroy }
+	}
+
+	// wait until all images are loaded...
+	Promise.all(sourceImages.map(img => {
+		return new Promise((resolve, reject) => {
+			img.addEventListener('load', e => {
+				resolve(img)
+			})
+		})
+	})).then(processLoadedImages)
+
+	function processLoadedImages(images) {
+		const finalSprites = []
+		images.forEach(image => {
+			const gridSize = parseInt(image.getAttribute('data-gridSize'))
+			if (!gridSize) { throw new Error("data-gridSize attribute is mandatory") }
+			const [offsetX, offsetY] = image.getAttribute('data-offset').split(',').map(n => { return parseInt(n) })
+			const scratch = createCanvas(gridSize + 2, gridSize + 2)
+
+			const namePrefix = image.getAttribute('data-namePrefix')
+			const nameSuffixList = image.getAttribute('data-nameSuffixes').split(',')
+
+			const across = image.width / gridSize
+			const down = image.height / gridSize
+			if (across !== Math.round(across)) { throw new Error("image width is not a multiple of gridSize") }
+			if (down !== Math.round(down)) { throw new Error("image height is not a multiple of gridSize") }
+
+			for (let gridTY = 0; gridTY < down; gridTY += 1) {
+				for (let gridTX = 0; gridTX < across; gridTX += 1) {
+					const gridX0 = gridTX * gridSize
+					const gridY0 = gridTY * gridSize
+					
+					scratch.ctx.clearRect(0, 0, gridSize + 2, gridSize + 2)
+					scratch.ctx.drawImage(image, gridX0, gridY0, gridSize, gridSize, 1, 1, gridSize, gridSize)
+					addGlow(scratch)
+					
+					const imageData = scratch.ctx.getImageData(0, 0, gridSize + 2, gridSize + 2)
+
+					const [ox, oy] = findOpaquePixelInRect(imageData, 0, 0, imageData.width - 1, imageData.height - 1)
+					if (ox === undefined) { debugger ; throw new Error("no opaque pixels found in grid square") }
+					const [x0, y0, x1, y1] = findSpriteRect(imageData, ox, oy)
+					const w = x1 - x0 + 1
+					const h = y1 - y0 + 1
+					const xoff = offsetX - x0 + 1
+					const yoff = offsetY - y0 + 1
+
+					const name = namePrefix + nameSuffixList.shift()
+
+					atlas.add(name, scratch, x0, y0, w, h, xoff, yoff)
+
+				}
+			}
+
+			scratch.destroy()
+
+		})
+
+		console.log(atlas.data)
+		const textarea = document.createElement('textarea')
+		textarea.innerText = 'export default ' + JSON.stringify({
+			size: atlasSize,
+			sprites: atlas.data,
+		})
+		document.body.appendChild(textarea)
+
+	}
+	
+	/*
+	img.addEventListener('load', e => {
+		 
+		const src = createCanvas(img.width, img.height)
+		src.ctx.drawImage(img, 0, 0)
+		//const dst = createCanvas(w, h)
+		
+		const imageData = src.ctx.getImageData(0, 0, src.canvas.width, src.canvas.height)
+
+		while (true) {
+			const [ox, oy] = findOpaquePixelInRect(imageData, 0, 0, imageData.width - 1, imageData.height - 1)
+			if (ox === undefined) { break }
+			//console.log(`opaque pixel found at [${ox}, ${oy}]`)
+
+			const [x0, y0, x1, y1] = findSpriteRect(imageData, ox, oy)
+			console.log(`rect found at [${x0}, ${y0}, ${x1}, ${y1}]`)
+			
+			//TODO: pull rect out into a new canvas, add glow border
+			const w = x1 - x0
+			const h = y1 - y0
+			const spr = createCanvas(w + 2, h + 2)
+			allSpriteCanvases.push(spr)
+			spr.ctx.drawImage(src.canvas, x0, y0, w, h, 1, 1, w, h)
+			addGlow(spr)
+
+			// clear pixels in imageData so we don't "find" this same sprite again
+			for (let y = y0; y <= y1; y += 1) {
+				for (let x = x0; x <= x1; x += 1) {
+					imageData.data[(imageData.width * y + x) * 4 + 3] = 0
+				}
+			}
+			// TESTING
+			src.ctx.strokeStyle = 'blue'
+			src.ctx.strokeRect(x0 - 0.5, y0 - 0.5, x1 - x0 + 2, y1 - y0 + 2)
+		}
+		//src.ctx.putImageData(imageData, 0, 0) // unnecessary
+
+
+
+		function getPixelAlpha(imageData, x, y) {
+			const w = imageData.width
+			const h = imageData.height
+			if (x < 0 || x >= w || y < 0 || y >= h) { return undefined }
+			return imageData.data[(w * y + x) * 4 + 3]
+			
+		}
+
+	})
+	*/
+
+	function addGlow(spr) {
+		const w = spr.canvas.width
+		const h = spr.canvas.height
+		const imageData = spr.ctx.getImageData(0, 0, w, h)
+		const data = imageData.data
+		for (let y = 0; y < w; y += 1) {
+			for (let x = 0; x < h; x += 1) {
+				const i = (w * y + x) * 4
+				const centerIsOpaque = data[i + 3] === 255
+				if (!centerIsOpaque) {
+					let glow = 0
+					for (let dx = -1; dx <= 1; dx += 1) {
+						for (let dy = -1; dy <= 1; dy += 1) {
+							const i2 = (w * (y + dy) + (x + dx)) * 4
+							const neighbourAlpha = data[i2 + 3]
+							if (neighbourAlpha === 255) {
+								if (Math.abs(dx) + Math.abs(dy) === 1) {
+									glow = Math.max(glow, 128)
+								}
+								else {
+									glow = Math.max(glow, 64)
+								}
+							}
+						}
+					}
+					data[i + 3] = glow
+				}
+			}
+		}
+		spr.ctx.putImageData(imageData, 0, 0)
+	}
+
+	function findOpaquePixelInRect(imageData, x0, y0, x1, y1) {
+		const data = imageData.data
+		const w = imageData.width
+		const h = imageData.height
+		x0 = Math.max(x0, 0)
+		y0 = Math.max(y0, 0)
+		x1 = Math.min(x1, w - 1)
+		y1 = Math.min(y1, h - 1)
+		//console.log(`searching for opaque pixel in [${x0}, ${y0}, ${x1}, ${y1}]`)
+		for (let y = y0; y <= y1; y += 1) {
+			for (let x = x0; x <= x1; x += 1) {
+				const i = (w * y + x) * 4
+				if (data[i + 3] > 0) {
+					return [x, y]
+				}
+			}
+		}
+		return [undefined, undefined]
+	}
+
+	function findSpriteRect(imageData, x, y) {
+		let x0 = x, x1 = x, y0 = y, y1 = y
+		let done = false
+		while (!done) {
+			done = true
+			if (isOpaquePixelInRect(imageData, x0 - 1, y0 - 1, x1 + 1, y0 - 1)) { y0 -= 1; done = false }
+			if (isOpaquePixelInRect(imageData, x0 - 1, y1 + 1, x1 + 1, y1 + 1)) { y1 += 1; done = false }
+			if (isOpaquePixelInRect(imageData, x0 - 1, y0 - 1, x0 - 1, y1 + 1)) { x0 -= 1; done = false }
+			if (isOpaquePixelInRect(imageData, x1 + 1, y0 - 1, x1 + 1, y1 + 1)) { x1 += 1; done = false }
+		}
+		return [x0, y0, x1, y1]
+	}
+
+	function isOpaquePixelInRect(imageData, x0, y0, x1, y1) {
+		const [ox, oy] = findOpaquePixelInRect(imageData, x0, y0, x1, y1)
+		return ox !== undefined
+	}
+
+
+	function downloadAll() {
+		for (let i = 0; i < allSpriteCanvases.length; i += 1) {
+			(function (i) {
+				const canvas = allSpriteCanvases[i]
+				const aTag = document.createElement('a')
+				aTag.setAttribute('href', canvas.canvas.toDataURL())
+				aTag.setAttribute('style', 'display:none')
+				aTag.setAttribute('download', `sprite-${i}.png`)
+				setTimeout(() => {
+					document.body.appendChild(aTag)
+					aTag.click()
+					document.body.removeChild(aTag)
+				}, i * 100)
+			})(i)
+		}
+	}
+	
+</script>
+</body>
+</html>
