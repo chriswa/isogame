@@ -33,7 +33,6 @@ export function startLoop(callback) {
 		const dt = now - lastTime
 		lastTime = now
 
-
 		callback(dt)
 
 		requestAnimationFrame(mainLoop)
