@@ -1,4 +1,46 @@
 import * as camera from './camera.js'
+import easings from '../util/easings.js'
+
+const defaultEasing = easings.outCubic
+
+class Tween {
+	constructor({ onStep, onEnd, easing }) {
+		this.onStep = onStep
+		this.onEnd = onEnd
+		this.easing = easing || defaultEasing
+		this.active = false
+		this.t = 0
+		this.x0 = undefined
+		this.dx = undefined
+		this.x1 = undefined
+		this.endValue = undefined
+		this.durationMs = 1
+	}
+	start(x0, dx, x1, durationMs) {
+		this.active = true
+		this.t = 0
+		this.x0 = x0
+		this.dx = dx
+		this.x1 = x1
+		this.durationMs = durationMs
+	}
+	update(dt) {
+		if (this.active) {
+			this.t += dt / this.durationMs
+			if (this.t < 1) {
+				const t = this.easing(this.t)
+				this.onStep(this.x0, this.dx, t)
+			}
+			else {
+				this.active = false
+				this.onEnd(this.x1)
+			}
+		}
+	}
+}
+
+
+
 
 
 function angleMod(angle) {
@@ -17,80 +59,61 @@ function shortestRotationToAngle(angle) {
 // ------
 
 let targetFacing = 0
-let yawActive = false
-let yawStart = 0
-let yawDelta = 0
-let yawT = 0
-let yawDuration = 0
-
-function yawCalcDuration(yawDelta) {
-	const yawDurationPerTurn = 1600
-	return Math.abs(yawDelta) / (Math.PI * 2) * yawDurationPerTurn
-}
-
-function yawEasing(t) {
-	//return t < .5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1 // easeInOutCubic from https://gist.github.com/gre/1650294
-	return (--t) * t * t + 1 // easeOutCubic
-}
 
 export function getFacing() {
 	return targetFacing
 }
 
+const yawTween = new Tween({
+	easing: easings.outCubic,
+	onStep(yawStart, yawDelta, t) {
+		camera.rotation[1] = angleMod(yawStart + yawDelta * t)
+	},
+	onEnd(yawEnd) {
+		camera.rotation[1] = yawEnd
+	},
+})
+
 export function setTargetFacing(targetFacing_) {
 	targetFacing = targetFacing_
-	yawActive = true
-	yawStart = camera.rotation[1]
+	const yawStart = camera.rotation[1]
 	const yawEnd = facingToYaw(targetFacing)
-	yawDelta = shortestRotationToAngle(angleMod(yawEnd - yawStart))
-	yawT = 0
-	yawDuration = yawCalcDuration(yawDelta)
-}
-
-function updateYaw(dt) {
-	if (yawActive) {
-		yawT += dt / yawDuration
-		if (yawT < 1) {
-			const x = yawEasing(yawT)
-			camera.rotation[1] = angleMod(yawStart + yawDelta * x)
-		}
-		else {
-			yawActive = false
-			camera.rotation[1] = facingToYaw(targetFacing)
-		}
-	}
+	const yawDelta = shortestRotationToAngle(angleMod(yawEnd - yawStart))
+	const yawDurationPerTurn = 1600
+	const yawDuration = Math.abs(yawDelta) / (Math.PI * 2) * yawDurationPerTurn
+	yawTween.start(yawStart, yawDelta, yawEnd, yawDuration)
 }
 
 // CENTER
 // ------
 
-let targetCenter = twgl.v3.create()
-let posActive = false
-let posStart = twgl.v3.create()
-let posDelta = twgl.v3.create()
-let posT = 0
-let posDuration = 0
+const targetCenter = twgl.v3.create()
+
+// work vectors
+const posStart = twgl.v3.create()
+const posDelta = twgl.v3.create()
 const zeroVector = twgl.v3.create()
-let workV3 = twgl.v3.create()
-
-function posCalcDuration(posDelta) {
-	const distance = twgl.v3.distance(posDelta, zeroVector)
-	return Math.max(Math.min(distance * 25, 300), 100)
-}
-
-function posEasing(t) {
-	return t < .5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1 // easeInOutCubic from https://gist.github.com/gre/1650294
-	//return (--t) * t * t + 1 // easeOutCubic
-}
+const workV3 = twgl.v3.create()
 
 export function setTargetCenter(targetCenter_) {
 	twgl.v3.negate(targetCenter_, targetCenter)
-	posActive = true
 	twgl.v3.copy(camera.position, posStart)
 	twgl.v3.subtract(targetCenter, posStart, posDelta) // set posDelta
-	posT = 0
-	posDuration = posCalcDuration(posDelta)
+	const distance = twgl.v3.distance(posDelta, zeroVector)
+	const duration = Math.max(Math.min(distance * 25, 300), 100)
+	posTween.start(posStart, posDelta, targetCenter, duration)
 }
+
+const posTween = new Tween({
+	easing: easings.inOutQuad,
+	onStep(posStart, posDelta, t) {
+		twgl.v3.mulScalar(posDelta, t, workV3)
+		twgl.v3.add(workV3, posStart, camera.position)
+	},
+	onEnd(posEnd) {
+		twgl.v3.copy(posEnd, camera.position)
+	},
+})
 
 function updatePos(dt) {
 	if (posActive) {
@@ -111,6 +134,7 @@ function updatePos(dt) {
 // ------
 
 export function update(dt) {
-	updateYaw(dt)
-	updatePos(dt)
+	//updateYaw(dt)
+	yawTween.update(dt)
+	posTween.update(dt)
 }

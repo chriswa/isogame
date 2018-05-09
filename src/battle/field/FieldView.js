@@ -6,7 +6,7 @@ const va = twgl.v3.create()
 const vb = twgl.v3.create()
 const vc = twgl.v3.create()
 
-export default class Field {
+export default class FieldView {
 	constructor(size, tileData, decorPositionData, decorTexcoordData, overlayPositionData) {
 		this.size = size
 		this.tileData = tileData

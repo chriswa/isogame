@@ -1,4 +1,4 @@
-import Field from './Field.js'
+import FieldView from './FieldView.js'
 import FBM from '../../util/FBM.js'
 
 function quantize(v) {
@@ -29,7 +29,6 @@ export function build(fieldDescriptor) {
 				x: x,
 				z: z,
 				terrain: 'sand', // TerrainTypes.sand,
-				unit: undefined,
 				obstruction: undefined, // ObstructionTypes.bigRock7,
 				midHeight: midHeight,
 				edgeSlopeHeights: { n: 4.5, s: 4, e: undefined, w: undefined }, // undefined may signify a step or a jump
@@ -63,7 +62,14 @@ export function build(fieldDescriptor) {
 
 	const { decorPositionData, decorTexcoordData, overlayPositionData } = drawMeshes(tileData, fieldWidth)
 
-	return new Field(fieldWidth, tileData, decorPositionData, decorTexcoordData, overlayPositionData)
+	const fieldView = new FieldView(fieldWidth, tileData, decorPositionData, decorTexcoordData, overlayPositionData)
+
+	const fieldModel = {
+		size: fieldWidth,
+		squares: tileData.map(d => { return { terrain: d.terrain, height: d.midHeight } })
+	}
+
+	return { fieldView, fieldModel }
 }
 
 function drawOverlayMesh(tileData, fieldWidth) {
