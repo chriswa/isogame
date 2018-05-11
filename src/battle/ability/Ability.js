@@ -2,19 +2,19 @@ class Ability {
 	getSpriteName() {
 		return 'unknown'
 	}
-	isCastable(battleModel, casterUnitId, abilityIndex) {
+	isCastable(battleModel, casterUnitId, abilityId) {
 		return true
 	}
-	getTooltipText(battleModel, casterUnitId, abilityIndex) {
+	getTooltipText(battleModel, casterUnitId, abilityId) {
 		return "Oops, this Ability did not override getTooltipText"
 	}
-	getTargetingUIId(battleModel, casterUnitId, abilityIndex) {
+	getTargetingUIId(battleModel, casterUnitId, abilityId) {
 		return 'aoe'
 	}
-	isTargetValid(battleModel, casterUnitId, abilityIndex, target) {
+	isTargetValid(battleModel, casterUnitId, abilityId, target) {
 		return false
 	}
-	execute(battleModel, casterUnitId, abilityIndex, target, simulator) {
+	execute(battleModel, casterUnitId, abilityId, target, simulator) {
 		//getUnit(battleModel, casterUnitId).mana -= 10
 		//simulator.addResult(battleModel, { type: 'unitCast', unitId: casterUnitId, facing: getFacingFromPointToPoint(getUnitPos(battleModel, casterUnitId), target) })
 	}

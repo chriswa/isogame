@@ -1,15 +1,27 @@
 import * as gfx from './gfx/gfx.js'
 import * as battleBuilder from './battle/battleBuilder.js'
 
-const battleState = battleBuilder.build()
+console.log('%cAPP START', 'font-size: 200%; margin-top: 20px;')
+
+const decisionCallback = (unitId, abilityId, target) => {
+	console.log(`battleAuthority.onSendDecision(${unitId}, ${abilityId}, ${target})`)
+	battleController.addBattleSimulationResult({ type: 'teleport', unitId, target })
+}
+
+const battleController = battleBuilder.buildSampleBattleController(decisionCallback)
+
+setTimeout(() => {
+	battleController.addBattleSimulationResult({ type: 'Spellcast', unitId: 0, name: 'Hello World!' })
+	battleController.addBattleSimulationResult({ type: 'Spellcast', unitId: 0, name: 'foobar' })
+}, 500)
 
 gfx.startLoop(dt => {
 
 	// update
-	battleState.update(dt)
+	battleController.update(dt)
 
 	// render
 	gfx.clear()
-	battleState.render()
+	battleController.render()
 
 })

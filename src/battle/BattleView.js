@@ -7,7 +7,7 @@ import { addRemovableEventListener } from '../util/domUtils.js'
 
 export default class Battle {
 
-	constructor(fieldView, battleModel) {
+	constructor(fieldView, battleModel, callbacks) {
 		this.tt = 0
 		this.destroyCallbacks = []
 		this.initEventHandlers()
@@ -57,6 +57,11 @@ export default class Battle {
 		}))
 	}
 
+	selectUnit(unitId) { } // called by UITargetState
+	selectAbility(abilityId) { } // called by UITargetState
+	setOverlayHandler(overlayHandler) { } // called by UITargetState ???
+	setWaiting(isWaiting) { } // called by BattleController to show that waiting for a response from the server
+
 	update(dt) {
 		this.tt += dt
 
@@ -90,6 +95,7 @@ export default class Battle {
 		const worldViewProjectionMatrix = camera.getWorldViewProjectionMatrix()
 		this.fieldView.render(worldViewProjectionMatrix)
 		this.bbgroup.render(worldViewProjectionMatrix)
+		return worldViewProjectionMatrix
 	}
 	
 }
