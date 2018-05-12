@@ -21,7 +21,7 @@ export default class FieldView {
 		for (let ty = 0; ty < this.size; ty += 1) {
 			for (let tx = 0; tx < this.size; tx += 1) {
 				const ti = ty * this.size + tx
-				const colour = callback(tx, ty)
+				const colour = callback([tx, ty])
 
 				overlayBuffer[ti * 4 + 0] = colour
 				overlayBuffer[ti * 4 + 1] = colour
@@ -70,6 +70,6 @@ export default class FieldView {
 				}
 			}
 		}
-		return closestTileCoords
+		return [ closestTileCoords, closestDistance ]
 	}
 }

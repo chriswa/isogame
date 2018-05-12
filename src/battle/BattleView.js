@@ -4,6 +4,8 @@ import * as cameraController from '../gfx/cameraController.js'
 import BillboardGroup from '../gfx/BillboardGroup.js'
 import SpriteData from '../../assets/sprites.js'
 import { addRemovableEventListener } from '../util/domUtils.js'
+import FieldView from './field/FieldView.js' // imported for type hinting
+
 
 export default class Battle {
 
@@ -12,6 +14,7 @@ export default class Battle {
 		this.destroyCallbacks = []
 		this.initEventHandlers()
 
+		/** @type FieldView */
 		this.fieldView = fieldView
 		this.battleModel = battleModel
 
@@ -48,19 +51,37 @@ export default class Battle {
 		}))
 		// on "click"
 		this.destroyCallbacks.push(addRemovableEventListener(document, 'click', e => {
-			const { origin, direction } = camera.getRayFromMouse(input.mousePos)
-			const tileCoords = this.fieldView.rayPick(origin, direction)
-			if (tileCoords !== undefined) {
-				const midHeight = this.fieldView.getTileAtCoords(tileCoords).midHeight
-				cameraController.setTargetCenter([tileCoords[0] + 0.5, midHeight, tileCoords[1] + 0.5])
+			const [pickedTileCoords, pickedUnitId] = this.mousePick(true)
+			if (pickedTileCoords !== undefined) {
+				const midHeight = this.fieldView.getTileAtCoords(pickedTileCoords).midHeight
+				cameraController.setTargetCenter([pickedTileCoords[0] + 0.5, midHeight, pickedTileCoords[1] + 0.5])
 			}
 		}))
 	}
 
 	selectUnit(unitId) { } // called by UITargetState
 	selectAbility(abilityId) { } // called by UITargetState
-	setOverlayHandler(overlayHandler) { } // called by UITargetState ???
-	setWaiting(isWaiting) { } // called by BattleController to show that waiting for a response from the server
+	setWaiting(isWaiting) { } // called by BattleController to show that we're waiting for a response from the server
+
+	mousePick(isUnitsIncluded = false) {
+		const { origin, direction } = camera.getRayFromMouse(input.mousePos)
+		let [ pickedTileCoords, tileDistance ] = this.fieldView.rayPick(origin, direction)
+		// TODO: also pick from this.unitSprites
+		let pickedUnitId = undefined
+		if (isUnitsIncluded) {
+			let unitDistance
+			[ pickedUnitId, unitDistance ] = [ undefined, undefined ]
+			if (pickedTileCoords && pickedUnitId !== undefined) {
+				if (tileDistance < unitDistance) {
+					pickedUnitId = undefined
+				}
+				else {
+					pickedTileCoords = this.battleModel.getUnitCoordsById(pickedUnitId)
+				}
+			}
+		}
+		return [ pickedTileCoords, pickedUnitId ]
+	}
 
 	update(dt) {
 		this.tt += dt
@@ -76,17 +97,6 @@ export default class Battle {
 			const directions = ['n', 'e', 's', 'w']
 			unitSprite.setSpriteName(unitModel.spriteSet + '-idle-' + directions[camera.getFacing(unitModel.facing)])
 		}
-
-		// sample mouse raypicking
-		const { origin, direction } = camera.getRayFromMouse(input.mousePos)
-		const tileCoords = this.fieldView.rayPick(origin, direction)
-		this.fieldView.updateOverlay((tx, ty) => {
-			if (!tileCoords) { return 0 }
-			const dx = Math.abs(tileCoords[0] - tx)
-			const dy = Math.abs(tileCoords[1] - ty)
-			const manhattan = dx + dy
-			return manhattan === 0 ? 3 : manhattan < 2 ? 2 : manhattan < 5 ? 1 : 0
-		})
 
 		cameraController.update(dt) // this must occur after anything which may update the cameraController
 	}

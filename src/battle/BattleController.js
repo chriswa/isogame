@@ -2,9 +2,18 @@ import * as fieldBuilder from './field/fieldBuilder.js'
 import BattleModel from './BattleModel.js'
 import BattleView from './BattleView.js'
 import PlaybackControllers from './PlaybackControllers.js'
-// import AbilityArchetypes from '???'
+import AbilityArchetypes from './AbilityArchetypes.js'
 
-class BattleControllerState {
+/*
+	FSM relationship:
+		BattleController.uiManagers : {
+			PLAYBACK: PlaybackManager,
+			TARGETING: TargetingManager,
+		}
+		BattleController.currentUiManager : BaseManager
+*/
+
+class BaseManager {
 	constructor(battleController) {
 		/** @type BattleController */
 		this.battleController = battleController
@@ -20,7 +29,7 @@ class BattleControllerState {
 	onSelectTarget(target) { } // ignore this event
 }
 
-class BattleControllerStatePlayback extends BattleControllerState {
+class PlaybackManager extends BaseManager {
 	constructor(battleController) {
 		super(battleController)
 		this.activePlaybackController = undefined
@@ -52,6 +61,7 @@ class BattleControllerStatePlayback extends BattleControllerState {
 		}
 	}
 	onStateEnter() {
+		this.view.fieldView.updateOverlay(testCoords => { return 0 }) // clear targeting overlay
 		this.startNextResult()
 	}
 	startNextResult() {
@@ -59,6 +69,7 @@ class BattleControllerStatePlayback extends BattleControllerState {
 			const activeResult = this.battleController.queuedResults.shift()
 			const playbackControllerClass = PlaybackControllers[activeResult.type]
 			this.activePlaybackController = new playbackControllerClass(this.model, this.view, activeResult)
+			this.battleController.log(`PlaybackController started: `, this.activePlaybackController)
 		}
 		else {
 			this.activePlaybackController = undefined
@@ -71,7 +82,7 @@ class BattleControllerStatePlayback extends BattleControllerState {
 	}
 }
 
-class BattleControllerStateTargeting extends BattleControllerState {
+class TargetingManager extends BaseManager {
 	constructor(battleController) {
 		super(battleController)
 		this.selectedUnitId = undefined
@@ -79,31 +90,39 @@ class BattleControllerStateTargeting extends BattleControllerState {
 		this.activeTargetingUI = undefined
 	}
 	update(dt) {
+		this.activeTargetingUI.update(dt)
 	}
 	onStateEnter() {
 		this.onSelectUnit(undefined)
 	}
 	onStateExit() {
-		this.view.setOverlayHandler(undefined)
+		this.removeActiveTargetingUi()
+	}
+	removeActiveTargetingUi() {
+		if (this.activeTargetingUI) {
+			this.activeTargetingUI.destroy()
+			this.activeTargetingUI = undefined
+		}
 	}
 	onSelectUnit(unitId) {
 		if (unitId === undefined) {
 			unitId = this.model.getActiveUnitId()
 		}
 		this.selectedUnitId = unitId
-		if (!this.selectedUnitId) { return }
+		if (this.selectedUnitId === undefined) { return }
 		this.view.selectUnit(unitId)
 		this.onSelectAbility(0)
 	}
 	onSelectAbility(abilityId) {
-		if (!this.selectedUnitId) { return }
+		if (this.selectedUnitId === undefined) { return }
 		this.selectedAbilityId = abilityId
 		this.view.selectAbility(abilityId)
 		const activeUnit = this.model.getUnitById(this.selectedUnitId)
 		const abilityType = activeUnit.abilities[abilityId].abilityType
 		const abilityArch = AbilityArchetypes[abilityType]
-		const overlayHandler = abilityArch.createOverlayHandler(this.model, this.selectedUnitId, abilityId)
-		this.view.setOverlayHandler(overlayHandler)
+		this.removeActiveTargetingUi() // call this first, so everything is cleaned up for TargetingUi constructor created next
+		this.activeTargetingUI = abilityArch.createTargetingUi(this.model, this.view, this.selectedUnitId, this.selectedAbilityId)
+		this.battleController.log(`TargetingUI started: `, this.activeTargetingUI)
 	}
 	onSelectTarget(target) {
 		if (!this.model.isItMyTurn()) { return }
@@ -115,7 +134,7 @@ class BattleControllerStateTargeting extends BattleControllerState {
 
 export default class BattleController {
 
-	constructor(fieldDescriptor, unitsModel, turnModel, localTeamId, decisionCallback) {
+	constructor(fieldDescriptor, unitsModel, turnModel, myTeamId, decisionCallback) {
 
 		this.decisionCallback = decisionCallback
 		this.queuedResults = []
@@ -124,59 +143,63 @@ export default class BattleController {
 		const { fieldView, fieldModel } = fieldBuilder.build(fieldDescriptor)
 
 		// Battle Model
-		this.model = new BattleModel(fieldModel, unitsModel, turnModel, localTeamId)
+		this.model = new BattleModel(fieldModel, unitsModel, turnModel, myTeamId)
 
 		// BattleView
 		const viewCallbacks = {
-			onSelectUnit: (unitId) => { this.uiState.onSelectUnit(unitId) },
-			onSelectAbility: (abilityId) => { this.uiState.onSelectAbility(abilityId) },
-			onSelectTarget: (target) => { this.uiState.onSelectTarget(target) },
+			onSelectUnit: (unitId) => { this.currentUiManager.onSelectUnit(unitId) },
+			onSelectAbility: (abilityId) => { this.currentUiManager.onSelectAbility(abilityId) },
+			onSelectTarget: (target) => { this.currentUiManager.onSelectTarget(target) },
 		}
 		this.view = new BattleView(fieldView, this.model, viewCallbacks)
 
 		// UI States
-		this.uiStates = {
-			PLAYBACK: new BattleControllerStatePlayback(this),
-			TARGETING: new BattleControllerStateTargeting(this),
+		this.uiManagers = {
+			PLAYBACK: new PlaybackManager(this),
+			TARGETING: new TargetingManager(this),
 		}
-		this.uiState = this.uiStates.TARGETING
-		this.uiState.onStateEnter()
+		this.currentUiManager = this.uiManagers.TARGETING
+		this.currentUiManager.onStateEnter()
 	}
 
 	destroy() { // called by owner
 		this.view.destroy() // BattleView has eventlisteners to clean up
 	}
 
+	log(arg0, ...args) {
+		console.log('%cBattleController: ' + arg0, 'color: #09c;', ...args)
+	}
+
 	setUiState(newState) {
-		this.uiState.onStateExit()
-		this.uiState = newState
-		this.uiState.onStateEnter()
+		this.currentUiManager.onStateExit()
+		this.currentUiManager = newState
+		this.currentUiManager.onStateEnter()
 	}
 
 	addBattleSimulationResult(result) { // called by "owner"
 		this.queuedResults.push(result)
-		if (this.uiState !== this.uiStates.PLAYBACK) {
-			this.setUiState(this.uiStates.PLAYBACK)
+		if (this.currentUiManager !== this.uiManagers.PLAYBACK) {
+			this.setUiState(this.uiManagers.PLAYBACK)
 		}
 	}
 
-	onSendDecision(unitId, abilityId, target) { // called by BattleControllerStateTargeting
+	onSendDecision(unitId, abilityId, target) { // called by TargetingManager
 		decisionCallback(unitId, abilityId, target)
 		this.view.setWaiting(true)
 	}
 
-	onPlaybackComplete() { // called by BattleControllerStatePlayback
-		this.setUiState(this.uiStates.TARGETING)
+	onPlaybackComplete() { // called by PlaybackManager
+		this.setUiState(this.uiManagers.TARGETING)
 	}
 
 	update(dt) {
-		this.uiState.update(dt)
+		this.currentUiManager.update(dt)
 		this.view.update(dt)
 	}
 
 	render() {
 		const worldViewProjectionMatrix = this.view.render()
-		this.uiState.render(worldViewProjectionMatrix)
+		this.currentUiManager.render(worldViewProjectionMatrix)
 	}
 	
 }

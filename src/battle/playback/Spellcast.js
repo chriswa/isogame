@@ -3,7 +3,7 @@ import BasePlaybackController from './base.js'
 export default class SpellcastPlaybackController extends BasePlaybackController {
 	init() {
 		this.t = 0
-		this.duration = 500
+		this.duration = 100
 	}
 	update(dt) {
 		const remainingT = this.duration - this.t
