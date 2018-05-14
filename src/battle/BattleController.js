@@ -4,6 +4,47 @@ import BattleView from './BattleView.js'
 import PlaybackControllers from './PlaybackControllers.js'
 import AbilityArchetypes from './AbilityArchetypes.js'
 
+import { EventSubscriber } from '../util/domUtils.js'
+import * as cameraController from '../gfx/cameraController.js'
+
+class MouseController {
+	constructor(view) {
+		this.view = view
+		this.active = false
+		this.eventSubscriber = new EventSubscriber() // for easy unsubscribing
+		this.initEventHandlers()
+	}
+	initEventHandlers() {
+		// on mouse wheel
+		this.eventSubscriber.subscribe(document, 'wheel', e => {
+			cameraController.setZoom(cameraController.getZoom() - e.deltaY / 100 / 10)
+		})
+		// on mousedown
+		this.eventSubscriber.subscribe(document, 'mousedown', e => {
+			if (e.button === 1) { // middle mouse button
+				cameraController.setTargetFacing((cameraController.getFacing() + 1) % 4)
+			}
+			else if (e.button === 0) { // left mouse button
+
+			}
+		})
+		// on "click"
+		this.eventSubscriber.subscribe(document, 'click', e => {
+			const [pickedTileCoords, pickedUnitId] = this.view.mousePick(true)
+			if (pickedTileCoords !== undefined) {
+				const midHeight = this.view.fieldView.getTileAtCoords(pickedTileCoords).midHeight
+				cameraController.setTargetCenter([pickedTileCoords[0] + 0.5, midHeight, pickedTileCoords[1] + 0.5])
+			}
+		})
+	}
+	activate() {
+		this.active = true
+	}
+	deactivate() {
+		this.active = false
+	}
+}
+
 /*
 	FSM relationship:
 		BattleController.uiManagers : {
@@ -160,10 +201,12 @@ export default class BattleController {
 		}
 		this.currentUiManager = this.uiManagers.TARGETING
 		this.currentUiManager.onStateEnter()
+
+		this.mouseController = new MouseController(this.view)
 	}
 
 	destroy() { // called by owner
-		this.view.destroy() // BattleView has eventlisteners to clean up
+		this.mouseController.destroy() // it has eventlisteners to clean up
 	}
 
 	log(arg0, ...args) {
@@ -195,6 +238,7 @@ export default class BattleController {
 	update(dt) {
 		this.currentUiManager.update(dt)
 		this.view.update(dt)
+		cameraController.update(dt) // this must occur after anything which may update the cameraController
 	}
 
 	render() {

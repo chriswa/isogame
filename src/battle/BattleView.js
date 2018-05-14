@@ -1,18 +1,13 @@
-import * as input from '../util/input.js'
 import * as camera from '../gfx/camera.js'
-import * as cameraController from '../gfx/cameraController.js'
 import BillboardGroup from '../gfx/BillboardGroup.js'
 import SpriteData from '../../assets/sprites.js'
-import { addRemovableEventListener } from '../util/domUtils.js'
 import FieldView from './field/FieldView.js' // imported for type hinting
+import * as input from '../util/input.js'
 
-
-export default class Battle {
+export default class BattleView {
 
 	constructor(fieldView, battleModel, callbacks) {
 		this.tt = 0
-		this.destroyCallbacks = []
-		this.initEventHandlers()
 
 		/** @type FieldView */
 		this.fieldView = fieldView
@@ -34,37 +29,12 @@ export default class Battle {
 
 	}
 
-	destroy() {
-		this.destroyCallbacks.forEach(callback => { callback() })
-	}
-
-	initEventHandlers() {
-		// on mouse wheel
-		this.destroyCallbacks.push(addRemovableEventListener(document, 'wheel', e => {
-			camera.setZoomExp(camera.getZoomExp() - e.deltaY / 100 / 10)
-		}))
-		// on mousedown
-		this.destroyCallbacks.push(addRemovableEventListener(document, 'mousedown', e => {
-			if (e.button === 1) { // middle mouse button
-				cameraController.setTargetFacing((cameraController.getFacing() + 1) % 4)
-			}
-		}))
-		// on "click"
-		this.destroyCallbacks.push(addRemovableEventListener(document, 'click', e => {
-			const [pickedTileCoords, pickedUnitId] = this.mousePick(true)
-			if (pickedTileCoords !== undefined) {
-				const midHeight = this.fieldView.getTileAtCoords(pickedTileCoords).midHeight
-				cameraController.setTargetCenter([pickedTileCoords[0] + 0.5, midHeight, pickedTileCoords[1] + 0.5])
-			}
-		}))
-	}
-
 	selectUnit(unitId) { } // called by UITargetState
 	selectAbility(abilityId) { } // called by UITargetState
 	setWaiting(isWaiting) { } // called by BattleController to show that we're waiting for a response from the server
-
 	mousePick(isUnitsIncluded = false) {
-		const { origin, direction } = camera.getRayFromMouse(input.mousePos)
+		const screenPos = input.mousePos
+		const { origin, direction } = camera.getRayFromScreenPos(screenPos)
 		let [ pickedTileCoords, tileDistance ] = this.fieldView.rayPick(origin, direction)
 		// TODO: also pick from this.unitSprites
 		let pickedUnitId = undefined
@@ -97,8 +67,6 @@ export default class Battle {
 			const directions = ['n', 'e', 's', 'w']
 			unitSprite.setSpriteName(unitModel.spriteSet + '-idle-' + directions[camera.getFacing(unitModel.facing)])
 		}
-
-		cameraController.update(dt) // this must occur after anything which may update the cameraController
 	}
 
 	render() {

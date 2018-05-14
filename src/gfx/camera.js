@@ -66,10 +66,10 @@ export function getAspectScaleXY() {
 	]
 }
 
-export function getRayFromMouse(mousePos) {
+export function getRayFromScreenPos(screenPos) {
 	const origin = twgl.v3.create(
-		(mousePos[0] / gl.canvas.width * 2) - 1,
-		-(mousePos[1] / gl.canvas.height * 2) + 1,
+		(screenPos[0] / gl.canvas.width * 2) - 1,
+		-(screenPos[1] / gl.canvas.height * 2) + 1,
 		-1
 	)
 	const dst = twgl.v3.copy(origin)

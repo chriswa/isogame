@@ -84,8 +84,38 @@ export function setTargetFacing(targetFacing_) {
 	yawTween.start(yawStart, yawDelta, yawEnd, yawDuration)
 }
 
-// CENTER
-// ------
+
+// ZOOM
+// ----
+
+let targetZoom = 0
+
+export function getZoom() {
+	return targetZoom
+}
+
+const zoomTween = new Tween({
+	easing: easings.outCubic,
+	onStep(zoomStart, zoomDelta, t) {
+		camera.setZoomExp(zoomStart + zoomDelta * t)
+	},
+	onEnd(zoomEnd) {
+		camera.setZoomExp(zoomEnd)
+	},
+})
+
+export function setZoom(targetZoom_) {
+	targetZoom = targetZoom_
+	const zoomStart = camera.getZoomExp()
+	const zoomEnd = targetZoom
+	const zoomDelta = zoomEnd - zoomStart
+	const zoomDuration = 200
+	zoomTween.start(zoomStart, zoomDelta, zoomEnd, zoomDuration)
+}
+
+
+// POSITION
+// --------
 
 const targetCenter = twgl.v3.create()
 
@@ -130,6 +160,7 @@ function updatePos(dt) {
 	}
 }
 
+
 // UPDATE
 // ------
 
@@ -137,4 +168,5 @@ export function update(dt) {
 	//updateYaw(dt)
 	yawTween.update(dt)
 	posTween.update(dt)
+	zoomTween.update(dt)
 }
