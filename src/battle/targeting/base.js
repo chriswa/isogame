@@ -18,4 +18,11 @@ export default class BaseTargetingController {
 	}
 	render(worldViewProjectionMatrix) {
 	}
+
+	onClick(mousePos) {
+		//const [pickedTileCoords, pickedUnitId] = this.view.mousePick(true)
+		//if (pickedTileCoords !== undefined) {
+		//}
+	}
+
 }

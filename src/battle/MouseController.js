@@ -7,8 +7,10 @@ import * as camera from '../gfx/camera.js'
 const dragThreshold = 4 // pixels
 
 export default class MouseController {
-	constructor(view) {
+	constructor(view, onClickCallback) {
 		this.view = view
+		this.onClickCallback = onClickCallback
+
 		this.active = false
 		this.eventSubscriber = new EventSubscriber() // for easy unsubscribing
 
@@ -79,7 +81,7 @@ export default class MouseController {
 		console.log('drag complete')
 	}
 	onClick() {
-		console.log('click')
+		this.onClickCallback(input.mousePos)
 	}
 	activate() {
 		this.active = true

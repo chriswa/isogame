@@ -107,10 +107,8 @@ class TargetingManager extends BaseManager {
 		}
 	}
 	onClick(mousePos) {
-		const [pickedTileCoords, pickedUnitId] = this.view.mousePick(true)
-		if (pickedTileCoords !== undefined) {
-			const midHeight = this.view.fieldView.getTileAtCoords(pickedTileCoords).midHeight
-			cameraController.setTargetCenter([pickedTileCoords[0] + 0.5, midHeight, pickedTileCoords[1] + 0.5])
+		if (this.activeTargetingUI) {
+			this.activeTargetingUI.onClick(mousePos)
 		}
 	}
 	onSelectUnit(unitId) {

@@ -14,6 +14,7 @@ export default class WalkTargetingController extends BaseTargetingController {
 	update(dt) {
 		const casterCoords = this.model.getUnitCoordsById(this.castingUnitId)
 		const [ targetCoords, targetUnitId ] = this.view.mousePick(true)
+
 		this.view.fieldView.updateOverlay(testCoords => {
 			//if (!targetCoords) { return 0 }
 			let colour = 0
@@ -37,5 +38,23 @@ export default class WalkTargetingController extends BaseTargetingController {
 			//return manhattan === 0 ? 3 : manhattan < 2 ? 2 : manhattan < 11 ? 1 : 0
 		})
 
+	}
+	onClick(mousePos) {
+		const casterCoords = this.model.getUnitCoordsById(this.castingUnitId)
+		const [pickedTileCoords, pickedUnitId] = this.view.mousePick(true)
+		if (pickedTileCoords !== undefined) {
+
+			const targetDistanceFromCaster = manhattan(casterCoords, pickedTileCoords)
+			if (targetDistanceFromCaster >= this.minTargetDistance && targetDistanceFromCaster <= this.maxTargetDistance) {
+				console.log(`TARGET: ${pickedTileCoords}`)
+			}
+
+			else {
+				console.log(`ignored click on tile which is not in range: ${pickedTileCoords}`)
+			}
+
+			//const midHeight = this.view.fieldView.getTileAtCoords(pickedTileCoords).midHeight
+			//cameraController.setTargetCenter([pickedTileCoords[0] + 0.5, midHeight, pickedTileCoords[1] + 0.5])
+		}
 	}
 }
