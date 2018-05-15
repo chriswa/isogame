@@ -27,6 +27,10 @@ export function setZoomExp(zoomExp_) {
 	zoom = Math.pow(2, zoomExp)
 }
 
+export function getRawZoom() {
+	return zoom
+}
+
 export function setPosition(x, y, z) {
 	position[0] = x
 	position[1] = y

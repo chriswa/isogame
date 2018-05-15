@@ -6,7 +6,7 @@ import * as input from '../util/input.js'
 
 export default class BattleView {
 
-	constructor(fieldView, battleModel, callbacks) {
+	constructor(fieldView, battleModel) {
 		this.tt = 0
 
 		/** @type FieldView */

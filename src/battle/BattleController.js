@@ -3,47 +3,8 @@ import BattleModel from './BattleModel.js'
 import BattleView from './BattleView.js'
 import PlaybackControllers from './PlaybackControllers.js'
 import AbilityArchetypes from './AbilityArchetypes.js'
+import MouseController from './MouseController.js'
 
-import { EventSubscriber } from '../util/domUtils.js'
-import * as cameraController from '../gfx/cameraController.js'
-
-class MouseController {
-	constructor(view) {
-		this.view = view
-		this.active = false
-		this.eventSubscriber = new EventSubscriber() // for easy unsubscribing
-		this.initEventHandlers()
-	}
-	initEventHandlers() {
-		// on mouse wheel
-		this.eventSubscriber.subscribe(document, 'wheel', e => {
-			cameraController.setZoom(cameraController.getZoom() - e.deltaY / 100 / 10)
-		})
-		// on mousedown
-		this.eventSubscriber.subscribe(document, 'mousedown', e => {
-			if (e.button === 1) { // middle mouse button
-				cameraController.setTargetFacing((cameraController.getFacing() + 1) % 4)
-			}
-			else if (e.button === 0) { // left mouse button
-
-			}
-		})
-		// on "click"
-		this.eventSubscriber.subscribe(document, 'click', e => {
-			const [pickedTileCoords, pickedUnitId] = this.view.mousePick(true)
-			if (pickedTileCoords !== undefined) {
-				const midHeight = this.view.fieldView.getTileAtCoords(pickedTileCoords).midHeight
-				cameraController.setTargetCenter([pickedTileCoords[0] + 0.5, midHeight, pickedTileCoords[1] + 0.5])
-			}
-		})
-	}
-	activate() {
-		this.active = true
-	}
-	deactivate() {
-		this.active = false
-	}
-}
 
 /*
 	FSM relationship:
@@ -65,9 +26,7 @@ class BaseManager {
 	render(worldViewProjectionMatrix) { }
 	onStateEnter() { }
 	onStateExit() { }
-	onSelectUnit(unitId) { } // ignore this event
-	onSelectAbility(abilityId) { } // ignore this event
-	onSelectTarget(target) { } // ignore this event
+	onClick(mousePos) { } // ignore this event
 }
 
 class PlaybackManager extends BaseManager {
@@ -135,14 +94,23 @@ class TargetingManager extends BaseManager {
 	}
 	onStateEnter() {
 		this.onSelectUnit(undefined)
+		this.battleController.mouseController.activate()
 	}
 	onStateExit() {
 		this.removeActiveTargetingUi()
+		this.battleController.mouseController.deactivate()
 	}
 	removeActiveTargetingUi() {
 		if (this.activeTargetingUI) {
 			this.activeTargetingUI.destroy()
 			this.activeTargetingUI = undefined
+		}
+	}
+	onClick(mousePos) {
+		const [pickedTileCoords, pickedUnitId] = this.view.mousePick(true)
+		if (pickedTileCoords !== undefined) {
+			const midHeight = this.view.fieldView.getTileAtCoords(pickedTileCoords).midHeight
+			cameraController.setTargetCenter([pickedTileCoords[0] + 0.5, midHeight, pickedTileCoords[1] + 0.5])
 		}
 	}
 	onSelectUnit(unitId) {
@@ -187,12 +155,9 @@ export default class BattleController {
 		this.model = new BattleModel(fieldModel, unitsModel, turnModel, myTeamId)
 
 		// BattleView
-		const viewCallbacks = {
-			onSelectUnit: (unitId) => { this.currentUiManager.onSelectUnit(unitId) },
-			onSelectAbility: (abilityId) => { this.currentUiManager.onSelectAbility(abilityId) },
-			onSelectTarget: (target) => { this.currentUiManager.onSelectTarget(target) },
-		}
-		this.view = new BattleView(fieldView, this.model, viewCallbacks)
+		this.view = new BattleView(fieldView, this.model)
+
+		this.mouseController = new MouseController(this.view, (clickPos) => { this.currentUiManager.onClick(clickPos) })
 
 		// UI States
 		this.uiManagers = {
@@ -201,8 +166,6 @@ export default class BattleController {
 		}
 		this.currentUiManager = this.uiManagers.TARGETING
 		this.currentUiManager.onStateEnter()
-
-		this.mouseController = new MouseController(this.view)
 	}
 
 	destroy() { // called by owner
@@ -238,7 +201,7 @@ export default class BattleController {
 	update(dt) {
 		this.currentUiManager.update(dt)
 		this.view.update(dt)
-		cameraController.update(dt) // this must occur after anything which may update the cameraController
+		this.mouseController.update(dt)
 	}
 
 	render() {

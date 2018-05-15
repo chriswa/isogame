@@ -37,11 +37,15 @@ class Tween {
 			}
 		}
 	}
+	halt() {
+		this.active = false
+	}
 }
 
 
 
 
+// helper functions for facing
 
 function angleMod(angle) {
 	while (angle < 0) { angle += Math.PI * 2 }
@@ -62,6 +66,10 @@ let targetFacing = 0
 
 export function getFacing() {
 	return targetFacing
+}
+
+export function getRawFacing() {
+	return camera.rotation[1]
 }
 
 const yawTween = new Tween({
@@ -94,6 +102,10 @@ export function getZoom() {
 	return targetZoom
 }
 
+export function getRawZoom() {
+	return camera.getRawZoom() // not exp!
+}
+
 const zoomTween = new Tween({
 	easing: easings.outCubic,
 	onStep(zoomStart, zoomDelta, t) {
@@ -124,6 +136,13 @@ const posStart = twgl.v3.create()
 const posDelta = twgl.v3.create()
 const zeroVector = twgl.v3.create()
 const workV3 = twgl.v3.create()
+
+export function rawMoveCenter(dx, dy, dz) {
+	posTween.halt()
+	camera.position[0] += dx
+	camera.position[1] += dy
+	camera.position[2] += dz
+}
 
 export function setTargetCenter(targetCenter_) {
 	twgl.v3.negate(targetCenter_, targetCenter)
