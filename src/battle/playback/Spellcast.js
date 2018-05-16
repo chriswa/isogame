@@ -4,6 +4,9 @@ export default class SpellcastPlaybackController extends BasePlaybackController 
 	init() {
 		this.t = 0
 		this.duration = 100
+
+		const unit = this.model.getUnitById(this.result.unitId)
+		console.log(unit)
 	}
 	update(dt) {
 		const remainingT = this.duration - this.t
@@ -17,7 +20,7 @@ export default class SpellcastPlaybackController extends BasePlaybackController 
 			consumedDt = dt
 		}
 
-		console.log(`pretend animation: t = ${ this.t / this.duration }`, this.result)
+		//console.log(`pretend animation: t = ${ this.t / this.duration }`, this.result)
 
 		return consumedDt
 	}

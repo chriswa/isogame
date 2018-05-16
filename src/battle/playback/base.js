@@ -1,5 +1,8 @@
+import BattleModel from './../BattleModel.js'
+
 export default class BasePlaybackController {
 	constructor(model, view, result) {
+		/** @type BattleModel */
 		this.model = model
 		this.view = view
 		this.result = result

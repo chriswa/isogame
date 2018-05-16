@@ -3,6 +3,7 @@ import BillboardGroup from '../gfx/BillboardGroup.js'
 import SpriteData from '../../assets/sprites.js'
 import FieldView from './field/FieldView.js' // imported for type hinting
 import * as input from '../util/input.js'
+import * as TextTexture from '../gfx/TextTexture.js'
 
 export default class BattleView {
 

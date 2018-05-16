@@ -5,7 +5,7 @@ console.log('%cAPP START                ', 'font-size: 200%; margin-top: 20px; b
 
 const decisionCallback = (unitId, abilityId, target) => {
 	console.log(`battleAuthority.onSendDecision(${unitId}, ${abilityId}, ${target})`)
-	battleController.addBattleSimulationResult({ type: 'teleport', unitId, target })
+	battleController.addBattleSimulationResult({ type: 'Spellcast', unitId, name: `${target}` })
 }
 
 const battleController = battleBuilder.buildSampleBattleController(decisionCallback)
