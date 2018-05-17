@@ -1,6 +1,24 @@
-import BasePlaybackController from './base.js'
+import { BaseResultPlayer, BaseResultAnimation } from './base.js'
 
-export default class SpellcastPlaybackController extends BasePlaybackController {
+class SpellcastAnimation extends BaseResultAnimation {
+	init() {
+		console.log(`SpellcastAnimation.init`, this.result)
+		this.duration = 100
+	}
+	//onPartial(ratio) {
+	//}
+}
+
+export default class extends BaseResultPlayer {
+	static getAnimationClass() {
+		return SpellcastAnimation
+	}
+	static updateModel(model, result) {
+		;;;
+	}
+}
+
+/*class SpellcastPlaybackController extends BaseResultPlayer {
 	init() {
 		this.t = 0
 		this.duration = 100
@@ -27,4 +45,4 @@ export default class SpellcastPlaybackController extends BasePlaybackController 
 	isComplete() {
 		return this.t >= this.duration
 	}
-}
+}*/

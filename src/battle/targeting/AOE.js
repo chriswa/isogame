@@ -5,11 +5,11 @@ function manhattan(a, b) {
 	return Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1])
 }
 
-export default class WalkTargetingController extends BaseTargetingController {
+export default class AOETargetingController extends BaseTargetingController {
 	init() {
-		this.maxTargetDistance = 5
-		this.minTargetDistance = 1
-		this.aoeRange = 1
+		this.minTargetDistance = this.extraArgs.minTargetDistance
+		this.maxTargetDistance = this.extraArgs.maxTargetDistance
+		this.aoeRange = this.extraArgs.aoeRange
 	}
 	update(dt) {
 		const casterCoords = this.model.getUnitCoordsById(this.castingUnitId)
@@ -39,14 +39,14 @@ export default class WalkTargetingController extends BaseTargetingController {
 		})
 
 	}
-	onClick(mousePos) {
+	onClick(pickedTileCoords, pickedUnitId) {
 		const casterCoords = this.model.getUnitCoordsById(this.castingUnitId)
-		const [pickedTileCoords, pickedUnitId] = this.view.mousePick(true)
 		if (pickedTileCoords !== undefined) {
 
 			const targetDistanceFromCaster = manhattan(casterCoords, pickedTileCoords)
 			if (targetDistanceFromCaster >= this.minTargetDistance && targetDistanceFromCaster <= this.maxTargetDistance) {
 				console.log(`TARGET: ${pickedTileCoords}`)
+				return true // handled click!
 			}
 
 			else {
@@ -56,5 +56,6 @@ export default class WalkTargetingController extends BaseTargetingController {
 			//const midHeight = this.view.fieldView.getTileAtCoords(pickedTileCoords).midHeight
 			//cameraController.setTargetCenter([pickedTileCoords[0] + 0.5, midHeight, pickedTileCoords[1] + 0.5])
 		}
+		return false // click not handled, allow default click behaviour (i.e. select unit)
 	}
 }

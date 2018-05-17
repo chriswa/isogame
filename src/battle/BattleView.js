@@ -40,16 +40,20 @@ export default class BattleView {
 		// TODO: also pick from this.unitSprites
 		let pickedUnitId = undefined
 		if (isUnitsIncluded) {
-			let unitDistance
-			[ pickedUnitId, unitDistance ] = [ undefined, undefined ]
-			if (pickedTileCoords && pickedUnitId !== undefined) {
-				if (tileDistance < unitDistance) {
-					pickedUnitId = undefined
-				}
-				else {
-					pickedTileCoords = this.battleModel.getUnitCoordsById(pickedUnitId)
-				}
+			pickedUnitId = this.battleModel.findUnitIdAtPos(pickedTileCoords)
+			if (pickedUnitId !== undefined) {
+				pickedTileCoords = undefined
 			}
+			//let unitDistance
+			//[ pickedUnitId, unitDistance ] = [ undefined, undefined ]
+			//if (pickedTileCoords && pickedUnitId !== undefined) {
+			//	if (tileDistance < unitDistance) {
+			//		pickedUnitId = undefined
+			//	}
+			//	else {
+			//		pickedTileCoords = this.battleModel.getUnitCoordsById(pickedUnitId)
+			//	}
+			//}
 		}
 		return [ pickedTileCoords, pickedUnitId ]
 	}

@@ -1,21 +1,21 @@
 import * as fieldBuilder from './field/fieldBuilder.js'
 import BattleModel from './BattleModel.js'
 import BattleView from './BattleView.js'
-import PlaybackControllers from './PlaybackControllers.js'
+import ResultPlayers from './ResultPlayers.js'
 import AbilityArchetypes from './AbilityArchetypes.js'
 import MouseController from './MouseController.js'
 
 
 /*
 	FSM relationship:
-		BattleController.uiManagers : {
-			PLAYBACK: PlaybackManager,
-			TARGETING: TargetingManager,
+		BattleController.SubControllers : {
+			PLAYBACK: ResultPlayingSubController,
+			TARGETING: TargetingSubController,
 		}
-		BattleController.currentUiManager : BaseManager
+		BattleController.currentSubController : BaseSubController
 */
 
-class BaseManager {
+class BaseSubController {
 	constructor(battleController) {
 		/** @type BattleController */
 		this.battleController = battleController
@@ -29,60 +29,65 @@ class BaseManager {
 	onClick(mousePos) { } // ignore this event
 }
 
-class PlaybackManager extends BaseManager {
+class ResultPlayingSubController extends BaseSubController {
 	constructor(battleController) {
 		super(battleController)
-		this.activePlaybackController = undefined
+		this.queuedResults = []
+		this.activePlayerAnimation = undefined
+		this.activePlayerModelUpdater = undefined
 	}
-	update(dt) {
-		let remainingDt = dt
-		while (remainingDt > 0 && this.activePlaybackController) {
-
-			const consumedDt = this.activePlaybackController.update(remainingDt)
-			if (consumedDt) {
-				remainingDt -= consumedDt
-			}
-
-			const isComplete = this.activePlaybackController.isComplete()
-
-			if (!consumedDt && !isComplete) { debugger } // prevent infinite loop
-
-			if (!isComplete) {
-				return // this watcher has more to show, so wait for next update
-			}
-			
-			// active watcher is complete, move on to next result
-			this.startNextResult()
-		}
-
-		// check for end of results
-		if (!this.activePlaybackController) {
-			this.battleController.onPlaybackComplete()
-		}
+	addResult(result) {
+		this.queuedResults.push(result)
 	}
 	onStateEnter() {
 		this.view.fieldView.updateOverlay(testCoords => { return 0 }) // clear targeting overlay
 		this.startNextResult()
 	}
 	startNextResult() {
-		if (this.battleController.queuedResults.length) {
-			const activeResult = this.battleController.queuedResults.shift()
-			const playbackControllerClass = PlaybackControllers[activeResult.type]
-			this.activePlaybackController = new playbackControllerClass(this.model, this.view, activeResult)
-			this.battleController.log(`PlaybackController started: `, this.activePlaybackController)
+		if (this.queuedResults.length) {
+			const activeResult = this.queuedResults.shift()
+			const resultPlayer = ResultPlayers[activeResult.type]
+			this.activePlayerAnimation = resultPlayer.startAnimation(this.model, this.view, activeResult)
+			this.activePlayerModelUpdater = () => {
+				this.battleController.log(`ResultPlayer model updater called: `, activeResult)
+				resultPlayer.updateModel(this.model, activeResult)
+			}
+			this.battleController.log(`ResultAnimation started: `, this.activePlayerAnimation)
 		}
 		else {
-			this.activePlaybackController = undefined
+			this.activePlayerAnimation = undefined
+		}
+	}
+	update(dt) {
+		let remainingDt = dt
+		while (this.activePlayerAnimation) {
+
+			// update the animation
+			remainingDt = this.activePlayerAnimation.update(remainingDt)
+
+			// if the animation used all the time, it's not done yet, so we're done for now
+			if (!remainingDt) {
+				return
+			}
+
+			// the animation is complete, update the model and move on to the next result (if there is one)
+			this.activePlayerModelUpdater()
+			this.startNextResult()
+		}
+
+		// check for end of results
+		if (!this.activePlayerAnimation) {
+			this.battleController.onResultsComplete()
 		}
 	}
 	render(worldViewProjectionMatrix) {
-		if (this.activePlaybackController) {
-			this.activePlaybackController.render(worldViewProjectionMatrix)
+		if (this.activePlayerAnimation) {
+			this.activePlayerAnimation.render(worldViewProjectionMatrix)
 		}
 	}
 }
 
-class TargetingManager extends BaseManager {
+class TargetingSubController extends BaseSubController {
 	constructor(battleController) {
 		super(battleController)
 		this.selectedUnitId = undefined
@@ -107,8 +112,16 @@ class TargetingManager extends BaseManager {
 		}
 	}
 	onClick(mousePos) {
+		const [pickedTileCoords, pickedUnitId] = this.view.mousePick(true)
+		console.log(`click!`, pickedTileCoords, pickedUnitId)
+		let clickHandled = false
 		if (this.activeTargetingUI) {
-			this.activeTargetingUI.onClick(mousePos)
+			clickHandled = this.activeTargetingUI.onClick(pickedTileCoords, pickedUnitId)
+		}
+		if (!clickHandled) {
+			if (pickedUnitId !== undefined) {
+				this.onSelectUnit(pickedUnitId)
+			}
 		}
 	}
 	onSelectUnit(unitId) {
@@ -128,8 +141,8 @@ class TargetingManager extends BaseManager {
 		const abilityType = activeUnit.abilities[abilityId].abilityType
 		const abilityArch = AbilityArchetypes[abilityType]
 		this.removeActiveTargetingUi() // call this first, so everything is cleaned up for TargetingUi constructor created next
-		this.activeTargetingUI = abilityArch.createTargetingUi(this.model, this.view, this.selectedUnitId, this.selectedAbilityId)
-		this.battleController.log(`TargetingUI started: `, this.activeTargetingUI)
+		this.activeTargetingUI = abilityArch.createTargetingController(this.model, this.view, this.selectedUnitId, this.selectedAbilityId)
+		this.battleController.log(`TargetingController started: `, this.activeTargetingUI)
 	}
 	onSelectTarget(target) {
 		if (!this.model.isItMyTurn()) { return }
@@ -144,26 +157,30 @@ export default class BattleController {
 	constructor(fieldDescriptor, unitsModel, turnModel, myTeamId, decisionCallback) {
 
 		this.decisionCallback = decisionCallback
-		this.queuedResults = []
 
 		// convert the fieldDescriptor (e.g. { type: "randomwoods", seed: 123 } into a view and model
 		const { fieldView, fieldModel } = fieldBuilder.build(fieldDescriptor)
 
 		// Battle Model
-		this.model = new BattleModel(fieldModel, unitsModel, turnModel, myTeamId)
+		this.model = new BattleModel({
+			field: fieldModel,
+			units: unitsModel,
+			turn: turnModel,
+			myTeamId,
+		})
 
 		// BattleView
 		this.view = new BattleView(fieldView, this.model)
 
-		this.mouseController = new MouseController(this.view, (clickPos) => { this.currentUiManager.onClick(clickPos) })
+		this.mouseController = new MouseController(this.view, (clickPos) => { this.currentSubController.onClick(clickPos) })
 
 		// UI States
-		this.uiManagers = {
-			PLAYBACK: new PlaybackManager(this),
-			TARGETING: new TargetingManager(this),
+		this.allSubControllers = {
+			PLAYBACK: new ResultPlayingSubController(this),
+			TARGETING: new TargetingSubController(this),
 		}
-		this.currentUiManager = this.uiManagers.TARGETING
-		this.currentUiManager.onStateEnter()
+		this.currentSubController = this.allSubControllers.TARGETING
+		this.currentSubController.onStateEnter()
 	}
 
 	destroy() { // called by owner
@@ -174,37 +191,37 @@ export default class BattleController {
 		console.log('%cBattleController: ' + arg0, 'color: #09c;', ...args)
 	}
 
-	setUiState(newState) {
-		this.currentUiManager.onStateExit()
-		this.currentUiManager = newState
-		this.currentUiManager.onStateEnter()
+	setSubController(newState) {
+		this.currentSubController.onStateExit()
+		this.currentSubController = newState
+		this.currentSubController.onStateEnter()
 	}
 
-	addBattleSimulationResult(result) { // called by "owner"
-		this.queuedResults.push(result)
-		if (this.currentUiManager !== this.uiManagers.PLAYBACK) {
-			this.setUiState(this.uiManagers.PLAYBACK)
+	addResult(result) { // called by "owner"
+		this.allSubControllers.PLAYBACK.addResult(result)
+		if (this.currentSubController !== this.allSubControllers.PLAYBACK) {
+			this.setSubController(this.allSubControllers.PLAYBACK)
 		}
 	}
 
-	onSendDecision(unitId, abilityId, target) { // called by TargetingManager
+	onSendDecision(unitId, abilityId, target) { // called by TargetingSubController
 		decisionCallback(unitId, abilityId, target)
 		this.view.setWaiting(true)
 	}
 
-	onPlaybackComplete() { // called by PlaybackManager
-		this.setUiState(this.uiManagers.TARGETING)
+	onResultsComplete() { // called by ResultPlayingSubController
+		this.setSubController(this.allSubControllers.TARGETING)
 	}
 
 	update(dt) {
-		this.currentUiManager.update(dt)
+		this.currentSubController.update(dt)
 		this.view.update(dt)
 		this.mouseController.update(dt)
 	}
 
 	render() {
 		const worldViewProjectionMatrix = this.view.render()
-		this.currentUiManager.render(worldViewProjectionMatrix)
+		this.currentSubController.render(worldViewProjectionMatrix)
 	}
 	
 }

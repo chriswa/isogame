@@ -1,12 +1,12 @@
 import BattleModel from '../BattleModel.js'
 
 export default class BaseTargetingController {
-	constructor(model, view, castingUnitId, castingAbilityId) {
+	constructor(model, view, castingUnitId, extraArgs) {
 		/** @type BattleModel */
 		this.model = model
 		this.view = view
 		this.castingUnitId = castingUnitId
-		this.castingAbilityId = castingAbilityId
+		this.extraArgs = extraArgs
 		this.init()
 	}
 	init() {
@@ -19,10 +19,7 @@ export default class BaseTargetingController {
 	render(worldViewProjectionMatrix) {
 	}
 
-	onClick(mousePos) {
-		//const [pickedTileCoords, pickedUnitId] = this.view.mousePick(true)
-		//if (pickedTileCoords !== undefined) {
-		//}
+	onClick(pickedTileCoords, pickedUnitId) {
 	}
 
 }

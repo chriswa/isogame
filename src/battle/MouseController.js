@@ -78,7 +78,7 @@ export default class MouseController {
 		cameraController.update(dt) // this must occur after anything which may update the cameraController
 	}
 	onDragComplete() {
-		console.log('drag complete')
+		//console.log('drag complete')
 	}
 	onClick() {
 		this.onClickCallback(input.mousePos)

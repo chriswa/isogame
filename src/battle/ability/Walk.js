@@ -1,12 +1,18 @@
 import BaseAbility from './base.js'
-import AOETargetingController from '../targeting/Walk.js'
+import AOETargetingController from '../targeting/AOE.js'
 
 export default new class WalkAbility {
 	getSpriteName() {
 		return 'unknown'
 	}
-	createTargetingUi(model, view, selectedUnitId, abilityId) {
-		return new AOETargetingController(model, view, selectedUnitId, abilityId)
+	createTargetingController(model, view, selectedUnitId, abilityId) {
+		const ability = model.getAbilityById(selectedUnitId, abilityId)
+		const extraArgs = {
+			minTargetDistance: 1,
+			maxTargetDistance: ability.distance,
+			aoeRange: 1,
+		}
+		return new AOETargetingController(model, view, selectedUnitId, extraArgs)
 	}
 	//isCastable(battleModel, casterUnitId, abilityId) {
 	//	return true
