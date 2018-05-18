@@ -1,20 +1,25 @@
 import * as gfx from '../../gfx/gfx.js'
 const gl = gfx.gl
 
+const depthBonus = 0.00001 // in front of FieldDecor, but behind BillboardGroups
 
 const vertexShaderSource = `
-	uniform mat4 u_worldViewProjectionMatrix;
+	uniform mat4 u_viewProjectionMatrix;
 
-	attribute vec3 a_position;
+	attribute vec3 a_vertpos;
+	attribute vec3 a_centerpos;
 	attribute float a_colour;
 
 	varying vec3 v_position;
 	varying float v_colour;
 
 	void main() {
-		v_position = a_position;
+		v_position = a_vertpos;
 		v_colour = a_colour;
-		gl_Position = u_worldViewProjectionMatrix * vec4(a_position, 1.0);
+
+		vec4 vertpos = u_viewProjectionMatrix * vec4(a_vertpos, 1.0);
+		vec4 centerpos = u_viewProjectionMatrix * vec4(a_centerpos.x, 0.0, a_centerpos.z, 1.0) - ${depthBonus}; // at y=0, and a little bit closer
+		gl_Position = vec4(vertpos.xy, centerpos.z, 1.0);
 	}
 `
 const fragmentShaderSource = `precision mediump float;
@@ -40,7 +45,7 @@ const fragmentShaderSource = `precision mediump float;
 const programInfo = twgl.createProgramInfo(gl, [vertexShaderSource, fragmentShaderSource])
 
 export default class FieldOverlayRenderer {
-	constructor(positionData) {
+	constructor(positionData, centerData) {
 		const vertexCount = positionData.length / 3 // x,y,z
 		this.colourData = []
 		this.colourData.length = vertexCount
@@ -49,12 +54,13 @@ export default class FieldOverlayRenderer {
 		this.drawCount = vertexCount / 4 * 6 // 6 verts per quad (e.g. 0,1,2,0,2,3)
 
 		this.bufferInfo = twgl.createBufferInfoFromArrays(gl, {
-			a_position: positionData,
+			a_vertpos: positionData,
+			a_centerpos: centerData,
 			a_colour: { buffer: this.colourData, numComponents: 1, drawType: gl.DYNAMIC_DRAW },
 		})
 		this.bufferInfo.indices = gfx.quadIndexBuffer
 
-		this.updateColourData() // FIXME: why is this required to avoid "glDrawElements: attempt to access out of range vertices in attribute 1"
+		//this.updateColourData() // FIXME: why is this required to avoid "glDrawElements: attempt to access out of range vertices in attribute 1"
 	}
 	getColourData() {
 		return this.colourData
@@ -63,9 +69,9 @@ export default class FieldOverlayRenderer {
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.bufferInfo.attribs.a_colour.buffer)
 		gl.bufferData(gl.ARRAY_BUFFER, this.colourData, gl.DYNAMIC_DRAW)
 	}
-	render(worldViewProjectionMatrix) {
+	render(viewProjectionMatrix) {
 		const uniforms = {
-			u_worldViewProjectionMatrix: worldViewProjectionMatrix,
+			u_viewProjectionMatrix: viewProjectionMatrix,
 		}
 		gl.useProgram(programInfo.program)
 		twgl.setBuffersAndAttributes(gl, programInfo, this.bufferInfo)

@@ -27,8 +27,8 @@ export default class MouseController {
 		// on mousedown
 		this.eventSubscriber.subscribe(document, 'mousedown', e => {
 			if (e.button === 0) { // left mouse button
-				this.dragStart[0] = input.mousePos[0]
-				this.dragStart[1] = input.mousePos[1]
+				this.dragStart[0] = e.clientX
+				this.dragStart[1] = e.clientY
 			}
 			else if (e.button === 1) { // middle mouse button
 				if (input.mouseButtons.left) { return } // don't allow rotation during drag, it's very confusing because the rotation origin is the centre of the screen 
@@ -63,8 +63,8 @@ export default class MouseController {
 		if (this.isDragging) {
 			// FIXME: use proper math instead of fudging stuff
 			//const [xScale, yScale] = camera.getAspectScaleXY()
-			const dx = (input.mousePos[0] - this.dragStart[0]) 
-			const dy = (input.mousePos[1] - this.dragStart[1]) * 1.5
+			const dx = (input.mousePos[0] - this.dragStart[0]) * 1/16
+			const dy = (input.mousePos[1] - this.dragStart[1]) * 1/16
 			const angle = cameraController.getRawFacing()
 			const cx = -Math.sin(angle) * dy + Math.cos(angle) * dx
 			const cz = Math.sin(angle) * dx + Math.cos(angle) * dy

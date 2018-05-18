@@ -2,10 +2,10 @@ import * as camera from './camera.js'
 import * as gfx from './gfx.js'
 const gl = gfx.gl
 
-const depthBonus = 0.001
+const depthBonus = 0.00002 // closer than FieldOverlay
 
 const vertexShaderSource = `
-	uniform mat4 u_worldViewProjectionMatrix;
+	uniform mat4 u_viewProjectionMatrix;
 	uniform vec2 u_scaleXY;
 
 	attribute vec3 a_position;
@@ -20,10 +20,12 @@ const vertexShaderSource = `
 		v_glow = a_glow;
 		v_texcoord = a_texcoord;
 
-		vec4 origin = u_worldViewProjectionMatrix * vec4(a_position, 1.0);
+		vec4 origin = u_viewProjectionMatrix * vec4(a_position, 1.0);
 		origin += vec4(1.0, 0.0, 0.0, 0.0) * a_bboffset.x * u_scaleXY.x;
 		origin += vec4(0.0, 1.0, 0.0, 0.0) * a_bboffset.y * u_scaleXY.y;
-		origin.z -= ${depthBonus}; // also, force a slightly shallower depth
+		
+		origin.z = (u_viewProjectionMatrix * vec4(a_position.x, 0.0, a_position.z, 1.0)).z - ${depthBonus}; // at y=0, and a little bit closer
+
 		gl_Position = origin;
 	}
 `
@@ -165,11 +167,11 @@ export default class BillboardGroup {
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.packedBuffer)
 		gl.bufferData(gl.ARRAY_BUFFER, this.packedBufferData, gl.DYNAMIC_DRAW)
 	}
-	render(worldViewProjectionMatrix, cameraUp, cameraRight) {
+	render(viewProjectionMatrix, cameraUp, cameraRight) {
 		this.pushAllBufferDataToGPU()
 		//console.log(camera.getAspectScaleXY())
 		const uniforms = {
-			u_worldViewProjectionMatrix: worldViewProjectionMatrix,
+			u_viewProjectionMatrix: viewProjectionMatrix,
 			u_scaleXY: camera.getAspectScaleXY(),
 			u_texture: this.texture,
 		}

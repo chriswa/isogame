@@ -96,7 +96,7 @@ export function setTargetFacing(targetFacing_) {
 // ZOOM
 // ----
 
-let targetZoom = 0
+let targetZoom = camera.getZoomExp()
 
 export function getZoom() {
 	return targetZoom

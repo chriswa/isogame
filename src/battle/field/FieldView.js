@@ -7,14 +7,12 @@ const vb = twgl.v3.create()
 const vc = twgl.v3.create()
 
 export default class FieldView {
-	constructor(size, tileData, decorPositionData, decorTexcoordData, overlayPositionData) {
+	constructor(size, tileData, meshData) {
 		this.size = size
 		this.tileData = tileData
-		this.decorPositionData = decorPositionData // Float32Array, triangle style (e.g. v0,v1,v2,v0,v2,v3)
-		this.decorTexcoordData = decorTexcoordData // Float32Array, triangle style (e.g. v0,v1,v2,v0,v2,v3)
-		this.overlayPositionData = overlayPositionData // Float32Array, quad style (e.g. v0,v1,v2,v3)
-		this.decorRenderer = new FieldDecorRenderer(this.decorPositionData, this.decorTexcoordData)
-		this.overlayRenderer = new FieldOverlayRenderer(this.overlayPositionData)
+		this.overlayPositionData = meshData.overlayPositionData // Float32Array, quad style (e.g. v0,v1,v2,v3)
+		this.decorRenderer = new FieldDecorRenderer(meshData.decorPositionData, meshData.decorTexcoordData, meshData.decorCenterData)
+		this.overlayRenderer = new FieldOverlayRenderer(meshData.overlayPositionData, meshData.overlayCenterData)
 	}
 	updateOverlay(callback) {
 		const overlayBuffer = this.overlayRenderer.getColourData()
@@ -31,9 +29,9 @@ export default class FieldView {
 		}
 		this.overlayRenderer.updateColourData()
 	}
-	render(worldViewProjectionMatrix) {
-		this.decorRenderer.render(worldViewProjectionMatrix)
-		this.overlayRenderer.render(worldViewProjectionMatrix)
+	render(viewProjectionMatrix) {
+		this.decorRenderer.render(viewProjectionMatrix)
+		this.overlayRenderer.render(viewProjectionMatrix)
 	}
 	getTileAtCoords([tx, ty]) {
 		return this.tileData[this.size * ty + tx]

@@ -3,16 +3,19 @@ const gl = gfx.gl
 
 
 const vertexShaderSource = `
-	uniform mat4 u_worldViewProjectionMatrix;
+	uniform mat4 u_viewProjectionMatrix;
 
-	attribute vec3 a_position;
+	attribute vec3 a_vertpos;
+	attribute vec3 a_centerpos;
 	attribute vec2 a_texcoord;
 
 	varying vec2 v_texcoord;
 
 	void main() {
 		v_texcoord = a_texcoord;
-		gl_Position = u_worldViewProjectionMatrix * vec4(a_position, 1.0);
+		vec4 vertpos = u_viewProjectionMatrix * vec4(a_vertpos, 1.0);
+		vec4 centerpos = u_viewProjectionMatrix * vec4(a_centerpos.x, 0.0, a_centerpos.z, 1.0); // at y=0
+		gl_Position = vec4(vertpos.xy, centerpos.z, 1.0);
 	}
 `
 const fragmentShaderSource = `precision mediump float;
@@ -40,15 +43,16 @@ const fieldDecorTexture = twgl.createTexture(gl, {
 })
 
 export default class FieldDecorRenderer {
-	constructor(positionData, texcoordData) {
+	constructor(positionData, texcoordData, centerData) {
 		this.bufferInfo = twgl.createBufferInfoFromArrays(gl, {
-			a_position: positionData,
+			a_vertpos: positionData,
+			a_centerpos: centerData,
 			a_texcoord: texcoordData,
 		})
 	}
-	render(worldViewProjectionMatrix) {
+	render(viewProjectionMatrix) {
 		const uniforms = {
-			u_worldViewProjectionMatrix: worldViewProjectionMatrix,
+			u_viewProjectionMatrix: viewProjectionMatrix,
 			u_texture: fieldDecorTexture,
 		}
 		gl.useProgram(programInfo.program)

@@ -11,24 +11,37 @@ export function buildSampleBattleController(decisionCallback) {
 		0: {
 			unitId: 0,
 			teamId: 0,
-			name: "Hanz", spriteSet: "human_red", x: 3, y: 3, facing: 0, hp: 7, maxHp: 7, mana: 4, maxMana: 4, time: 47, turnbreaker: 0.454563,
+			name: "Hanz", spriteSet: "human_red", x: 0, y: 0, facing: 0, hp: 7, maxHp: 7, mana: 4, maxMana: 4, time: 47, turnbreaker: 0.454563,
 			buffs: {
 				0: { buffId: 0, buffType: "Poison", power: 1, turnsRemaining: 2, },
 			},
 			abilities: {
-				0: { abilityId: 0, abilityType: "Walk", distance: 11, },
+				0: { abilityId: 0, abilityType: "Walk", distance: 4, },
 			}
 		},
 		1: {
 			unitId: 1,
 			teamId: 1,
-			name: "Mordeqai", spriteSet: "goblin_purple", x: 7, y: 2, facing: 1, hp: 7, maxHp: 7, mana: 4, maxMana: 4, time: 69, turnbreaker: 0.873465,
+			name: "Mordeqai", spriteSet: "goblin_purple", x: 7, y: 0, facing: 1, hp: 7, maxHp: 7, mana: 4, maxMana: 4, time: 69, turnbreaker: 0.873465,
+			buffs: {
+			},
+			abilities: {
+				0: { abilityId: 0, abilityType: "Walk", distance: 3, },
+			}
+		},
+	}
+
+	for (let i = 2; i < 32; i += 1) {
+		unitsModel[i] = {
+			unitId: i,
+			teamId: 1,
+			name: "Rando", spriteSet: "goblin_green", x: Math.floor(Math.random() * 32), y: Math.floor(Math.random() * 32), facing: Math.floor(Math.random() * 4), hp: 7, maxHp: 7, mana: 4, maxMana: 4, time: 69, turnbreaker: 0.873465,
 			buffs: {
 			},
 			abilities: {
 				0: { abilityId: 0, abilityType: "Walk", distance: 7, },
 			}
-		},
+		}
 	}
 
 	const turnModel = {

@@ -16,8 +16,6 @@ export default class BaseTargetingController {
 	}
 	update(dt) {
 	}
-	render(worldViewProjectionMatrix) {
-	}
 
 	onClick(pickedTileCoords, pickedUnitId) {
 	}

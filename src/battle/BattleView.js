@@ -14,7 +14,7 @@ export default class BattleView {
 		this.fieldView = fieldView
 		this.battleModel = battleModel
 
-		this.bbgroup = new BillboardGroup("assets/sprites.png", 10, SpriteData)
+		this.bbgroup = new BillboardGroup("assets/sprites.png", 1000, SpriteData)
 
 		this.unitSprites = {}
 		for (let unitId in this.battleModel.units) {
@@ -75,10 +75,9 @@ export default class BattleView {
 	}
 
 	render() {
-		const worldViewProjectionMatrix = camera.getWorldViewProjectionMatrix()
-		this.fieldView.render(worldViewProjectionMatrix)
-		this.bbgroup.render(worldViewProjectionMatrix)
-		return worldViewProjectionMatrix
+		const viewProjectionMatrix = camera.getViewProjectionMatrix()
+		this.fieldView.render(viewProjectionMatrix)
+		this.bbgroup.render(viewProjectionMatrix)
 	}
 	
 }

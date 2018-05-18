@@ -39,8 +39,6 @@ export class BaseResultAnimation {
 	onComplete() {
 		this.onPartial(1)
 	}
-	render(worldViewProjectionMatrix) {
-	}
 }
 
 export class BaseResultPlayer {

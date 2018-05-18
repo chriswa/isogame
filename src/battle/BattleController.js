@@ -9,7 +9,7 @@ import MouseController from './MouseController.js'
 /*
 	FSM relationship:
 		BattleController.SubControllers : {
-			PLAYBACK: ResultPlayingSubController,
+			RESULTPLAYING: ResultPlayingSubController,
 			TARGETING: TargetingSubController,
 		}
 		BattleController.currentSubController : BaseSubController
@@ -23,7 +23,6 @@ class BaseSubController {
 	get view() { return this.battleController.view } // shortcut
 	get model() { return this.battleController.model } // shortcut
 	update(dt) { }
-	render(worldViewProjectionMatrix) { }
 	onStateEnter() { }
 	onStateExit() { }
 	onClick(mousePos) { } // ignore this event
@@ -78,11 +77,6 @@ class ResultPlayingSubController extends BaseSubController {
 		// check for end of results
 		if (!this.activePlayerAnimation) {
 			this.battleController.onResultsComplete()
-		}
-	}
-	render(worldViewProjectionMatrix) {
-		if (this.activePlayerAnimation) {
-			this.activePlayerAnimation.render(worldViewProjectionMatrix)
 		}
 	}
 }
@@ -176,7 +170,7 @@ export default class BattleController {
 
 		// UI States
 		this.allSubControllers = {
-			PLAYBACK: new ResultPlayingSubController(this),
+			RESULTPLAYING: new ResultPlayingSubController(this),
 			TARGETING: new TargetingSubController(this),
 		}
 		this.currentSubController = this.allSubControllers.TARGETING
@@ -198,9 +192,9 @@ export default class BattleController {
 	}
 
 	addResult(result) { // called by "owner"
-		this.allSubControllers.PLAYBACK.addResult(result)
-		if (this.currentSubController !== this.allSubControllers.PLAYBACK) {
-			this.setSubController(this.allSubControllers.PLAYBACK)
+		this.allSubControllers.RESULTPLAYING.addResult(result)
+		if (this.currentSubController !== this.allSubControllers.RESULTPLAYING) {
+			this.setSubController(this.allSubControllers.RESULTPLAYING)
 		}
 	}
 
@@ -220,8 +214,7 @@ export default class BattleController {
 	}
 
 	render() {
-		const worldViewProjectionMatrix = this.view.render()
-		this.currentSubController.render(worldViewProjectionMatrix)
+		this.view.render()
 	}
 	
 }

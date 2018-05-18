@@ -25,6 +25,9 @@ export default class BattleModel {
 		const activeUnit = this.getUnit(this.getActiveUnitId())
 		return activeUnit && activeUnit.teamId === this.myTeamId
 	}
+	getAbilityById(unitId, abilityId) {
+		return this.getUnitById(unitId).abilities[abilityId]
+	}
 	findUnitIdAtPos(pos) {
 		if (!pos) { return undefined }
 		const [x, y] = pos

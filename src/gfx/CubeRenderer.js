@@ -24,14 +24,14 @@ const gl = gfx.gl
 //})
 // ... render
 //	cubeList.forEach(cube => {
-//		cube.render(worldViewProjectionMatrix)
+//		cube.render(viewProjectionMatrix)
 //	})
 
 
 
 
 const vertexShaderSource = `
-	uniform mat4 u_worldViewProjectionMatrix;
+	uniform mat4 u_viewProjectionMatrix;
 
 	attribute vec3 a_position;
 	attribute vec2 a_texcoord;
@@ -40,7 +40,7 @@ const vertexShaderSource = `
 
 	void main() {
 		v_texcoord = a_texcoord;
-		gl_Position = u_worldViewProjectionMatrix * vec4(a_position, 1.0);
+		gl_Position = u_viewProjectionMatrix * vec4(a_position, 1.0);
 	}
 `
 const fragmentShaderSource = `precision mediump float;
@@ -75,11 +75,11 @@ export default class CubeRenderer {
 		this.position = twgl.v3.create(x, y, z)
 		this.colour = twgl.v3.create(r, g, b)
 	}
-	render(worldViewProjectionMatrix) {
-		twgl.m4.translate(worldViewProjectionMatrix, this.position, workMatrix)
+	render(viewProjectionMatrix) {
+		twgl.m4.translate(viewProjectionMatrix, this.position, workMatrix)
 		twgl.m4.scale(workMatrix, this.scale, workMatrix)
 		const uniforms = {
-			u_worldViewProjectionMatrix: workMatrix,
+			u_viewProjectionMatrix: workMatrix,
 			u_colour: this.colour,
 		}
 		gl.useProgram(programInfo.program)

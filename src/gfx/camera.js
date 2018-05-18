@@ -7,6 +7,8 @@ export const scale = twgl.v3.create(80, 80, 80)
 let zoomExp = 0
 let zoom = 1
 
+setZoomExp(-4) // set default zoom
+
 function ortho(dstMatrix) {
 	twgl.m4.ortho(
 		-gl.canvas.width / 2 - 0.5,
@@ -43,30 +45,33 @@ export function getFacing(relFacing = 0) {
 	return Math.round(rightTurns) % 4
 }
 
-const worldViewProjectionMatrix = twgl.m4.identity()
+const viewProjectionMatrix = twgl.m4.identity()
 
-export function getWorldViewProjectionMatrix() {
-	ortho(worldViewProjectionMatrix)
-	const scaleFactor = zoom * Math.min(gl.canvas.height, gl.canvas.width) * 1/16
+export function getViewProjectionMatrix() {
+	// create projection matrix
+	ortho(viewProjectionMatrix)
+	const scaleFactor = zoom * Math.min(gl.canvas.height, gl.canvas.width)
 	scale[0] = scale[1] = scale[2] = scaleFactor
-	twgl.m4.scale(worldViewProjectionMatrix, scale, worldViewProjectionMatrix)
-	twgl.m4.rotateX(worldViewProjectionMatrix, rotation[0], worldViewProjectionMatrix)
-	twgl.m4.rotateY(worldViewProjectionMatrix, rotation[1], worldViewProjectionMatrix)
-	twgl.m4.rotateZ(worldViewProjectionMatrix, rotation[2], worldViewProjectionMatrix)
-	twgl.m4.translate(worldViewProjectionMatrix, position, worldViewProjectionMatrix)
+	twgl.m4.scale(viewProjectionMatrix, scale, viewProjectionMatrix)
+
+	// create view matrix and multiply it in-place with projection matrix
+	twgl.m4.rotateX(viewProjectionMatrix, rotation[0], viewProjectionMatrix)
+	twgl.m4.rotateY(viewProjectionMatrix, rotation[1], viewProjectionMatrix)
+	twgl.m4.rotateZ(viewProjectionMatrix, rotation[2], viewProjectionMatrix)
+	twgl.m4.translate(viewProjectionMatrix, position, viewProjectionMatrix)
 	
-	return worldViewProjectionMatrix
+	return viewProjectionMatrix
 }
 
 export function getAspectScaleXY() {
 	const smallestDimension = Math.min(gl.canvas.height, gl.canvas.width)
 	const xScale = gl.canvas.width
 	const yScale = gl.canvas.height
-	const scaleFactor = zoom * smallestDimension * 1 / 16
+	const scaleFactor = zoom * smallestDimension
 
 	return [
-		zoom / xScale * smallestDimension * 1/16 / 16, // FIXME: why /16 a second time?
-		zoom / yScale * smallestDimension * 1/16 / 16, // FIXME: why /16 a second time?
+		zoom / xScale * smallestDimension / 16, // FIXME: why /16
+		zoom / yScale * smallestDimension / 16, // FIXME: why /16
 	]
 }
 
@@ -79,8 +84,8 @@ export function getRayFromScreenPos(screenPos) {
 	const dst = twgl.v3.copy(origin)
 	dst[2] = 1
 
-	//ortho(worldViewProjectionMatrix)
-	const matrix = getWorldViewProjectionMatrix()
+	//ortho(viewProjectionMatrix)
+	const matrix = getViewProjectionMatrix()
 	twgl.m4.inverse(matrix, matrix)
 
 	twgl.m4.transformPoint(matrix, origin, origin)

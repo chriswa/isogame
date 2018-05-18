@@ -60,9 +60,9 @@ export function build(fieldDescriptor) {
 		}
 	}
 
-	const { decorPositionData, decorTexcoordData, overlayPositionData } = drawMeshes(tileData, fieldWidth)
+	const meshData = drawMeshes(tileData, fieldWidth)
 
-	const fieldView = new FieldView(fieldWidth, tileData, decorPositionData, decorTexcoordData, overlayPositionData)
+	const fieldView = new FieldView(fieldWidth, tileData, meshData)
 
 	const fieldModel = {
 		size: fieldWidth,
@@ -86,7 +86,9 @@ function drawOverlayMesh(tileData, fieldWidth) {
 function drawMeshes(tileData, fieldWidth) {
 	const decorPositionData = []
 	const decorTexcoordData = []
+	const decorCenterData = []
 	const overlayPositionData = []
+	const overlayCenterData = []
 	for (let z = 0; z < fieldWidth; z += 1) {
 		for (let x = 0; x < fieldWidth; x += 1) {
 			const tile = tileData[x + z * fieldWidth]
@@ -97,24 +99,29 @@ function drawMeshes(tileData, fieldWidth) {
 			const zn = (z + 0)
 			const zs = (z + 1)
 
+			const xmid = (x + 0.5)
+			const zmid = (z + 0.5)
+
 			const u = Math.floor(Math.random() * 3)
 			const v = 0
-			const u0 = (u + 0) / 16
-			const u1 = (u + 1) / 16
-			const v0 = (v + 0) / 16
-			const v1 = (v + 1) / 16
+			let u0 = (u + 0) / 16
+			let u1 = (u + 1) / 16
+			let v0 = (v + 0) / 16
+			let v1 = (v + 1) / 16
 
 			tile.overlayQuadId = overlayPositionData.length / 6 / 3
 			
-			const overlayDY = -0.001
-			pushQuadAsVerts(overlayPositionData, [], xw, corner.nw + overlayDY, zn, u0, v0, xw, corner.sw + overlayDY, zs, u0, v1, xe, corner.se + overlayDY, zs, u1, v1, xe, corner.ne + overlayDY, zn, u1, v0)
+			pushQuadAsVerts(overlayPositionData, [], overlayCenterData, xmid, tile.midHeight, zmid, xw, corner.nw, zn, u0, v0, xw, corner.sw, zs, u0, v1, xe, corner.se, zs, u1, v1, xe, corner.ne, zn, u1, v0)
 			
-			pushQuadAsTris(decorPositionData, decorTexcoordData, xw, corner.nw, zn, u0, v0, xw, corner.sw, zs, u0, v1, xe, corner.se, zs, u1, v1, xe, corner.ne, zn, u1, v0)
+			pushQuadAsTris(decorPositionData, decorTexcoordData, decorCenterData, xmid, tile.midHeight, zmid, xw, corner.nw, zn, u0, v0, xw, corner.sw, zs, u0, v1, xe, corner.se, zs, u1, v1, xe, corner.ne, zn, u1, v0)
 
-			pushQuadAsTris(decorPositionData, decorTexcoordData, xw, corner.nw, zn, u0, v0, xw, 2, zn, u0, v1, xw, 2, zs, u1, v1, xw, corner.sw, zs, u1, v0)
-			pushQuadAsTris(decorPositionData, decorTexcoordData, xw, corner.sw, zs, u0, v0, xw, 2, zs, u0, v1, xe, 2, zs, u1, v1, xe, corner.se, zs, u1, v0)
-			pushQuadAsTris(decorPositionData, decorTexcoordData, xe, corner.se, zs, u0, v0, xe, 2, zs, u0, v1, xe, 2, zn, u1, v1, xe, corner.ne, zn, u1, v0)
-			pushQuadAsTris(decorPositionData, decorTexcoordData, xe, corner.ne, zn, u0, v0, xe, 2, zn, u0, v1, xw, 2, zn, u1, v1, xw, corner.nw, zn, u1, v0)
+			v0 += 1 / 16
+			v1 += 1 / 16
+
+			pushQuadAsTris(decorPositionData, decorTexcoordData, decorCenterData, xmid, tile.midHeight, zmid, xw, corner.nw, zn, u0, v0, xw, 2, zn, u0, v1, xw, 2, zs, u1, v1, xw, corner.sw, zs, u1, v0)
+			pushQuadAsTris(decorPositionData, decorTexcoordData, decorCenterData, xmid, tile.midHeight, zmid, xw, corner.sw, zs, u0, v0, xw, 2, zs, u0, v1, xe, 2, zs, u1, v1, xe, corner.se, zs, u1, v0)
+			pushQuadAsTris(decorPositionData, decorTexcoordData, decorCenterData, xmid, tile.midHeight, zmid, xe, corner.se, zs, u0, v0, xe, 2, zs, u0, v1, xe, 2, zn, u1, v1, xe, corner.ne, zn, u1, v0)
+			pushQuadAsTris(decorPositionData, decorTexcoordData, decorCenterData, xmid, tile.midHeight, zmid, xe, corner.ne, zn, u0, v0, xe, 2, zn, u0, v1, xw, 2, zn, u1, v1, xw, corner.nw, zn, u1, v0)
 
 		}
 	}
@@ -123,11 +130,13 @@ function drawMeshes(tileData, fieldWidth) {
 	return {
 		decorPositionData: new Float32Array(decorPositionData),
 		decorTexcoordData: new Float32Array(decorTexcoordData),
+		decorCenterData: new Float32Array(decorCenterData),
 		overlayPositionData: new Float32Array(overlayPositionData),
+		overlayCenterData: new Float32Array(overlayCenterData),
 	}
 }
 
-function pushQuadAsTris(positionData, texcoordData, x0, y0, z0, u0, v0, x1, y1, z1, u1, v1, x2, y2, z2, u2, v2, x3, y3, z3, u3, v3) {
+function pushQuadAsTris(positionData, texcoordData, centerData, xmid, ymid, zmid, x0, y0, z0, u0, v0, x1, y1, z1, u1, v1, x2, y2, z2, u2, v2, x3, y3, z3, u3, v3) {
 	positionData.push(
 		x0, y0, z0,
 		x1, y1, z1,
@@ -144,9 +153,12 @@ function pushQuadAsTris(positionData, texcoordData, x0, y0, z0, u0, v0, x1, y1, 
 		u2, v2,
 		u3, v3,
 	)
+	for (let i = 0; i < 6; i += 1) {
+		centerData.push(xmid, ymid, zmid)
+	}
 }
 
-function pushQuadAsVerts(positionData, texcoordData, x0, y0, z0, u0, v0, x1, y1, z1, u1, v1, x2, y2, z2, u2, v2, x3, y3, z3, u3, v3) {
+function pushQuadAsVerts(positionData, texcoordData, centerData, xmid, ymid, zmid, x0, y0, z0, u0, v0, x1, y1, z1, u1, v1, x2, y2, z2, u2, v2, x3, y3, z3, u3, v3) {
 	positionData.push(
 		x0, y0, z0,
 		x1, y1, z1,
@@ -159,4 +171,7 @@ function pushQuadAsVerts(positionData, texcoordData, x0, y0, z0, u0, v0, x1, y1,
 		u2, v2,
 		u3, v3,
 	)
+	for (let i = 0; i < 4; i += 1) {
+		centerData.push(xmid, ymid, zmid)
+	}
 }
