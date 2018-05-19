@@ -3,11 +3,8 @@ const gl = gfx.gl
 
 export const position = twgl.v3.create(0, 0, 0)
 export const rotation = twgl.v3.create(Math.PI * -0.25, Math.PI * 0.25, Math.PI * 0)
-export const scale = twgl.v3.create(80, 80, 80)
-let zoomExp = 0
-let zoom = 1
-
-setZoomExp(-4) // set default zoom
+export const scaleVector = twgl.v3.create(80, 80, 80)
+let scale = 1
 
 function ortho(dstMatrix) {
 	twgl.m4.ortho(
@@ -21,16 +18,12 @@ function ortho(dstMatrix) {
 	)
 }
 
-export function getZoomExp() {
-	return zoomExp
-}
-export function setZoomExp(zoomExp_) {
-	zoomExp = zoomExp_
-	zoom = Math.pow(2, zoomExp)
+export function setScale(scale_) {
+	scale = scale_
 }
 
-export function getRawZoom() {
-	return zoom
+export function getScale() {
+	return scale
 }
 
 export function setPosition(x, y, z) {
@@ -50,9 +43,9 @@ const viewProjectionMatrix = twgl.m4.identity()
 export function getViewProjectionMatrix() {
 	// create projection matrix
 	ortho(viewProjectionMatrix)
-	const scaleFactor = zoom * Math.min(gl.canvas.height, gl.canvas.width)
-	scale[0] = scale[1] = scale[2] = scaleFactor
-	twgl.m4.scale(viewProjectionMatrix, scale, viewProjectionMatrix)
+	const scaleFactor = scale * Math.min(gl.canvas.height, gl.canvas.width)
+	scaleVector[0] = scaleVector[1] = scaleVector[2] = scaleFactor
+	twgl.m4.scale(viewProjectionMatrix, scaleVector, viewProjectionMatrix)
 
 	// create view matrix and multiply it in-place with projection matrix
 	twgl.m4.rotateX(viewProjectionMatrix, rotation[0], viewProjectionMatrix)
@@ -67,11 +60,11 @@ export function getAspectScaleXY() {
 	const smallestDimension = Math.min(gl.canvas.height, gl.canvas.width)
 	const xScale = gl.canvas.width
 	const yScale = gl.canvas.height
-	const scaleFactor = zoom * smallestDimension
+	const scaleFactor = scale * smallestDimension
 
 	return [
-		zoom / xScale * smallestDimension / 16, // FIXME: why /16
-		zoom / yScale * smallestDimension / 16, // FIXME: why /16
+		scale / xScale * smallestDimension / 16, // FIXME: why /16
+		scale / yScale * smallestDimension / 16, // FIXME: why /16
 	]
 }
 

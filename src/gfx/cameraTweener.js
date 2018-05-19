@@ -96,29 +96,36 @@ export function setTargetFacing(targetFacing_) {
 // ZOOM
 // ----
 
-let targetZoom = camera.getZoomExp()
+let targetZoom = -4
+let currentZoom
+setCameraScaleFromZoom(targetZoom)
+
+function setCameraScaleFromZoom(zoom) {
+	currentZoom = zoom
+	camera.setScale(Math.pow(2, zoom))
+}
 
 export function getZoom() {
 	return targetZoom
 }
 
 export function getRawZoom() {
-	return camera.getRawZoom() // not exp!
+	return camera.getScale() // not exp!
 }
 
 const zoomTween = new Tween({
 	easing: easings.outCubic,
 	onStep(zoomStart, zoomDelta, t) {
-		camera.setZoomExp(zoomStart + zoomDelta * t)
+		setCameraScaleFromZoom(zoomStart + zoomDelta * t)
 	},
 	onEnd(zoomEnd) {
-		camera.setZoomExp(zoomEnd)
+		setCameraScaleFromZoom(zoomEnd)
 	},
 })
 
 export function setZoom(targetZoom_) {
 	targetZoom = targetZoom_
-	const zoomStart = camera.getZoomExp()
+	const zoomStart = currentZoom
 	const zoomEnd = targetZoom
 	const zoomDelta = zoomEnd - zoomStart
 	const zoomDuration = 200

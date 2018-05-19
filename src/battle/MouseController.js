@@ -1,5 +1,5 @@
 import { EventSubscriber } from '../util/domUtils.js'
-import * as cameraController from '../gfx/cameraController.js'
+import * as cameraTweener from '../gfx/cameraTweener.js'
 import * as input from '../util/input.js'
 import gl from '../gfx/gl.js'
 import * as camera from '../gfx/camera.js'
@@ -22,7 +22,7 @@ export default class MouseController {
 	initEventHandlers() {
 		// on mouse wheel
 		this.eventSubscriber.subscribe(document, 'wheel', e => {
-			cameraController.setZoom(cameraController.getZoom() - e.deltaY / 100 / 10)
+			cameraTweener.setZoom(cameraTweener.getZoom() - e.deltaY / 100 / 10)
 		})
 		// on mousedown
 		this.eventSubscriber.subscribe(document, 'mousedown', e => {
@@ -32,7 +32,7 @@ export default class MouseController {
 			}
 			else if (e.button === 1) { // middle mouse button
 				if (input.mouseButtons.left) { return } // don't allow rotation during drag, it's very confusing because the rotation origin is the centre of the screen 
-				cameraController.setTargetFacing((cameraController.getFacing() + 1) % 4)
+				cameraTweener.setTargetFacing((cameraTweener.getFacing() + 1) % 4)
 			}
 		})
 		// on mouseup
@@ -65,17 +65,17 @@ export default class MouseController {
 			//const [xScale, yScale] = camera.getAspectScaleXY()
 			const dx = (input.mousePos[0] - this.dragStart[0]) * 1/16
 			const dy = (input.mousePos[1] - this.dragStart[1]) * 1/16
-			const angle = cameraController.getRawFacing()
+			const angle = cameraTweener.getRawFacing()
 			const cx = -Math.sin(angle) * dy + Math.cos(angle) * dx
 			const cz = Math.sin(angle) * dx + Math.cos(angle) * dy
-			const scale = ( 1 / cameraController.getRawZoom()) / 40 // WHY FORTY?!
-			cameraController.rawMoveCenter(cx * scale, 0, cz * scale)
+			const scale = ( 1 / cameraTweener.getRawZoom()) / 40 // WHY FORTY?!
+			cameraTweener.rawMoveCenter(cx * scale, 0, cz * scale)
 			// absorb movement!
 			this.dragStart[0] = input.mousePos[0]
 			this.dragStart[1] = input.mousePos[1]
 		}
 
-		cameraController.update(dt) // this must occur after anything which may update the cameraController
+		cameraTweener.update(dt) // this must occur after anything which may update the cameraTweener
 	}
 	onDragComplete() {
 		//console.log('drag complete')
