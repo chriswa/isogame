@@ -34,7 +34,7 @@ export default class BattleView {
 	selectAbility(abilityId) { } // called by UITargetState
 	setWaiting(isWaiting) { } // called by BattleController to show that we're waiting for a response from the server
 	mousePick(isUnitsIncluded = false) {
-		const screenPos = input.mousePos
+		const screenPos = input.latestMousePos
 		const { origin, direction } = camera.getRayFromScreenPos(screenPos)
 		let [ pickedTileCoords, tileDistance ] = this.fieldView.rayPick(origin, direction)
 		// TODO: also pick from this.unitSprites

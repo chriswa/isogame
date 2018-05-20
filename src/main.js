@@ -1,3 +1,4 @@
+import * as input from './util/input.js'
 import * as gfx from './gfx/gfx.js'
 import * as battleBuilder from './battle/battleBuilder.js'
 
@@ -14,6 +15,8 @@ setTimeout(() => {
 }, 500)
 
 gfx.startLoop(dt => {
+
+	input.update()
 
 	// update
 	battleController.update(dt)

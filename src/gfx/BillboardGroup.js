@@ -167,7 +167,7 @@ export default class BillboardGroup {
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.packedBuffer)
 		gl.bufferData(gl.ARRAY_BUFFER, this.packedBufferData, gl.DYNAMIC_DRAW)
 	}
-	render(viewProjectionMatrix, cameraUp, cameraRight) {
+	render(viewProjectionMatrix) {
 		this.pushAllBufferDataToGPU()
 		//console.log(camera.getAspectScaleXY())
 		const uniforms = {
@@ -179,5 +179,14 @@ export default class BillboardGroup {
 		twgl.setBuffersAndAttributes(gl, programInfo, this.bufferInfo)
 		twgl.setUniforms(programInfo, uniforms)
 		twgl.drawBufferInfo(gl, this.bufferInfo)
+	}
+	mousePick(mousePos, viewProjectionMatrix) {
+		const bbScreenPos = twgl.v3.create()
+		for (let i = 0; i < this.count; i += 1) {
+			//
+			const billboard = this.list[i]
+			const worldPos = [billboard.groupData[0], billboard.groupData[1], billboard.groupData[2]]
+			twgl.m4.transformPoint(viewProjectionMatrix, worldPos, bbScreenPos)
+		}
 	}
 }

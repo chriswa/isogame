@@ -17,7 +17,7 @@ const gl = gfx.gl
 //	}
 //}
 //document.addEventListener("click", e => {
-//	const { origin, direction } = camera.getRayFromMouse(input.mousePos)
+//	const { origin, direction } = camera.getRayFromMouse(input.latestMousePos)
 //	raycastCubes(origin, direction)
 //	const tileCoords = field1.rayPick(origin, direction)
 //	console.log(tileCoords)
