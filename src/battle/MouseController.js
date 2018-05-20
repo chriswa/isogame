@@ -28,10 +28,15 @@ export default class MouseController {
 					const scale = (1 / cameraTweener.getRawZoom()) / 40 // WHY FORTY?!
 					cameraTweener.rawMoveCenter(cx * scale, 0, cz * scale)
 				}
+				else if (button === 2) { // right mouse button
+					camera.rotation[0] += -deltaPos[1] / 500
+					camera.rotation[1] += deltaPos[0] / 200
+				}
 			},
 			onClick(pos, button) {
-				if (button === 1) { // middle mouse button
+				if (button === 2) { // right mouse button
 					cameraTweener.setTargetFacing((cameraTweener.getFacing() + 1) % 4)
+					camera.rotation[0] = Math.PI * -0.25 // reset any manual pitch rotation set by dragging right mouse button
 				}
 				else if (button === 0) { // left mouse button
 					onClickCallback(pos)

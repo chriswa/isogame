@@ -14,6 +14,10 @@ export const isButtonDown = {
 	middle: false,
 }
 
+document.addEventListener('contextmenu', e => {
+	e.preventDefault()
+})
+
 document.addEventListener('mousedown', e => {
 	isButtonDown[buttonNumbersToNames[e.button]] = true
 	eventQueue.push({ type: 'mousedown', button: e.button, pos: [e.clientX, e.clientY] })
