@@ -53,6 +53,7 @@ const fragmentShaderSource = `precision mediump float;
 			float glowalpha = alpha * 2.0;
 			colour = (glowalpha * glowcolour);
 		}
+		if (alpha < 0.1) { discard; }
 		gl_FragColor = colour;
 	}
 `
@@ -83,6 +84,7 @@ class Billboard {
 		this.dataOffset = bufferDataOffset
 		this.spriteData = spriteData
 		this.active = false
+		this.pickId = undefined
 	}
 	setPosition(pos) {
 		for (let v = 0; v < 4; v += 1) {
@@ -133,6 +135,7 @@ export default class BillboardGroup {
 		this.packedBufferData = new Float32Array(floatsPerBillboard * maxCount)
 		this.spriteData = spriteData
 		this.count = 0
+		/** @type { Array<Billboard> } */
 		this.list = []
 		for (let i = 0; i < maxCount; i += 1) {
 			this.list.push(new Billboard(this.packedBufferData, floatsPerBillboard * i, this.spriteData))
@@ -180,13 +183,51 @@ export default class BillboardGroup {
 		twgl.setUniforms(programInfo, uniforms)
 		twgl.drawBufferInfo(gl, this.bufferInfo)
 	}
-	mousePick(mousePos, viewProjectionMatrix) {
+	rayPick(pickScreenPos, origin, direction) {
 		const bbScreenPos = twgl.v3.create()
+		let pickedUnitId = undefined
+		let pickedUnitDistance = Infinity
 		for (let i = 0; i < this.count; i += 1) {
-			//
+			/** @type { Billboard } */
 			const billboard = this.list[i]
-			const worldPos = [billboard.groupData[0], billboard.groupData[1], billboard.groupData[2]]
-			twgl.m4.transformPoint(viewProjectionMatrix, worldPos, bbScreenPos)
+			const worldPos = [billboard.groupData[billboard.dataOffset + 0], billboard.groupData[billboard.dataOffset + 1], billboard.groupData[billboard.dataOffset + 2]]
+			camera.worldPosToScreenPos(worldPos, bbScreenPos)
+
+			const unitDistance = bbScreenPos[2] // - depthBonus
+			
+			const dx = pickScreenPos[0] - bbScreenPos[0]
+			const dy = pickScreenPos[1] - bbScreenPos[1]
+
+			const scale = camera.getScale() * 16
+
+			// AABB check
+			const nw_ox = billboard.groupData[billboard.dataOffset + floatsPerVertex * 0 + 4] * scale
+			const nw_oy = billboard.groupData[billboard.dataOffset + floatsPerVertex * 0 + 5] * scale
+			const nw_u = billboard.groupData[billboard.dataOffset + floatsPerVertex * 0 + 6] * billboard.spriteData.size
+			const nw_v = billboard.groupData[billboard.dataOffset + floatsPerVertex * 0 + 7] * billboard.spriteData.size
+			const se_ox = billboard.groupData[billboard.dataOffset + floatsPerVertex * 2 + 4] * scale
+			const se_oy = billboard.groupData[billboard.dataOffset + floatsPerVertex * 2 + 5] * scale
+			const se_u = billboard.groupData[billboard.dataOffset + floatsPerVertex * 2 + 6] * billboard.spriteData.size
+			const se_v = billboard.groupData[billboard.dataOffset + floatsPerVertex * 2 + 7] * billboard.spriteData.size
+
+			// pixel-check
+
+			const inAABB = dx >= nw_ox && dx <= se_ox && dy >= -nw_oy && dy <= -se_oy
+
+
+			if (inAABB && unitDistance < pickedUnitDistance) {
+
+				//console.log([dx, dy])
+				//console.log([nw_ox, nw_oy, se_ox, se_oy])
+				//console.log([nw_u, nw_v, se_u, se_v])
+
+
+
+				pickedUnitId = billboard.pickId
+				pickedUnitDistance = unitDistance
+			}
+			
 		}
+		return [pickedUnitId, pickedUnitDistance]
 	}
 }

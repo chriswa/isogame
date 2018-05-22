@@ -11,9 +11,22 @@ export default class AOETargetingController extends BaseTargetingController {
 		this.maxTargetDistance = this.extraArgs.maxTargetDistance
 		this.aoeRange = this.extraArgs.aoeRange
 	}
-	update(dt) {
+	render() {
+		const [targetCoords, targetUnitId] = this.view.mousePick()
+
 		const casterCoords = this.model.getUnitCoordsById(this.castingUnitId)
-		const [ targetCoords, targetUnitId ] = this.view.mousePick(true)
+
+		this.view.updateUnitGlows(unitId => {
+			if (unitId === targetUnitId) {
+				return 1
+			}
+			else if (unitId === this.castingUnitId) {
+				return 2
+			}
+			else {
+				return 0
+			}
+		})
 
 		this.view.fieldView.updateOverlay(testCoords => {
 			//if (!targetCoords) { return 0 }

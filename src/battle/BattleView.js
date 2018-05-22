@@ -20,6 +20,7 @@ export default class BattleView {
 		for (let unitId in this.battleModel.units) {
 			const unitModel = this.battleModel.units[unitId]
 			const unitSprite = this.bbgroup.acquire()
+			unitSprite.pickId = parseInt(unitId)
 			unitSprite.x = unitModel.x
 			unitSprite.y = unitModel.y
 			const tileData = this.fieldView.tileData[this.fieldView.size * unitSprite.y + unitSprite.x]
@@ -33,48 +34,56 @@ export default class BattleView {
 	selectUnit(unitId) { } // called by UITargetState
 	selectAbility(abilityId) { } // called by UITargetState
 	setWaiting(isWaiting) { } // called by BattleController to show that we're waiting for a response from the server
-	mousePick(isUnitsIncluded = false) {
+	
+	mousePick() {
 		const screenPos = input.latestMousePos
 		const { origin, direction } = camera.getRayFromScreenPos(screenPos)
-		let [ pickedTileCoords, tileDistance ] = this.fieldView.rayPick(origin, direction)
-		// TODO: also pick from this.unitSprites
-		let pickedUnitId = undefined
-		if (isUnitsIncluded) {
-			pickedUnitId = this.battleModel.findUnitIdAtPos(pickedTileCoords)
-			if (pickedUnitId !== undefined) {
-				pickedTileCoords = undefined
+		let [pickedTileCoords, tileDistance] = this.fieldView.rayPick(origin, direction)
+		let [pickedUnitId, unitDistance] = this.bbgroup.rayPick(screenPos, origin, direction)
+		// if both tile and unit are picked, choose only the closest, setting the other to undefined
+		if (pickedTileCoords && pickedUnitId !== undefined) {
+			//console.log(tileDistance, unitDistance)
+			if (tileDistance < unitDistance) {
+				pickedUnitId = undefined
 			}
-			//let unitDistance
-			//[ pickedUnitId, unitDistance ] = [ undefined, undefined ]
-			//if (pickedTileCoords && pickedUnitId !== undefined) {
-			//	if (tileDistance < unitDistance) {
-			//		pickedUnitId = undefined
-			//	}
-			//	else {
-			//		pickedTileCoords = this.battleModel.getUnitCoordsById(pickedUnitId)
-			//	}
-			//}
+			else {
+				pickedTileCoords = undefined // this.battleModel.getUnitCoordsById(pickedUnitId)
+			}
 		}
 		return [ pickedTileCoords, pickedUnitId ]
+	}
+
+	updateUnitGlows(callback) {
+		for (let unitIdStr in this.unitSprites) {
+			const unitSprite = this.unitSprites[unitIdStr]
+			const unitId = parseInt(unitIdStr)
+			const glowValue = callback(unitId)
+			unitSprite.setGlow(glowValue)
+		}
 	}
 
 	update(dt) {
 		this.tt += dt
 
-		// update sample billboard(s)
-		const glowFract = (Math.sin(this.tt / 80) / 2 + 0.5)
-		if (glowFract >= 1) { glowFract = 0.99999999 }
+		// billboard sprites should be updated now (before mouseover picking is done)
 		for (let unitId in this.battleModel.units) {
 			const unitModel = this.battleModel.units[unitId]
 			const unitSprite = this.unitSprites[unitId]
 			
-			unitSprite.setGlow(1 + glowFract)
 			const directions = ['n', 'e', 's', 'w']
 			unitSprite.setSpriteName(unitModel.spriteSet + '-idle-' + directions[camera.getFacing(unitModel.facing)])
 		}
 	}
 
 	render() {
+		// billboard glow should be updated now (now that mouseover picking is done)
+		//const glowFract = (Math.sin(this.tt / 80) / 2 + 0.5)
+		//if (glowFract >= 1) { glowFract = 0.99999999 }
+		//for (let unitId in this.battleModel.units) {
+		//	const unitSprite = this.unitSprites[unitId]
+		//	unitSprite.setGlow(1 + glowFract)
+		//}
+
 		const viewProjectionMatrix = camera.getViewProjectionMatrix()
 		this.fieldView.render(viewProjectionMatrix)
 		this.bbgroup.render(viewProjectionMatrix)

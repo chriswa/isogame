@@ -23,6 +23,7 @@ class BaseSubController {
 	get view() { return this.battleController.view } // shortcut
 	get model() { return this.battleController.model } // shortcut
 	update(dt) { }
+	render() { }
 	onStateEnter() { }
 	onStateExit() { }
 	onClick(mousePos) { } // ignore this event
@@ -79,6 +80,9 @@ class ResultPlayingSubController extends BaseSubController {
 			this.battleController.onResultsComplete()
 		}
 	}
+	render() {
+		this.activePlayerAnimation.render()
+	}
 }
 
 class TargetingSubController extends BaseSubController {
@@ -89,7 +93,9 @@ class TargetingSubController extends BaseSubController {
 		this.activeTargetingUI = undefined
 	}
 	update(dt) {
-		this.activeTargetingUI.update(dt)
+	}
+	render() {
+		this.activeTargetingUI.render()
 	}
 	onStateEnter() {
 		this.onSelectUnit(undefined)
@@ -106,7 +112,7 @@ class TargetingSubController extends BaseSubController {
 		}
 	}
 	onClick(mousePos) {
-		const [pickedTileCoords, pickedUnitId] = this.view.mousePick(true)
+		const [pickedTileCoords, pickedUnitId] = this.view.mousePick()
 		console.log(`click!`, pickedTileCoords, pickedUnitId)
 		let clickHandled = false
 		if (this.activeTargetingUI) {
@@ -209,11 +215,12 @@ export default class BattleController {
 
 	update(dt) {
 		this.currentSubController.update(dt)
-		this.view.update(dt)
-		this.mouseController.update(dt)
+		this.view.update(dt) // this sets glows and sprite names for billboards
+		this.mouseController.update(dt) // this calls cameraTweener.update
 	}
 
 	render() {
+		this.currentSubController.render() // does a mouseover pick, which should be done after (a) the camera has been moved and (b) sprites have been finalized (except glow)
 		this.view.render()
 	}
 	

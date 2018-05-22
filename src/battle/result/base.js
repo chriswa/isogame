@@ -33,6 +33,8 @@ export class BaseResultAnimation {
 			return 0
 		}
 	}
+	render() {
+	}
 	onPartial(ratio) {
 		console.log(`BaseResultAnimation: ${ Math.round(ratio * 100 * 10000) / 10000 } %`, this.result)
 	}

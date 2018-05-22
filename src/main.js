@@ -16,6 +16,7 @@ setTimeout(() => {
 
 gfx.startLoop(dt => {
 
+	// process queued input events first: for accurate mouse picks, this is done before moving the camera or advancing sprite animations
 	input.update()
 
 	// update

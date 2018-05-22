@@ -1,9 +1,11 @@
 import BattleModel from '../BattleModel.js'
+import BattleView from '../BattleView.js'
 
 export default class BaseTargetingController {
 	constructor(model, view, castingUnitId, extraArgs) {
 		/** @type BattleModel */
 		this.model = model
+		/** @type BattleView */
 		this.view = view
 		this.castingUnitId = castingUnitId
 		this.extraArgs = extraArgs
@@ -15,6 +17,8 @@ export default class BaseTargetingController {
 	destroy() {
 	}
 	update(dt) {
+	}
+	render() {
 	}
 
 	onClick(pickedTileCoords, pickedUnitId) {

@@ -191,7 +191,6 @@ function updatePos(dt) {
 // ------
 
 export function update(dt) {
-	//updateYaw(dt)
 	yawTween.update(dt)
 	posTween.update(dt)
 	zoomTween.update(dt)

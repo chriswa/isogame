@@ -35,11 +35,21 @@ document.addEventListener('wheel', e => {
 
 const inputLayers = []
 export function addInputLayer(layer) {
+	layer.active = true
 	inputLayers.push(layer)
 	inputLayers.sort((a, b) => { return a.layerOrder - b.layerOrder }) // ascending
 }
 export function removeInputLayer(layer) {
 	_.remove(inputLayers, layer)
+}
+export function disableInputLayer(layer) {
+	layer.active = false
+	_.each(buttonStates, buttonState => {
+		buttonState.disableLayer(layer)
+	})
+}
+export function reenableInputLayer(layer) {
+	layer.active = true
 }
 
 export class InputLayerInterface { // our interface (consumers do not need to inherit)
@@ -100,6 +110,11 @@ class ButtonState {
 				this.startPos[1] = pos[1] // "
 				this.targetLayer.onDrag(deltaPos, this.button)
 			}
+		}
+	}
+	disableLayer(layer) {
+		if (this.targetLayer === layer) {
+			this.targetLayer = undefined
 		}
 	}
 }

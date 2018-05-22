@@ -63,9 +63,19 @@ export function getAspectScaleXY() {
 	const scaleFactor = scale * smallestDimension
 
 	return [
-		scale / xScale * smallestDimension / 16, // FIXME: why /16
+		scale / xScale * smallestDimension / 16, // FIXME: why /16,
 		scale / yScale * smallestDimension / 16, // FIXME: why /16
 	]
+}
+
+export function worldPosToScreenPos(worldPos, outScreenPos) {
+	const matrix = getViewProjectionMatrix()
+
+	const viewportToCanvasMatrix = twgl.m4.identity()
+	twgl.m4.scale(viewportToCanvasMatrix, [gl.canvas.width * 0.5, -gl.canvas.height * 0.5, 10000], viewportToCanvasMatrix)
+	twgl.m4.translate(viewportToCanvasMatrix, [1, -1, 0], viewportToCanvasMatrix)
+	twgl.m4.multiply(viewportToCanvasMatrix, matrix, matrix)
+	twgl.m4.transformPoint(matrix, worldPos, outScreenPos)
 }
 
 export function getRayFromScreenPos(screenPos) {
