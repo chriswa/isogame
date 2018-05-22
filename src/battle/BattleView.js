@@ -39,10 +39,10 @@ export default class BattleView {
 		const screenPos = input.latestMousePos
 		const { origin, direction } = camera.getRayFromScreenPos(screenPos)
 		let [pickedTileCoords, tileDistance] = this.fieldView.rayPick(origin, direction)
-		let [pickedUnitId, unitDistance] = this.bbgroup.rayPick(screenPos, origin, direction)
+		let [pickedUnitId, unitDistance] = this.bbgroup.screenPick(screenPos)
 		// if both tile and unit are picked, choose only the closest, setting the other to undefined
+		console.log(tileDistance, unitDistance)
 		if (pickedTileCoords && pickedUnitId !== undefined) {
-			//console.log(tileDistance, unitDistance)
 			if (tileDistance < unitDistance) {
 				pickedUnitId = undefined
 			}

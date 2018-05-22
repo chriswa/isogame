@@ -1,5 +1,7 @@
 import * as camera from './camera.js'
+import * as debugCanvas from './debugCanvas.js'
 import * as gfx from './gfx.js'
+import BitArray from './../util/BitArray.js'
 const gl = gfx.gl
 
 const depthBonus = 0.00002 // closer than FieldOverlay
@@ -43,7 +45,7 @@ const fragmentShaderSource = `precision mediump float;
 			glowcolour = vec4(1.0, 1.0, 1.0, glowstrength);
 		}
 		else if (glowcolouroption == 2.0) {
-			glowcolour = vec4(1.0, 0.0, 0.0, glowstrength);
+			glowcolour = vec4(0.0, 0.0, 0.0, glowstrength);
 		}
 
 		vec4 texcolour = texture2D(u_texture, v_texcoord);
@@ -60,7 +62,7 @@ const fragmentShaderSource = `precision mediump float;
 
 const programInfo = twgl.createProgramInfo(gl, [vertexShaderSource, fragmentShaderSource])
 
-function loadTexture(textureSrc) {
+function loadTexture(textureSrc, callback) {
 	return twgl.createTexture(gl, {
 		src: textureSrc,
 		mag: gl.NEAREST,
@@ -71,7 +73,24 @@ function loadTexture(textureSrc) {
 	}, (err, texture, source) => {
 		// texture loaded!
 		//console.log("createTexture callback:", err, texture, source, source.width, source.height)
+		callback(texture, source)
 	})
+}
+
+function getAlphaBitArrayFromTexture(texture, source) {
+	const canvas = document.createElement('canvas')
+	const ctx = canvas.getContext('2d')
+	canvas.width = source.width
+	canvas.height = source.height
+	ctx.drawImage(source, 0, 0, source.width, source.height)
+	const imageData = ctx.getImageData(0, 0, source.width, source.height).data
+	const pixelCount = source.width * source.height
+	const alphaBitmask = new BitArray(pixelCount)
+	for (let i = 0; i < pixelCount; i += 1) {
+		const alpha = imageData[i*4 + 3]
+		alphaBitmask.write(i, alpha >= 128)
+	}
+	return alphaBitmask
 }
 
 
@@ -131,7 +150,10 @@ class Billboard {
 
 export default class BillboardGroup {
 	constructor(textureSrc, maxCount, spriteData) {
-		this.texture = loadTexture(textureSrc)
+		this.textureAlphaBitArray = undefined
+		this.texture = loadTexture(textureSrc, (texture, source) => {
+			this.textureAlphaBitArray = getAlphaBitArrayFromTexture(texture, source)
+		})
 		this.packedBufferData = new Float32Array(floatsPerBillboard * maxCount)
 		this.spriteData = spriteData
 		this.count = 0
@@ -183,24 +205,26 @@ export default class BillboardGroup {
 		twgl.setUniforms(programInfo, uniforms)
 		twgl.drawBufferInfo(gl, this.bufferInfo)
 	}
-	rayPick(pickScreenPos, origin, direction) {
+	screenPick(pickScreenPos) {
 		const bbScreenPos = twgl.v3.create()
 		let pickedUnitId = undefined
 		let pickedUnitDistance = Infinity
+
+		const scale = camera.getScale() * Math.min(gl.canvas.height, gl.canvas.width) / 16 / 2
+
 		for (let i = 0; i < this.count; i += 1) {
 			/** @type { Billboard } */
 			const billboard = this.list[i]
 			const worldPos = [billboard.groupData[billboard.dataOffset + 0], billboard.groupData[billboard.dataOffset + 1], billboard.groupData[billboard.dataOffset + 2]]
 			camera.worldPosToScreenPos(worldPos, bbScreenPos)
 
-			const unitDistance = bbScreenPos[2] // - depthBonus
+			const unitDistance = bbScreenPos[2] // * scale //  - depthBonus
 			
 			const dx = pickScreenPos[0] - bbScreenPos[0]
 			const dy = pickScreenPos[1] - bbScreenPos[1]
 
-			const scale = camera.getScale() * 16
-
 			// AABB check
+
 			const nw_ox = billboard.groupData[billboard.dataOffset + floatsPerVertex * 0 + 4] * scale
 			const nw_oy = billboard.groupData[billboard.dataOffset + floatsPerVertex * 0 + 5] * scale
 			const nw_u = billboard.groupData[billboard.dataOffset + floatsPerVertex * 0 + 6] * billboard.spriteData.size
@@ -210,21 +234,30 @@ export default class BillboardGroup {
 			const se_u = billboard.groupData[billboard.dataOffset + floatsPerVertex * 2 + 6] * billboard.spriteData.size
 			const se_v = billboard.groupData[billboard.dataOffset + floatsPerVertex * 2 + 7] * billboard.spriteData.size
 
-			// pixel-check
-
 			const inAABB = dx >= nw_ox && dx <= se_ox && dy >= -nw_oy && dy <= -se_oy
 
+			//debugCanvas.ctx.strokeStyle = 'black'
+			//debugCanvas.ctx.strokeRect(bbScreenPos[0] + nw_ox, bbScreenPos[1] - nw_oy, se_ox - nw_ox, -(se_oy - nw_oy))
 
 			if (inAABB && unitDistance < pickedUnitDistance) {
+
+				// pixel check
+
+				if (this.textureAlphaBitArray) {
+					const u = Math.floor(nw_u + ((dx - nw_ox) / (se_ox - nw_ox)) * (se_u - nw_u))
+					const v = Math.floor(nw_v + ((-dy - nw_oy) / (se_oy - nw_oy)) * (se_v - nw_v))
+					const pixelOpaque = this.textureAlphaBitArray.read(u + v * billboard.spriteData.size)
+
+					if (pixelOpaque) {
+						pickedUnitId = billboard.pickId
+						pickedUnitDistance = unitDistance
+					}
+				}
 
 				//console.log([dx, dy])
 				//console.log([nw_ox, nw_oy, se_ox, se_oy])
 				//console.log([nw_u, nw_v, se_u, se_v])
 
-
-
-				pickedUnitId = billboard.pickId
-				pickedUnitDistance = unitDistance
 			}
 			
 		}
