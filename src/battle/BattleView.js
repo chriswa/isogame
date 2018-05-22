@@ -41,13 +41,13 @@ export default class BattleView {
 		let [pickedTileCoords, tileDistance] = this.fieldView.rayPick(origin, direction)
 		let [pickedUnitId, unitDistance] = this.bbgroup.screenPick(screenPos)
 		// if both tile and unit are picked, choose only the closest, setting the other to undefined
-		console.log(tileDistance, unitDistance)
+		//console.log(tileDistance, unitDistance)
 		if (pickedTileCoords && pickedUnitId !== undefined) {
-			if (tileDistance < unitDistance) {
+			if (tileDistance < unitDistance) { // FIXME: these scalars don't compare properly!
 				pickedUnitId = undefined
 			}
 			else {
-				pickedTileCoords = undefined // this.battleModel.getUnitCoordsById(pickedUnitId)
+				pickedTileCoords = undefined
 			}
 		}
 		return [ pickedTileCoords, pickedUnitId ]
