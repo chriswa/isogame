@@ -9,12 +9,10 @@ canvas.style.height = '100vh'
 
 document.body.appendChild(canvas)
 
-export function update() {
+export function clear() {
 	twgl.resizeCanvasToDisplaySize(canvas)
 	ctx.clearRect(0, 0, canvas.width, canvas.height)
-
 	//ctx.fillStyle = 'blue'
 	//ctx.fillRect(100, 100, canvas.width - 200, canvas.height - 200)
-
 }
 

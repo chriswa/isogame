@@ -6,6 +6,13 @@ const gl = gfx.gl
 
 const depthBonus = 0.00002 // closer than FieldOverlay
 
+export const glowOptions = {
+	NONE: 0,
+	SOLID_WHITE: 1,
+	PULSE_WHITE_BLACK: 2,
+	PULSE_RED_BLACK: 3,
+}
+
 const vertexShaderSource = `
 	uniform mat4 u_viewProjectionMatrix;
 	uniform vec2 u_scaleXY;
@@ -15,11 +22,11 @@ const vertexShaderSource = `
 	attribute vec2 a_bboffset;
 	attribute vec2 a_texcoord;
 
-	varying float v_glow;
+	varying float v_glowColour;
 	varying vec2 v_texcoord;
 
 	void main() {
-		v_glow = a_glow;
+		v_glowColour = a_glow;
 		v_texcoord = a_texcoord;
 
 		vec4 origin = u_viewProjectionMatrix * vec4(a_position, 1.0);
@@ -33,25 +40,31 @@ const vertexShaderSource = `
 `
 const fragmentShaderSource = `precision mediump float;
 	uniform sampler2D u_texture;
+	uniform float u_glowStrength; // 0.0 == black, 1.0 == full colour according to glowcolouroption
 
-	varying float v_glow;
+	varying float v_glowColour;
 	varying vec2 v_texcoord;
 
 	void main() {
-		float glowstrength = 1.0 - fract(v_glow);
-		vec4 glowcolour = vec4(0.0, 0.0, 0.0, 0.0);
-		float glowcolouroption = floor(v_glow);
-		if (glowcolouroption == 1.0) {
-			glowcolour = vec4(1.0, 1.0, 1.0, glowstrength);
+		float glowcolouroption = floor(v_glowColour);
+		vec4 glowcolour = vec4(0.0, 0.0, 0.0, 1.0);
+		if (v_glowColour == ${glowOptions.SOLID_WHITE}.0) {
+			glowcolour = vec4(1.0, 1.0, 1.0, 1.0);
 		}
-		else if (glowcolouroption == 2.0) {
-			glowcolour = vec4(0.0, 0.0, 0.0, glowstrength);
+		else if (v_glowColour == ${glowOptions.PULSE_WHITE_BLACK}.0) {
+			glowcolour += u_glowStrength * vec4(1.0, 1.0, 1.0, 0.0);
+		}
+		else if (v_glowColour == ${glowOptions.PULSE_RED_BLACK}.0) {
+			glowcolour += u_glowStrength * vec4(1.0, 0.0, 0.0, 0.0);
 		}
 
 		vec4 texcolour = texture2D(u_texture, v_texcoord);
 		float alpha = texcolour.a;
+
 		vec4 colour = texcolour;
 		if (alpha > 0.0 && alpha < 1.0) {
+			if (v_glowColour < 1.0) { discard; }
+
 			float glowalpha = alpha * 2.0;
 			colour = (glowalpha * glowcolour);
 		}
@@ -102,8 +115,8 @@ class Billboard {
 		this.groupData = groupBufferData
 		this.dataOffset = bufferDataOffset
 		this.spriteData = spriteData
-		this.active = false
 		this.pickId = undefined
+		this.spriteName = undefined
 	}
 	setPosition(pos) {
 		for (let v = 0; v < 4; v += 1) {
@@ -112,12 +125,26 @@ class Billboard {
 			this.groupData[this.dataOffset + floatsPerVertex * v + 2] = pos[2] // z
 		}
 	}
+	getPosition() {
+		return [
+			this.groupData[this.dataOffset + 0],
+			this.groupData[this.dataOffset + 1],
+			this.groupData[this.dataOffset + 2],
+		]
+	}
 	setGlow(glow) {
 		for (let v = 0; v < 4; v += 1) {
 			this.groupData[this.dataOffset + floatsPerVertex * v + 3] = glow
 		}
 	}
+	hide() {
+		this.setSprite(0, 0, 0, 0, 0, 0)
+	}
+	show() {
+		this.setSpriteName(this.spriteName)
+	}
 	setSpriteName(name) {
+		this.spriteName = name
 		const sprite = this.spriteData.sprites[name]
 		if (!sprite) { throw new Error(`no such sprite: "${name}"`) }
 		this.setSprite(sprite.w, sprite.h, sprite.x, sprite.y, sprite.ox, sprite.oy)
@@ -144,8 +171,12 @@ class Billboard {
 		this.groupData[this.dataOffset + floatsPerVertex * 3 + 6] = (u0 + width) / this.spriteData.size
 		this.groupData[this.dataOffset + floatsPerVertex * 3 + 7] = v0 / this.spriteData.size
 	}
-	//moveIndex(newIndex) { // for defragging when a billboard is removed which is not the last!
-	//}
+	moveOffset(newOffset) {
+		for (let i = 0; i < floatsPerBillboard; i += 1) {
+			this.groupData[newOffset + i] = this.groupData[this.dataOffset + i]
+		}
+		this.dataOffset = newOffset
+	}
 }
 
 export default class BillboardGroup {
@@ -182,23 +213,38 @@ export default class BillboardGroup {
 			throw new Error(`BillboardGroup acquire failed: no available Billboards in group!`)
 		}
 		const billboard = this.list[this.count]
-		billboard.active = true
 		this.count += 1
 		return billboard
 	}
-	release(billboard) {
+	release(doomedBillboard) {
+		console.warn(`untested code!`)
+		this.count -= 1
+		if (doomedBillboard.arrayIndex !== this.count) {
+			const shuffledBillboard = this.list[this.count]
+
+			// swap buffer contents
+			shuffledBillboard.moveOffset(doomedBillboard.dataOffset)
+			doomedBillboard.dataOffset = this.count * floatsPerBillboard
+
+			// swap list positions
+			const doomedListIndex = doomedBillboard.dataOffset / floatsPerBillboard
+			this.list[doomedListIndex] = shuffledBillboard
+			this.list[this.count] = doomedBillboard
+		}
 	}
 	pushAllBufferDataToGPU() {
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.packedBuffer)
 		gl.bufferData(gl.ARRAY_BUFFER, this.packedBufferData, gl.DYNAMIC_DRAW)
 	}
-	render(viewProjectionMatrix) {
+	render(viewProjectionMatrix, tt) {
 		this.pushAllBufferDataToGPU()
 		//console.log(camera.getAspectScaleXY())
+		const glowPulsesPerSecond = 4
 		const uniforms = {
 			u_viewProjectionMatrix: viewProjectionMatrix,
 			u_scaleXY: camera.getAspectScaleXY(),
 			u_texture: this.texture,
+			u_glowStrength: (Math.sin(glowPulsesPerSecond * tt / 1000 * Math.PI * 2) + 1) / 2,
 		}
 		gl.useProgram(programInfo.program)
 		twgl.setBuffersAndAttributes(gl, programInfo, this.bufferInfo)
@@ -215,7 +261,10 @@ export default class BillboardGroup {
 		for (let i = 0; i < this.count; i += 1) {
 			/** @type { Billboard } */
 			const billboard = this.list[i]
-			const worldPos = [billboard.groupData[billboard.dataOffset + 0], billboard.groupData[billboard.dataOffset + 1], billboard.groupData[billboard.dataOffset + 2]]
+
+			if (billboard.pickId === undefined) { continue } // skip billboards with no pickId set!
+
+			const worldPos = billboard.getPosition()
 			camera.worldPosToScreenPos(worldPos, bbScreenPos)
 
 			const unitDistance = bbScreenPos[2] // * scale //  - depthBonus

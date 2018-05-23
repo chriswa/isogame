@@ -4,6 +4,9 @@ import SpriteData from '../../assets/sprites.js'
 import FieldView from './field/FieldView.js' // imported for type hinting
 import * as input from '../util/input.js'
 import * as TextTexture from '../gfx/TextTexture.js'
+import BattleModel from './BattleModel.js';
+
+const topTextElement = document.getElementById('topText')
 
 export default class BattleView {
 
@@ -12,23 +15,43 @@ export default class BattleView {
 
 		/** @type FieldView */
 		this.fieldView = fieldView
+		/** @type BattleModel */
 		this.battleModel = battleModel
 
 		this.bbgroup = new BillboardGroup("assets/sprites.png", 1000, SpriteData)
 
+		// create sprite for bouncing turn indicator
+		this.indicatorSprite = this.bbgroup.acquire()
+		this.indicatorSprite.setSpriteName('drop_indicator')
+
+		// create sprites for each unit
 		this.unitSprites = {}
 		for (let unitId in this.battleModel.units) {
 			const unitModel = this.battleModel.units[unitId]
 			const unitSprite = this.bbgroup.acquire()
 			unitSprite.pickId = parseInt(unitId)
-			unitSprite.x = unitModel.x
-			unitSprite.y = unitModel.y
-			const tileData = this.fieldView.tileData[this.fieldView.size * unitSprite.y + unitSprite.x]
-			unitSprite.setPosition(twgl.v3.create(unitSprite.x + .5, tileData.midHeight, unitSprite.y + .5))
-			unitSprite.setGlow(1.0)
+			const tileData = this.fieldView.tileData[this.fieldView.size * unitModel.z + unitModel.x]
+			unitSprite.setPosition(twgl.v3.create(unitModel.x + .5, tileData.midHeight, unitModel.z + .5))
 			this.unitSprites[unitId] = unitSprite
 		}
 
+		
+
+	}
+
+	setTopText(message) {
+		topTextElement.innerText = message
+	}
+
+	showActiveUnit(unitId) {
+		const activeUnit = this.battleModel.getUnitById(unitId)
+		const tileData = this.fieldView.tileData[this.fieldView.size * activeUnit.z + activeUnit.x]
+		this.indicatorSpriteBaseHeight = tileData.midHeight - 2.2
+		this.indicatorSprite.setPosition(twgl.v3.create(activeUnit.x + 0.5, this.indicatorSpriteBaseHeight, activeUnit.z + 0.5))
+		this.indicatorSprite.show()
+	}
+	hideActiveUnit() {
+		this.indicatorSprite.hide()
 	}
 
 	selectUnit(unitId) { } // called by UITargetState
@@ -43,12 +66,12 @@ export default class BattleView {
 		// if both tile and unit are picked, choose only the closest, setting the other to undefined
 		//console.log(tileDistance, unitDistance)
 		if (pickedTileCoords && pickedUnitId !== undefined) {
-			if (tileDistance < unitDistance) { // FIXME: these scalars don't compare properly!
-				pickedUnitId = undefined
-			}
-			else {
+			//if (tileDistance < unitDistance) { // FIXME: these scalars don't compare properly!
+			//	pickedUnitId = undefined
+			//}
+			//else {
 				pickedTileCoords = undefined
-			}
+			//}
 		}
 		return [ pickedTileCoords, pickedUnitId ]
 	}
@@ -73,20 +96,17 @@ export default class BattleView {
 			const directions = ['n', 'e', 's', 'w']
 			unitSprite.setSpriteName(unitModel.spriteSet + '-idle-' + directions[camera.getFacing(unitModel.facing)])
 		}
+
+		const indicatorPos = this.indicatorSprite.getPosition()
+		const bouncesPerSecond = 2
+		indicatorPos[1] = this.indicatorSpriteBaseHeight - Math.abs(Math.sin(bouncesPerSecond * this.tt / 1000 * Math.PI * 2 / 2))
+		this.indicatorSprite.setPosition(indicatorPos)
 	}
 
 	render() {
-		// billboard glow should be updated now (now that mouseover picking is done)
-		//const glowFract = (Math.sin(this.tt / 80) / 2 + 0.5)
-		//if (glowFract >= 1) { glowFract = 0.99999999 }
-		//for (let unitId in this.battleModel.units) {
-		//	const unitSprite = this.unitSprites[unitId]
-		//	unitSprite.setGlow(1 + glowFract)
-		//}
-
 		const viewProjectionMatrix = camera.getViewProjectionMatrix()
 		this.fieldView.render(viewProjectionMatrix)
-		this.bbgroup.render(viewProjectionMatrix)
+		this.bbgroup.render(viewProjectionMatrix, this.tt)
 	}
 	
 }

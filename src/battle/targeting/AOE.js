@@ -1,4 +1,5 @@
 import BaseTargetingController from './base.js'
+import { glowOptions as billboardGlowOptions } from './../../gfx/BillboardGroup.js'
 
 function manhattan(a, b) {
 	if (!a || !b) { return Infinity }
@@ -17,14 +18,14 @@ export default class AOETargetingController extends BaseTargetingController {
 		const casterCoords = this.model.getUnitCoordsById(this.castingUnitId)
 
 		this.view.updateUnitGlows(unitId => {
-			if (unitId === targetUnitId) {
-				return 1
+			if (unitId === this.castingUnitId) {
+				return billboardGlowOptions.SOLID_WHITE
 			}
-			else if (unitId === this.castingUnitId) {
-				return 2
+			else if (unitId === targetUnitId) {
+				return billboardGlowOptions.PULSE_WHITE_BLACK
 			}
 			else {
-				return 0
+				return billboardGlowOptions.NONE
 			}
 		})
 

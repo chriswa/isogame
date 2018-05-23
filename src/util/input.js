@@ -59,6 +59,7 @@ export class InputLayerInterface { // our interface (consumers do not need to in
 	}
 	onMouseDown(pos, button) { return false } // if true, we "capture" the mousedown event and will be called for onClick or onDrag(s)
 	onDrag(deltaPos, button) { }
+	onDragEnd(button) { }
 	onClick(pos, button) { }
 	onWheel(pos, deltaY) { }
 }
@@ -73,7 +74,7 @@ class ButtonState {
 		this.targetLayer = undefined
 	}
 	mousedown(pos) {
-		this.targetLayer = _.find(inputLayers, inputLayer => { return inputLayer.onMouseDown(this.button) })
+		this.targetLayer = _.find(inputLayers, inputLayer => { return inputLayer.active && inputLayer.onMouseDown(this.button) })
 		this.startPos[0] = pos[0]
 		this.startPos[1] = pos[1]
 		this.isButtonDown = true
@@ -84,6 +85,7 @@ class ButtonState {
 				const deltaPos = [pos[0] - this.startPos[0], pos[1] - this.startPos[1]]
 				this.targetLayer.onDrag(deltaPos, this.button)
 				this.isDragging = false
+				this.targetLayer.onDragEnd(this.button)
 			}
 			else {
 				this.targetLayer.onClick(pos, this.button)
@@ -114,6 +116,7 @@ class ButtonState {
 	}
 	disableLayer(layer) {
 		if (this.targetLayer === layer) {
+			console.log(`layer disabled`)
 			this.targetLayer = undefined
 		}
 	}
@@ -128,7 +131,7 @@ const buttonStates = [
 export function update() {
 	_.each(eventQueue, ({ type, button, deltaY, pos }) => {
 		if (type === 'wheel') {
-			_.find(inputLayers, inputLayer => { return inputLayer.onWheel(pos, deltaY) }) // stop after the first one returns true
+			_.find(inputLayers, inputLayer => { return inputLayer.active && inputLayer.onWheel(pos, deltaY) }) // stop after the first one returns true
 		}
 		else {
 			const buttonState = buttonStates[button]

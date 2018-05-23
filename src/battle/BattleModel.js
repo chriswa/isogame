@@ -19,10 +19,10 @@ export default class BattleModel {
 	}
 	getUnitCoordsById(unitId) {
 		const unit = this.getUnitById(unitId)
-		return [ unit.x, unit.y ]
+		return [ unit.x, unit.z ]
 	}
 	isItMyTurn() {
-		const activeUnit = this.getUnit(this.getActiveUnitId())
+		const activeUnit = this.getUnitById(this.getActiveUnitId())
 		return activeUnit && activeUnit.teamId === this.myTeamId
 	}
 	getAbilityById(unitId, abilityId) {
@@ -30,10 +30,10 @@ export default class BattleModel {
 	}
 	findUnitIdAtPos(pos) {
 		if (!pos) { return undefined }
-		const [x, y] = pos
+		const [x, z] = pos
 		for (let unitId in this.units) {
 			const unit = this.units[unitId]
-			if (unit.x === x && unit.y === y) {
+			if (unit.x === x && unit.z === z) {
 				return unitId
 			}
 		}

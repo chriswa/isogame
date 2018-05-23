@@ -12,7 +12,6 @@ export default class MouseController {
 		this.onClickCallback = onClickCallback
 
 		this.inputLayer = {
-			active: false,
 			layerOrder: 10,
 			dragThreshold: 4,
 			onMouseDown(pos, button) {
@@ -28,15 +27,26 @@ export default class MouseController {
 					const scale = (1 / cameraTweener.getRawZoom()) / 40 // WHY FORTY?!
 					cameraTweener.rawMoveCenter(cx * scale, 0, cz * scale)
 				}
-				else if (button === 2) { // right mouse button
+				else if (button === 1) { // middle mouse button
 					camera.rotation[0] += -deltaPos[1] / 500
+				}
+				else if (button === 2) { // right mouse button
 					camera.rotation[1] += deltaPos[0] / 200
+				}
+			},
+			onDragEnd(button) {
+				if (button === 2) { // right mouse button
+					const closestFacing = Math.floor(camera.rotation[1] / (Math.PI / 2)) % 4
+					cameraTweener.setTargetFacing(-closestFacing)
 				}
 			},
 			onClick(pos, button) {
 				if (button === 2) { // right mouse button
 					cameraTweener.setTargetFacing((cameraTweener.getFacing() + 1) % 4)
-					camera.rotation[0] = Math.PI * -0.25 // reset any manual pitch rotation set by dragging right mouse button
+					camera.rotation[0] = Math.PI * -0.25 // reset any manual pitch rotation set by dragging middle mouse button
+				}
+				else if (button === 1) { // middle mouse button
+					camera.rotation[0] = Math.PI * -0.25 // reset any manual pitch rotation set by dragging middle mouse button
 				}
 				else if (button === 0) { // left mouse button
 					onClickCallback(pos)
@@ -53,9 +63,9 @@ export default class MouseController {
 	}
 
 	activate() {
-		this.inputLayer.active = true
+		input.reenableInputLayer(this.inputLayer)
 	}
 	deactivate() {
-		this.inputLayer.active = false
+		input.disableInputLayer(this.inputLayer)
 	}
 }

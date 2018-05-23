@@ -42,6 +42,7 @@ class ResultPlayingSubController extends BaseSubController {
 	onStateEnter() {
 		this.view.fieldView.updateOverlay(testCoords => { return 0 }) // clear targeting overlay
 		this.startNextResult()
+		this.view.setTopText('(showing results)')
 	}
 	startNextResult() {
 		if (this.queuedResults.length) {
@@ -100,10 +101,19 @@ class TargetingSubController extends BaseSubController {
 	onStateEnter() {
 		this.onSelectUnit(undefined)
 		this.battleController.mouseController.activate()
+		this.view.showActiveUnit(this.model.getActiveUnitId())
+		if (this.model.isItMyTurn()) {
+			this.view.setTopText("Your turn")
+		}
+		else {
+			this.view.setTopText("Opponent's turn")
+		}
 	}
 	onStateExit() {
 		this.removeActiveTargetingUi()
 		this.battleController.mouseController.deactivate()
+		this.view.hideActiveUnit()
+		this.view.setTopText('')
 	}
 	removeActiveTargetingUi() {
 		if (this.activeTargetingUI) {
