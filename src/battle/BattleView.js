@@ -24,6 +24,7 @@ export default class BattleView {
 		// create sprite for bouncing turn indicator
 		this.indicatorSprite = this.bbgroup.acquire()
 		this.indicatorSprite.setSpriteName('drop_indicator')
+		this.indicatorSprite.setGlow(2)
 
 		// create sprites for each unit
 		this.unitSprites = {}

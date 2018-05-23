@@ -180,6 +180,9 @@ class Billboard {
 }
 
 export default class BillboardGroup {
+
+	static get glowOptions() { return glowOptions }
+	
 	constructor(textureSrc, maxCount, spriteData) {
 		this.textureAlphaBitArray = undefined
 		this.texture = loadTexture(textureSrc, (texture, source) => {
