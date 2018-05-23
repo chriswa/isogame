@@ -1,7 +1,7 @@
 // adapted from http://gizma.com/easing/
 // see also https://gist.github.com/gre/1650294
 
-export default {
+const def = {
 	linear(t) {
 		return t
 	},
@@ -91,3 +91,5 @@ export default {
 		return 1/2 * (Math.sqrt(1 - t*t) + 1)
 	},
 }
+
+export default def

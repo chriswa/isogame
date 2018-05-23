@@ -16,10 +16,10 @@ export default class FieldView {
 	}
 	updateOverlay(callback) {
 		const overlayBuffer = this.overlayRenderer.getColourData()
-		for (let ty = 0; ty < this.size; ty += 1) {
+		for (let tz = 0; tz < this.size; tz += 1) {
 			for (let tx = 0; tx < this.size; tx += 1) {
-				const ti = ty * this.size + tx
-				const colour = callback([tx, ty])
+				const ti = tz * this.size + tx
+				const colour = callback([tx, tz])
 
 				overlayBuffer[ti * 4 + 0] = colour
 				overlayBuffer[ti * 4 + 1] = colour
@@ -33,16 +33,16 @@ export default class FieldView {
 		this.decorRenderer.render(viewProjectionMatrix)
 		this.overlayRenderer.render(viewProjectionMatrix)
 	}
-	getTileAtCoords([tx, ty]) {
-		return this.tileData[this.size * ty + tx]
+	getTileAtCoords([tx, tz]) {
+		return this.tileData[this.size * tz + tx]
 	}
 
 	rayPick(origin, direction) {
 		let closestDistance = Infinity
 		let closestTileCoords = undefined
-		for (let ty = 0; ty < this.size; ty += 1) {
+		for (let tz = 0; tz < this.size; tz += 1) {
 			for (let tx = 0; tx < this.size; tx += 1) {
-				const ti = ty * this.size + tx
+				const ti = tz * this.size + tx
 
 				for (let triangleIndex = 0; triangleIndex < 2; triangleIndex += 1) {
 					const positionIndexA = 3 * (ti * 4                    ) // 0, 0
@@ -60,9 +60,9 @@ export default class FieldView {
 					
 					const distance = raycast.intersectTriangle(origin, direction, va, vb, vc)
 					if (distance !== null && distance < closestDistance) {
-						//console.log(`hit triangle at ${tx},${ty} at t = ${distance}`)
+						//console.log(`hit triangle at ${tx},${tz} at t = ${distance}`)
 						closestDistance = distance
-						closestTileCoords = [tx, ty]
+						closestTileCoords = [tx, tz]
 					}
 
 				}

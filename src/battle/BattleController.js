@@ -116,10 +116,10 @@ class TargetingSubController extends BaseSubController {
 		}
 	}
 	onClick(mousePos) {
-		const [pickedTileCoords, pickedUnitId] = this.view.mousePick()
+		const [pickedTileCoords, pickedUnitId, pickedTileCoordsBehindUnit] = this.view.mousePick()
 		let clickHandled = false
 		if (this.activeTargetingUI) {
-			clickHandled = this.activeTargetingUI.onClick(pickedTileCoords, pickedUnitId)
+			clickHandled = this.activeTargetingUI.onClick(pickedTileCoords, pickedUnitId, pickedTileCoordsBehindUnit)
 		}
 		if (!clickHandled) {
 			if (pickedUnitId !== undefined) {
@@ -145,7 +145,7 @@ class TargetingSubController extends BaseSubController {
 			this.view.setTopText("Your turn")
 		}
 		else {
-			this.view.setTopText("Opponent's turn")
+			this.view.setTopText("Waiting for opponent...")
 		}
 
 		this.onSelectAbility(0)

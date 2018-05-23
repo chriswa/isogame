@@ -12,6 +12,7 @@ export function build(fieldDescriptor) {
 	if (type !== 'randomwoods') { throw new Error(`field type unsupported`) }
 
 	const fbm = new FBM(seed, 6, 2, 0.2, 2, 0.07)
+	const staticFbm = new FBM(seed, 1, 2, 0.2, 2, 0.87)
 
 	const fieldWidth = 32 // max is 104?
 	const tileData = []
@@ -25,11 +26,21 @@ export function build(fieldDescriptor) {
 			}
 			const y = quantize(fbm.sample(x, z))
 			//const y = (cornerHeights.nw + cornerHeights.se) / 2
+
+			let terrainTypeId = 'DIRT'
+			const staticSample = staticFbm.sample(x, z)
+			console.log(staticSample)
+			if (staticSample > 0.7) {
+				terrainTypeId = 'BUSH'
+			}
+			else if (staticSample > 0.6) {
+				terrainTypeId = 'STICK'
+			}
+
 			tileData.push({
 				x: x,
 				z: z,
-				terrain: 'sand', // TerrainTypes.sand,
-				obstruction: undefined, // ObstructionTypes.bigRock7,
+				terrainTypeId, // see TerrainTypes
 				y: y,
 				edgeSlopeHeights: { n: 4.5, s: 4, e: undefined, w: undefined }, // undefined may signify a step or a jump
 				overlayQuadId: 0, // used to detemine which triangles to enable for rendering an overlay for this tile
@@ -102,7 +113,7 @@ function drawMeshes(tileData, fieldWidth) {
 			const xmid = x
 			const zmid = z
 
-			const u = Math.floor(Math.random() * 3)
+			const u = Math.floor(Math.random() * 2)
 			const v = 0
 			let u0 = (u + 0) / 16
 			let u1 = (u + 1) / 16

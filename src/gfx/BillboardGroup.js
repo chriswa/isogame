@@ -2,16 +2,10 @@ import * as camera from './camera.js'
 import * as debugCanvas from './debugCanvas.js'
 import * as gfx from './gfx.js'
 import BitArray from './../util/BitArray.js'
+import billboardGlowOptions from './billboardGlowOptions.js'
 const gl = gfx.gl
 
 const depthBonus = 0.00002 // closer than FieldOverlay
-
-export const glowOptions = {
-	NONE: 0,
-	SOLID_WHITE: 1,
-	PULSE_WHITE_BLACK: 2,
-	PULSE_RED_BLACK: 3,
-}
 
 const vertexShaderSource = `
 	uniform mat4 u_viewProjectionMatrix;
@@ -48,13 +42,13 @@ const fragmentShaderSource = `precision mediump float;
 	void main() {
 		float glowcolouroption = floor(v_glowColour);
 		vec4 glowcolour = vec4(0.0, 0.0, 0.0, 1.0);
-		if (v_glowColour == ${glowOptions.SOLID_WHITE}.0) {
+		if (v_glowColour == ${billboardGlowOptions.SOLID_WHITE}.0) {
 			glowcolour = vec4(1.0, 1.0, 1.0, 1.0);
 		}
-		else if (v_glowColour == ${glowOptions.PULSE_WHITE_BLACK}.0) {
+		else if (v_glowColour == ${billboardGlowOptions.PULSE_WHITE_BLACK}.0) {
 			glowcolour += u_glowStrength * vec4(1.0, 1.0, 1.0, 0.0);
 		}
-		else if (v_glowColour == ${glowOptions.PULSE_RED_BLACK}.0) {
+		else if (v_glowColour == ${billboardGlowOptions.PULSE_RED_BLACK}.0) {
 			glowcolour += u_glowStrength * vec4(1.0, 0.0, 0.0, 0.0);
 		}
 
@@ -181,8 +175,6 @@ class Billboard {
 
 export default class BillboardGroup {
 
-	static get glowOptions() { return glowOptions }
-	
 	constructor(textureSrc, maxCount, spriteData) {
 		this.textureAlphaBitArray = undefined
 		this.texture = loadTexture(textureSrc, (texture, source) => {

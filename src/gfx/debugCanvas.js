@@ -14,8 +14,8 @@ document.body.insertBefore(canvas, gfx.gl.canvas.nextSibling)
 export function clear() {
 	twgl.resizeCanvasToDisplaySize(canvas)
 	ctx.clearRect(0, 0, canvas.width, canvas.height)
-	ctx.fillStyle = '#000'
-	ctx.font = 'bold 18px Arial'
-	ctx.fillText("debugCanvas", canvas.width - 125, 20)
+	//ctx.fillStyle = '#000'
+	//ctx.font = 'bold 18px Arial'
+	//ctx.fillText("debugCanvas", canvas.width - 125, 20)
 }
 

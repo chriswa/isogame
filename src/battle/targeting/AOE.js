@@ -1,11 +1,6 @@
 import BaseTargetingController from './base.js'
-import { glowOptions as billboardGlowOptions } from './../../gfx/BillboardGroup.js'
 import { colourOptions as overlayColourOptions } from './../field/FieldOverlayRenderer.js'
-
-function manhattan(a, b) {
-	if (!a || !b) { return Infinity }
-	return Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1])
-}
+import { manhattan } from '../../util/mathUtils.js'
 
 export default class AOETargetingController extends BaseTargetingController {
 	init() {
@@ -13,37 +8,27 @@ export default class AOETargetingController extends BaseTargetingController {
 		this.maxTargetDistance = this.extraArgs.maxTargetDistance
 		this.aoeRange = this.extraArgs.aoeRange
 	}
-	isCasterActiveAndOwned() {
-		return this.model.isItMyTurn() && this.model.getActiveUnitId() == this.castingUnitId
-	}
 	render() {
-		const [targetCoords, targetUnitId] = this.view.mousePick()
+		const [pickedCoords, pickedUnitId, pickedTileCoordsBehindUnit] = this.view.mousePick() // false)
 
 		const casterCoords = this.model.getUnitCoordsById(this.castingUnitId)
 
-		this.view.updateUnitGlows(unitId => {
-			if (unitId === this.castingUnitId) {
-				return billboardGlowOptions.SOLID_WHITE
-			}
-			else if (unitId === targetUnitId) {
-				return billboardGlowOptions.PULSE_WHITE_BLACK
-			}
-			else {
-				return billboardGlowOptions.NONE
-			}
-		})
+		this.updateUnitGlows(pickedUnitId) // caster is solid white, mouseover unit is flashing white-black
 
 		this.view.fieldView.updateOverlay(testCoords => {
-			//if (!targetCoords) { return 0 }
+			//if (!pickedCoords) { return 0 }
 			let colour = overlayColourOptions.NONE
 			const casterDistance = manhattan(casterCoords, testCoords)
+
+			// targeting range
 			if (casterDistance >= this.minTargetDistance && casterDistance <= this.maxTargetDistance) {
 				colour = this.isCasterActiveAndOwned() ? overlayColourOptions.SOLID_CYAN : overlayColourOptions.SOLID_GREY
 			}
 
-			const targetDistanceFromCaster = manhattan(casterCoords, targetCoords)
+			// aoe range
+			const targetDistanceFromCaster = manhattan(casterCoords, pickedCoords)
 			if (targetDistanceFromCaster >= this.minTargetDistance && targetDistanceFromCaster <= this.maxTargetDistance) {
-				const targetDistance = manhattan(targetCoords, testCoords)
+				const targetDistance = manhattan(pickedCoords, testCoords)
 				if (targetDistance === 0) {
 					colour = overlayColourOptions.SOLID_RED
 				}
@@ -53,11 +38,11 @@ export default class AOETargetingController extends BaseTargetingController {
 			}
 
 			return colour
-			//return manhattan === 0 ? 3 : manhattan < 2 ? 2 : manhattan < 11 ? 1 : 0
 		})
 
 	}
-	onClick(pickedTileCoords, pickedUnitId) {
+	onClick(pickedTileCoords, pickedUnitId, pickedTileCoordsBehindUnit) {
+		//pickedTileCoords = pickedTileCoordsBehindUnit // ignore pickedUnitId!
 		if (!this.isCasterActiveAndOwned()) {
 			return false // default click behaviour: select the active unit
 		}

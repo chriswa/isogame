@@ -1,5 +1,7 @@
 import Walk from './ability/Walk.js'
 
-export default {
+const def = {
 	Walk,
 }
+
+export default def
