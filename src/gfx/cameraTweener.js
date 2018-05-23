@@ -82,14 +82,18 @@ const yawTween = new Tween({
 	},
 })
 
-export function setTargetFacing(targetFacing_) {
+export function setTargetFacing(targetFacing_, speed = 'fast') {
 	targetFacing = targetFacing_
 	const yawStart = camera.rotation[1]
 	const yawEnd = facingToYaw(targetFacing)
 	const yawDelta = shortestRotationToAngle(angleMod(yawEnd - yawStart))
 	const yawDurationPerTurn = 1600
-	const yawDuration = Math.abs(yawDelta) / (Math.PI * 2) * yawDurationPerTurn
+	const yawDuration = Math.abs(yawDelta) / (Math.PI * 2) * yawDurationPerTurn + (speed === 'slow' ? 300 : 0)
 	yawTween.start(yawStart, yawDelta, yawEnd, yawDuration)
+}
+
+export function cancelFacingTween() {
+	yawTween.halt()
 }
 
 

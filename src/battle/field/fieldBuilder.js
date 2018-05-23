@@ -23,14 +23,14 @@ export function build(fieldDescriptor) {
 				sw: quantize(fbm.sample(x - 0.5, z + 0.5)),
 				nw: quantize(fbm.sample(x - 0.5, z - 0.5)),
 			}
-			const midHeight = quantize(fbm.sample(x, z))
-			//const midHeight = (cornerHeights.nw + cornerHeights.se) / 2
+			const y = quantize(fbm.sample(x, z))
+			//const y = (cornerHeights.nw + cornerHeights.se) / 2
 			tileData.push({
 				x: x,
 				z: z,
 				terrain: 'sand', // TerrainTypes.sand,
 				obstruction: undefined, // ObstructionTypes.bigRock7,
-				midHeight: midHeight,
+				y: y,
 				edgeSlopeHeights: { n: 4.5, s: 4, e: undefined, w: undefined }, // undefined may signify a step or a jump
 				overlayQuadId: 0, // used to detemine which triangles to enable for rendering an overlay for this tile
 				west: undefined,  // pointers to neighboring tiles; set below
@@ -66,7 +66,7 @@ export function build(fieldDescriptor) {
 
 	const fieldModel = {
 		size: fieldWidth,
-		squares: tileData.map(d => { return { terrain: d.terrain, height: d.midHeight } })
+		squares: tileData.map(d => { return { terrain: d.terrain, height: d.y } })
 	}
 
 	return { fieldView, fieldModel }
@@ -94,13 +94,13 @@ function drawMeshes(tileData, fieldWidth) {
 			const tile = tileData[x + z * fieldWidth]
 			const corner = tile.cornerHeights
 
-			const xw = (x + 0)
-			const xe = (x + 1)
-			const zn = (z + 0)
-			const zs = (z + 1)
+			const xw = (x - 0.5)
+			const xe = (x + 0.5)
+			const zn = (z - 0.5)
+			const zs = (z + 0.5)
 
-			const xmid = (x + 0.5)
-			const zmid = (z + 0.5)
+			const xmid = x
+			const zmid = z
 
 			const u = Math.floor(Math.random() * 3)
 			const v = 0
@@ -111,17 +111,17 @@ function drawMeshes(tileData, fieldWidth) {
 
 			tile.overlayQuadId = overlayPositionData.length / 6 / 3
 			
-			pushQuadAsVerts(overlayPositionData, [], overlayCenterData, xmid, tile.midHeight, zmid, xw, corner.nw, zn, u0, v0, xw, corner.sw, zs, u0, v1, xe, corner.se, zs, u1, v1, xe, corner.ne, zn, u1, v0)
+			pushQuadAsVerts(overlayPositionData, [], overlayCenterData, xmid, tile.y, zmid, xw, corner.nw, zn, u0, v0, xw, corner.sw, zs, u0, v1, xe, corner.se, zs, u1, v1, xe, corner.ne, zn, u1, v0)
 			
-			pushQuadAsTris(decorPositionData, decorTexcoordData, decorCenterData, xmid, tile.midHeight, zmid, xw, corner.nw, zn, u0, v0, xw, corner.sw, zs, u0, v1, xe, corner.se, zs, u1, v1, xe, corner.ne, zn, u1, v0)
+			pushQuadAsTris(decorPositionData, decorTexcoordData, decorCenterData, xmid, tile.y, zmid, xw, corner.nw, zn, u0, v0, xw, corner.sw, zs, u0, v1, xe, corner.se, zs, u1, v1, xe, corner.ne, zn, u1, v0)
 
 			v0 += 1 / 16
 			v1 += 1 / 16
 
-			pushQuadAsTris(decorPositionData, decorTexcoordData, decorCenterData, xmid, tile.midHeight, zmid, xw, corner.nw, zn, u0, v0, xw, 2, zn, u0, v1, xw, 2, zs, u1, v1, xw, corner.sw, zs, u1, v0)
-			pushQuadAsTris(decorPositionData, decorTexcoordData, decorCenterData, xmid, tile.midHeight, zmid, xw, corner.sw, zs, u0, v0, xw, 2, zs, u0, v1, xe, 2, zs, u1, v1, xe, corner.se, zs, u1, v0)
-			pushQuadAsTris(decorPositionData, decorTexcoordData, decorCenterData, xmid, tile.midHeight, zmid, xe, corner.se, zs, u0, v0, xe, 2, zs, u0, v1, xe, 2, zn, u1, v1, xe, corner.ne, zn, u1, v0)
-			pushQuadAsTris(decorPositionData, decorTexcoordData, decorCenterData, xmid, tile.midHeight, zmid, xe, corner.ne, zn, u0, v0, xe, 2, zn, u0, v1, xw, 2, zn, u1, v1, xw, corner.nw, zn, u1, v0)
+			pushQuadAsTris(decorPositionData, decorTexcoordData, decorCenterData, xmid, tile.y, zmid, xw, corner.nw, zn, u0, v0, xw, 2, zn, u0, v1, xw, 2, zs, u1, v1, xw, corner.sw, zs, u1, v0)
+			pushQuadAsTris(decorPositionData, decorTexcoordData, decorCenterData, xmid, tile.y, zmid, xw, corner.sw, zs, u0, v0, xw, 2, zs, u0, v1, xe, 2, zs, u1, v1, xe, corner.se, zs, u1, v0)
+			pushQuadAsTris(decorPositionData, decorTexcoordData, decorCenterData, xmid, tile.y, zmid, xe, corner.se, zs, u0, v0, xe, 2, zs, u0, v1, xe, 2, zn, u1, v1, xe, corner.ne, zn, u1, v0)
+			pushQuadAsTris(decorPositionData, decorTexcoordData, decorCenterData, xmid, tile.y, zmid, xe, corner.ne, zn, u0, v0, xe, 2, zn, u0, v1, xw, 2, zn, u1, v1, xw, corner.nw, zn, u1, v0)
 
 		}
 	}

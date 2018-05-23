@@ -3,6 +3,14 @@ const gl = gfx.gl
 
 const depthBonus = 0.00001 // in front of FieldDecor, but behind BillboardGroups
 
+export const colourOptions = {
+	NONE: 0,
+	SOLID_CYAN: 1,
+	SOLID_YELLOW: 2,
+	SOLID_RED: 3,
+	SOLID_GREY: 4,
+}
+
 const vertexShaderSource = `
 	uniform mat4 u_viewProjectionMatrix;
 
@@ -30,15 +38,26 @@ const fragmentShaderSource = `precision mediump float;
 
 	void main() {
 		float opacity = v_colour > 0.0 ? 1.0 : 0.0;
-		float r = v_colour == 1.0 ? 0.1 : v_colour == 2.0 ? 1.0 : 1.0;
-		float g = v_colour == 1.0 ? 0.2 : v_colour == 2.0 ? 1.0 : 0.0;
-		float b = v_colour == 1.0 ? 1.0 : v_colour == 2.0 ? 0.0 : 0.0;
+		vec3 colour;
+		if (v_colour == ${ colourOptions.SOLID_CYAN }.0) {
+			colour = vec3(0.1, 0.2, 1.0);
+		}
+		else if (v_colour == ${ colourOptions.SOLID_YELLOW }.0) {
+			colour = vec3(1.0, 1.0, 0.0);
+		}
+		else if (v_colour == ${ colourOptions.SOLID_RED }.0) {
+			colour = vec3(1.0, 0.0, 0.0);
+		}
+		else if (v_colour == ${ colourOptions.SOLID_GREY }.0) {
+			//colour = vec3(0.1, 0.2, 0.5);
+			colour = vec3(0.5, 0.4, 0.0);
+		}
 
-		float fx = abs(fract(v_position.x) - 0.5) * 2.0;
-		float fz = abs(fract(v_position.z) - 0.5) * 2.0;
+		float fx = abs(fract(v_position.x + 0.5) - 0.5) * 2.0;
+		float fz = abs(fract(v_position.z + 0.5) - 0.5) * 2.0;
 		float f = max(fx, fz);
 		f = f * f * f * 0.3 + 0.4;
-		gl_FragColor = vec4(r, g, b, opacity * f);
+		gl_FragColor = vec4(colour, opacity * f);
 	}
 `
 

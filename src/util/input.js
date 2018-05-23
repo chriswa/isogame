@@ -2,6 +2,8 @@ export const latestMousePos = twgl.v3.create()
 
 export const eventQueue = []
 
+const eventElement = document.getElementById('inputEventHelper')
+
 document.addEventListener('mousemove', e => {
 	latestMousePos[0] = e.clientX
 	latestMousePos[1] = e.clientY
@@ -18,7 +20,7 @@ document.addEventListener('contextmenu', e => {
 	e.preventDefault()
 })
 
-document.addEventListener('mousedown', e => {
+eventElement.addEventListener('mousedown', e => {
 	isButtonDown[buttonNumbersToNames[e.button]] = true
 	eventQueue.push({ type: 'mousedown', button: e.button, pos: [e.clientX, e.clientY] })
 })
@@ -27,7 +29,7 @@ document.addEventListener('mouseup', e => {
 	isButtonDown[buttonNumbersToNames[e.button]] = false
 	eventQueue.push({ type: 'mouseup', button: e.button, pos: [e.clientX, e.clientY] })
 })
-document.addEventListener('wheel', e => {
+eventElement.addEventListener('wheel', e => {
 	eventQueue.push({ type: 'wheel', deltaY: e.deltaY, pos: [e.clientX, e.clientY] })
 })
 
@@ -59,6 +61,7 @@ export class InputLayerInterface { // our interface (consumers do not need to in
 	}
 	onMouseDown(pos, button) { return false } // if true, we "capture" the mousedown event and will be called for onClick or onDrag(s)
 	onDrag(deltaPos, button) { }
+	onDragStart(button) { }
 	onDragEnd(button) { }
 	onClick(pos, button) { }
 	onWheel(pos, deltaY) { }
@@ -74,7 +77,7 @@ class ButtonState {
 		this.targetLayer = undefined
 	}
 	mousedown(pos) {
-		this.targetLayer = _.find(inputLayers, inputLayer => { return inputLayer.active && inputLayer.onMouseDown(this.button) })
+		this.targetLayer = _.find(inputLayers, inputLayer => { return inputLayer.active && inputLayer.onMouseDown(pos, this.button) })
 		this.startPos[0] = pos[0]
 		this.startPos[1] = pos[1]
 		this.isButtonDown = true
@@ -104,6 +107,7 @@ class ButtonState {
 				const deltaSquared = dx * dx + dy * dy
 				if (deltaSquared >= dragThresholdSquared) {
 					this.isDragging = true
+					this.targetLayer.onDragStart(this.button)
 				}
 			}
 			if (this.isDragging) {

@@ -34,15 +34,20 @@ export default class MouseController {
 					camera.rotation[1] += deltaPos[0] / 200
 				}
 			},
+			onDragStart(button) {
+				if (button === 2) { // right mouse button
+					cameraTweener.cancelFacingTween()
+				}
+			},
 			onDragEnd(button) {
 				if (button === 2) { // right mouse button
 					const closestFacing = Math.floor(camera.rotation[1] / (Math.PI / 2)) % 4
-					cameraTweener.setTargetFacing(-closestFacing)
+					cameraTweener.setTargetFacing(-closestFacing, 'slow')
 				}
 			},
 			onClick(pos, button) {
 				if (button === 2) { // right mouse button
-					cameraTweener.setTargetFacing((cameraTweener.getFacing() + 1) % 4)
+					cameraTweener.setTargetFacing((cameraTweener.getFacing() + 1) % 4, 'fast')
 					camera.rotation[0] = Math.PI * -0.25 // reset any manual pitch rotation set by dragging middle mouse button
 				}
 				else if (button === 1) { // middle mouse button

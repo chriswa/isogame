@@ -4,7 +4,8 @@ import SpriteData from '../../assets/sprites.js'
 import FieldView from './field/FieldView.js' // imported for type hinting
 import * as input from '../util/input.js'
 import * as TextTexture from '../gfx/TextTexture.js'
-import BattleModel from './BattleModel.js';
+import BattleModel from './BattleModel.js'
+import * as cameraTweener from '../gfx/cameraTweener.js'
 
 const topTextElement = document.getElementById('topText')
 
@@ -31,7 +32,7 @@ export default class BattleView {
 			const unitSprite = this.bbgroup.acquire()
 			unitSprite.pickId = parseInt(unitId)
 			const tileData = this.fieldView.tileData[this.fieldView.size * unitModel.z + unitModel.x]
-			unitSprite.setPosition(twgl.v3.create(unitModel.x + .5, tileData.midHeight, unitModel.z + .5))
+			unitSprite.setPosition(twgl.v3.create(unitModel.x, tileData.y, unitModel.z))
 			this.unitSprites[unitId] = unitSprite
 		}
 
@@ -39,22 +40,34 @@ export default class BattleView {
 
 	}
 
+	getYForTileCenter(x, z) {
+		const tileData = this.fieldView.tileData[this.fieldView.size * z + x]
+		return tileData.y
+	}
+
 	setTopText(message) {
 		topTextElement.innerText = message
 	}
 
-	showActiveUnit(unitId) {
-		const activeUnit = this.battleModel.getUnitById(unitId)
-		const tileData = this.fieldView.tileData[this.fieldView.size * activeUnit.z + activeUnit.x]
-		this.indicatorSpriteBaseHeight = tileData.midHeight - 2.2
-		this.indicatorSprite.setPosition(twgl.v3.create(activeUnit.x + 0.5, this.indicatorSpriteBaseHeight, activeUnit.z + 0.5))
+	showActiveUnitIndicator(unitId) {
+		const unit = this.battleModel.getUnitById(unitId)
+		this.indicatorSpriteBaseHeight = this.getYForTileCenter(unit.x, unit.z) - 2.2
+		this.indicatorSprite.setPosition(twgl.v3.create(unit.x, this.indicatorSpriteBaseHeight, unit.z))
 		this.indicatorSprite.show()
 	}
-	hideActiveUnit() {
+	hideActiveUnitIndicator() {
 		this.indicatorSprite.hide()
 	}
+	centerOnUnit(unitId) {
+		const unit = this.battleModel.getUnitById(unitId)
+		const y = this.getYForTileCenter(unit.x, unit.z)
+		cameraTweener.setTargetCenter([unit.x, y, unit.z])
+	}
 
-	selectUnit(unitId) { } // called by UITargetState
+	selectUnit(unitId) { // called by UITargetState
+		this.centerOnUnit(unitId)
+		//TODO: init unitPanel to display selected unit's stats and abilities
+	}
 	selectAbility(abilityId) { } // called by UITargetState
 	setWaiting(isWaiting) { } // called by BattleController to show that we're waiting for a response from the server
 	

@@ -99,20 +99,14 @@ class TargetingSubController extends BaseSubController {
 		this.activeTargetingUI.render()
 	}
 	onStateEnter() {
-		this.onSelectUnit(undefined)
+		this.selectUnit(undefined)
 		this.battleController.mouseController.activate()
-		this.view.showActiveUnit(this.model.getActiveUnitId())
-		if (this.model.isItMyTurn()) {
-			this.view.setTopText("Your turn")
-		}
-		else {
-			this.view.setTopText("Opponent's turn")
-		}
+		this.view.showActiveUnitIndicator(this.model.getActiveUnitId())
 	}
 	onStateExit() {
 		this.removeActiveTargetingUi()
 		this.battleController.mouseController.deactivate()
-		this.view.hideActiveUnit()
+		this.view.hideActiveUnitIndicator()
 		this.view.setTopText('')
 	}
 	removeActiveTargetingUi() {
@@ -123,24 +117,37 @@ class TargetingSubController extends BaseSubController {
 	}
 	onClick(mousePos) {
 		const [pickedTileCoords, pickedUnitId] = this.view.mousePick()
-		console.log(`click!`, pickedTileCoords, pickedUnitId)
 		let clickHandled = false
 		if (this.activeTargetingUI) {
 			clickHandled = this.activeTargetingUI.onClick(pickedTileCoords, pickedUnitId)
 		}
 		if (!clickHandled) {
 			if (pickedUnitId !== undefined) {
-				this.onSelectUnit(pickedUnitId)
+				this.selectUnit(pickedUnitId)
+			}
+			else {
+				const activeUnitId = this.model.getActiveUnitId()
+				if (activeUnitId !== undefined) {
+					this.selectUnit(activeUnitId)
+				}
 			}
 		}
 	}
-	onSelectUnit(unitId) {
+	selectUnit(unitId) {
 		if (unitId === undefined) {
 			unitId = this.model.getActiveUnitId()
 		}
 		this.selectedUnitId = unitId
 		if (this.selectedUnitId === undefined) { return }
 		this.view.selectUnit(unitId)
+		
+		if (this.model.isItMyTurn()) {
+			this.view.setTopText("Your turn")
+		}
+		else {
+			this.view.setTopText("Opponent's turn")
+		}
+
 		this.onSelectAbility(0)
 	}
 	onSelectAbility(abilityId) {

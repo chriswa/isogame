@@ -11,7 +11,7 @@ export function buildSampleBattleController(decisionCallback) {
 		0: {
 			unitId: 0,
 			teamId: 0,
-			name: "Hanz", spriteSet: "human_red", x: 0, z: 0, facing: 0, hp: 7, maxHp: 7, mana: 4, maxMana: 4, time: 47, turnbreaker: 0.454563,
+			name: "Hanz", spriteSet: "human_red", x: 11, z: 11, facing: 0, hp: 7, maxHp: 7, mana: 4, maxMana: 4, time: 47, turnbreaker: 0.454563,
 			buffs: {
 				0: { buffId: 0, buffType: "Poison", power: 1, turnsRemaining: 2, },
 			},
@@ -22,7 +22,7 @@ export function buildSampleBattleController(decisionCallback) {
 		1: {
 			unitId: 1,
 			teamId: 1,
-			name: "Mordeqai", spriteSet: "goblin_purple", x: 7, z: 0, facing: 1, hp: 7, maxHp: 7, mana: 4, maxMana: 4, time: 69, turnbreaker: 0.873465,
+			name: "Mordeqai", spriteSet: "goblin_purple", x: 7, z: 9, facing: 1, hp: 7, maxHp: 7, mana: 4, maxMana: 4, time: 69, turnbreaker: 0.873465,
 			buffs: {
 			},
 			abilities: {

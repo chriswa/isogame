@@ -17,11 +17,21 @@
 									user-select: none; /* Non-prefixed version, currently
 																				supported by Chrome and Opera */
 			}
+			button:focus {
+				outline: none;
+			}
 
 			#mainCanvas {
 				width: 100vw;
 				height: 100vh;
 				display: block;
+			}
+			#inputEventHelper {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100vw;
+				height: 100vh;
 			}
 			#topText {
 				color: white;
@@ -61,6 +71,12 @@
 				-moz-osx-font-smoothing: inherit;
 				-webkit-appearance: none;
 			}
+			#unitPanelActionButtons > button:hover {
+				background-color: #666;
+			}
+			#unitPanelActionButtons > button:active {
+				background-color: #ccc;
+			}
 			#unitPanelPortrait {
 				position: absolute;
 				left: 0;
@@ -73,6 +89,7 @@
 		<!-- page content -->
 		<canvas id="mainCanvas"></canvas>
 		<div id="topText">Loading...</div>
+		<div id="inputEventHelper"></div>
 		<div id="unitPanel">
 			<img id="unitPanelPortrait" src="assets/sample_portrait.png">
 			<div id="unitPanelActionButtons">
