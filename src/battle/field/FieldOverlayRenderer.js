@@ -43,14 +43,13 @@ const fragmentShaderSource = `precision mediump float;
 			colour = vec3(0.1, 0.2, 1.0);
 		}
 		else if (v_colour == ${ colourOptions.SOLID_YELLOW }.0) {
-			colour = vec3(1.0, 1.0, 0.0);
+			colour = vec3(0.55, 0.55, 0.0);
 		}
 		else if (v_colour == ${ colourOptions.SOLID_RED }.0) {
 			colour = vec3(1.0, 0.0, 0.0);
 		}
 		else if (v_colour == ${ colourOptions.SOLID_GREY }.0) {
-			//colour = vec3(0.1, 0.2, 0.5);
-			colour = vec3(0.5, 0.4, 0.0);
+			colour = vec3(0.4, 0.4, 0.4);
 		}
 
 		float fx = abs(fract(v_position.x + 0.5) - 0.5) * 2.0;

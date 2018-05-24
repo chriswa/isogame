@@ -13,7 +13,7 @@ const battleController = battleBuilder.buildSampleBattleController(decisionCallb
 setTimeout(() => {
 	battleController.addResult({ type: 'Spellcast', unitId: 0, name: 'Hello World!' })
 	battleController.addResult({ type: 'Spellcast', unitId: 1, name: 'foobar' })
-}, 500)
+}, 1000)
 
 gfx.startLoop(dt => {
 

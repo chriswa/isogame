@@ -7,6 +7,7 @@ import * as TextTexture from '../gfx/TextTexture.js'
 import BattleModel from './BattleModel.js'
 import * as cameraTweener from '../gfx/cameraTweener.js'
 import TerrainTypes from './field/TerrainTypes.js'
+import Sprite from './../gfx/Sprite.js'
 
 const topTextElement = document.getElementById('topText')
 
@@ -27,15 +28,17 @@ export default class BattleView {
 		this.indicatorBillboard.setSpriteName('drop_indicator')
 		this.indicatorBillboard.setGlow(1)
 
-		// create billboards for each unit
-		this.unitBillboards = {}
+		// create sprites for each unit
+		this.unitSprites = {}
 		for (let unitId in this.battleModel.units) {
 			const unitModel = this.battleModel.units[unitId]
 			const unitBillboard = this.bbgroup.acquire()
 			unitBillboard.pickId = parseInt(unitId)
+
+			const unitSprite = new Sprite(unitBillboard, unitModel.spriteSet, unitModel.facing)
 			const tileData = this.fieldView.tileData[this.fieldView.size * unitModel.z + unitModel.x]
-			unitBillboard.setPosition([unitModel.x, tileData.y, unitModel.z])
-			this.unitBillboards[unitId] = unitBillboard
+			unitSprite.setPosition([unitModel.x, tileData.y, unitModel.z])
+			this.unitSprites[unitId] = unitSprite
 		}
 
 		// create billboards for field obstructions
@@ -111,12 +114,20 @@ export default class BattleView {
 	}
 
 	updateUnitGlows(callback) {
-		for (let unitIdStr in this.unitBillboards) {
-			const unitBillboard = this.unitBillboards[unitIdStr]
+		for (let unitIdStr in this.unitSprites) {
+			const unitSprite = this.unitSprites[unitIdStr]
 			const unitId = parseInt(unitIdStr)
 			const glowValue = callback(unitId)
-			unitBillboard.setGlow(glowValue)
+			unitSprite.setGlow(glowValue)
 		}
+	}
+
+	allUnitsIdle() {
+		_.each(this.unitSprites, unitSprite => { unitSprite.startAnimation('IDLE') })
+	}
+	
+	allUnitsStand() {
+		_.each(this.unitSprites, unitSprite => { unitSprite.startAnimation('STAND') })
 	}
 
 	update(dt) {
@@ -124,12 +135,12 @@ export default class BattleView {
 
 		const directions = ['n', 'e', 's', 'w']
 		
-		// billboard sprites should be updated now (before mouseover picking is done)
+		// unit sprites should be updated now (before mouseover picking is done)
 		for (let unitId in this.battleModel.units) {
 			const unitModel = this.battleModel.units[unitId]
-			const unitBillboard = this.unitBillboards[unitId]
+			const unitSprite = this.unitSprites[unitId]
 			
-			unitBillboard.setSpriteName(unitModel.spriteSet + '-idle-' + directions[camera.getFacing(unitModel.facing)])
+			unitSprite.update(dt, camera.getFacing(0))
 		}
 
 		for (let [billboard, terrainType, facing] of this.obstructionBillboards) {
