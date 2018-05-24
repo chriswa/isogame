@@ -3,7 +3,9 @@ const Animations = {
 		{ frameName: 'idle', duration: undefined, },
 	],
 	CAST: [
-		{ frameName: 'cast', duration: undefined, },
+		//{ frameName: 'cast', duration: undefined, },
+		{ frameName: 'idle', duration: 50, },
+		{ frameName: 'cast', duration: 150, },
 	],
 	ACT: [
 		{ frameName: 'act', duration: undefined, },

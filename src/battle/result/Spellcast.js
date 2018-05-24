@@ -3,7 +3,10 @@ import { BaseResultPlayer, BaseResultAnimation } from './base.js'
 class SpellcastAnimation extends BaseResultAnimation {
 	init() {
 		console.log(`SpellcastAnimation.init`, this.result)
-		this.duration = 500
+		this.duration = 1000
+		this.view.unitSprites[ this.result.unitId ].startAnimation('CAST')
+		this.view.setTopText(JSON.stringify(this.result))
+
 	}
 	//onPartial(ratio) {
 	//}

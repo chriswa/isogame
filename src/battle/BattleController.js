@@ -41,12 +41,17 @@ class ResultPlayingSubController extends BaseSubController {
 	}
 	onStateEnter() {
 		this.view.fieldView.updateOverlay(testCoords => { return 0 }) // clear targeting overlay
+		this.view.setTopText('')
 		this.startNextResult()
-		this.view.setTopText('(showing results)')
-		this.view.allUnitsStand()
+	}
+	onStateExit() {
+		this.view.allUnitsIdle()
 	}
 	startNextResult() {
 		if (this.queuedResults.length) {
+			
+			this.view.allUnitsStand()
+			
 			const activeResult = this.queuedResults.shift()
 			const resultPlayer = ResultPlayers[activeResult.type]
 			this.activePlayerAnimation = resultPlayer.startAnimation(this.model, this.view, activeResult)
@@ -103,7 +108,6 @@ class TargetingSubController extends BaseSubController {
 		this.selectUnit(undefined)
 		this.battleController.mouseController.activate()
 		this.view.showActiveUnitIndicator(this.model.getActiveUnitId())
-		this.view.allUnitsIdle()
 	}
 	onStateExit() {
 		this.removeActiveTargetingUi()
