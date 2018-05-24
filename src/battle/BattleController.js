@@ -122,7 +122,7 @@ class TargetingSubController extends BaseSubController {
 			clickHandled = this.activeTargetingUI.onClick(pickedTileCoords, pickedUnitId, pickedTileCoordsBehindUnit)
 		}
 		if (!clickHandled) {
-			if (pickedUnitId !== undefined) {
+			if (pickedUnitId !== undefined && pickedUnitId >= 0) { // negative pickIds are used for obstructions
 				this.selectUnit(pickedUnitId)
 			}
 			else {

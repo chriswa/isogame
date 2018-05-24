@@ -1,6 +1,8 @@
 import BaseTargetingController from './base.js'
 import { colourOptions as overlayColourOptions } from './../field/FieldOverlayRenderer.js'
 import { manhattan } from '../../util/mathUtils.js'
+import Dijkstra from './../../util/Dijkstra.js'
+import Grid from './../../util/Grid.js'
 
 export default class AOETargetingController extends BaseTargetingController {
 	init() {
@@ -9,7 +11,7 @@ export default class AOETargetingController extends BaseTargetingController {
 		this.aoeRange = this.extraArgs.aoeRange
 	}
 	render() {
-		const [pickedCoords, pickedUnitId, pickedTileCoordsBehindUnit] = this.view.mousePick() // false)
+		const [pickedCoords, pickedUnitId, pickedTileCoordsBehindUnit] = this.view.mousePick()
 
 		const casterCoords = this.model.getUnitCoordsById(this.castingUnitId)
 

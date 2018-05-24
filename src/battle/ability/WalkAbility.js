@@ -1,5 +1,6 @@
 import BaseAbility from './base.js'
-import AOETargetingController from '../targeting/AOE.js'
+import AOETargetingController from '../targeting/AOETargeting.js'
+import WalkTargetingController from '../targeting/WalkTargeting.js'
 
 export default new class WalkAbility {
 	getSpriteName() {
@@ -7,12 +8,15 @@ export default new class WalkAbility {
 	}
 	createTargetingController(model, view, selectedUnitId, abilityId) {
 		const ability = model.getAbilityById(selectedUnitId, abilityId)
-		const extraArgs = {
+		/*const extraArgs = {
 			minTargetDistance: 1,
 			maxTargetDistance: ability.distance,
 			aoeRange: 1,
 		}
 		return new AOETargetingController(model, view, selectedUnitId, extraArgs)
+		*/
+		const distance = ability.distance - (model.turn.movementUsed || 0)
+		return new WalkTargetingController(model, view, selectedUnitId, { distance })
 	}
 	//isCastable(battleModel, casterUnitId, abilityId) {
 	//	return true

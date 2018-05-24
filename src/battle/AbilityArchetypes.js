@@ -1,7 +1,7 @@
-import Walk from './ability/Walk.js'
+import WalkAbility from './ability/WalkAbility.js'
 
 const def = {
-	Walk,
+	WalkAbility,
 }
 
 export default def

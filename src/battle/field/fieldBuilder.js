@@ -29,7 +29,6 @@ export function build(fieldDescriptor) {
 
 			let terrainTypeId = 'DIRT'
 			const staticSample = staticFbm.sample(x, z)
-			console.log(staticSample)
 			if (staticSample > 0.7) {
 				terrainTypeId = 'BUSH'
 			}
@@ -77,7 +76,7 @@ export function build(fieldDescriptor) {
 
 	const fieldModel = {
 		size: fieldWidth,
-		squares: tileData.map(d => { return { terrain: d.terrain, height: d.y } })
+		squares: tileData.map(d => { return { terrainTypeId: d.terrainTypeId, height: d.y } })
 	}
 
 	return { fieldView, fieldModel }

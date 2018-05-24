@@ -1,7 +1,8 @@
 const def = {
-	DIRT: { walkCost: 1, },
-	BUSH: { obstructWalking: true, spriteName: 'bush', hasFacing: false, },
-	STICK: { obstructWalking: true, spriteName: 'stick', hasFacing: true, },
+	VOID: { },
+	DIRT: { walkCost: 1, }, // if there's no walkCost, the terrain cannot be walked upon
+	BUSH: { spriteName: 'bush', },
+	STICK: { obstructWalking: true, spriteName: 'stick', hasFacing: true, }, // hasFacing will append '-n', '-e', etc
 }
 
 export default def

@@ -16,7 +16,7 @@ export function buildSampleBattleController(decisionCallback) {
 				0: { buffId: 0, buffType: "Poison", power: 1, turnsRemaining: 2, },
 			},
 			abilities: {
-				0: { abilityId: 0, abilityType: "Walk", distance: 4, },
+				0: { abilityId: 0, abilityType: "WalkAbility", distance: 16, },
 			}
 		},
 		1: {
@@ -26,7 +26,7 @@ export function buildSampleBattleController(decisionCallback) {
 			buffs: {
 			},
 			abilities: {
-				0: { abilityId: 0, abilityType: "Walk", distance: 3, },
+				0: { abilityId: 0, abilityType: "WalkAbility", distance: 3, },
 			}
 		},
 	}
@@ -39,7 +39,7 @@ export function buildSampleBattleController(decisionCallback) {
 			buffs: {
 			},
 			abilities: {
-				0: { abilityId: 0, abilityType: "Walk", distance: 7, },
+				0: { abilityId: 0, abilityType: "WalkAbility", distance: 7, },
 			}
 		}
 	}
