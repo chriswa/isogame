@@ -1,6 +1,6 @@
 import BaseAbility from './base.js'
-import AOETargetingController from '../targeting/AOETargeting.js'
 import WalkTargetingController from '../targeting/WalkTargeting.js'
+import WalkPathing from './../WalkPathing.js'
 
 export default new class WalkAbility {
 	getSpriteName() {
@@ -15,25 +15,37 @@ export default new class WalkAbility {
 		}
 		return new AOETargetingController(model, view, selectedUnitId, extraArgs)
 		*/
-		const distance = ability.distance - (model.turn.movementUsed || 0)
+		const distance = ability.distance - (model.getActiveUnitId() === selectedUnitId ? (model.turn.movementUsed || 0) : 0)
 		return new WalkTargetingController(model, view, selectedUnitId, { distance })
 	}
-	//isCastable(battleModel, casterUnitId, abilityId) {
+	//isCastable(model, casterUnitId, abilityId) {
 	//	return true
 	//}
-	//getTooltipText(battleModel, casterUnitId, abilityId) {
+	//getTooltipText(model, casterUnitId, abilityId) {
 	//	return "Oops, this Ability did not override getTooltipText"
 	//}
-	//getTargetingUIId(battleModel, casterUnitId, abilityId) {
+	//getTargetingUIId(model, casterUnitId, abilityId) {
 	//	return 'aoe'
 	//}
-	//isTargetValid(battleModel, casterUnitId, abilityId, target) {
+	//isTargetValid(model, casterUnitId, abilityId, target) {
 	//	return false
 	//}
-	execute(battleModel, casterUnitId, abilityId, target, simulator) {
-		simulator.addResult({ type: 'Spellcast', unitId: casterUnitId, name: `target = ${target}` })
+	execute(model, casterUnitId, abilityId, target, simulator) {
 
-		//getUnit(battleModel, casterUnitId).mana -= 10
-		//simulator.addResult(battleModel, { type: 'unitCast', unitId: casterUnitId, facing: getFacingFromPointToPoint(getUnitPos(battleModel, casterUnitId), target) })
+		const unit = model.getUnitById(casterUnitId)
+		const ability = model.getAbilityById(casterUnitId, abilityId)
+		const distance = ability.distance - (model.getActiveUnitId() === casterUnitId ? (model.turn.movementUsed || 0) : 0)
+		const walkPathing = new WalkPathing(model, unit.pos, distance)
+
+		const path = walkPathing.findAppealingPath(target)
+
+		_.each(path, (nextCoords) => {
+			simulator.addResult({ type: 'Walk', unitId: casterUnitId, target: nextCoords })
+		})
+
+		//simulator.addResult({ type: 'Spellcast', unitId: casterUnitId, name: `target = ${target}`, target: target })
+
+		//getUnit(model, casterUnitId).mana -= 10
+		//simulator.addResult(model, { type: 'unitCast', unitId: casterUnitId, facing: getFacingFromPointToPoint(getUnitPos(model, casterUnitId), target) })
 	}
 }

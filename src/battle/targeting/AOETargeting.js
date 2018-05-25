@@ -1,6 +1,6 @@
 import BaseTargetingController from './base.js'
 import { colourOptions as overlayColourOptions } from './../field/FieldOverlayRenderer.js'
-import { manhattan } from '../../util/mathUtils.js'
+import * as v2 from '../../util/v2.js'
 import Dijkstra from './../../util/Dijkstra.js'
 import Grid from './../../util/Grid.js'
 
@@ -19,7 +19,7 @@ export default class AOETargetingController extends BaseTargetingController {
 		this.view.fieldView.updateOverlay(testCoords => {
 			//if (!pickedCoords) { return 0 }
 			let colour = overlayColourOptions.NONE
-			const casterDistance = manhattan(this.casterCoords, testCoords)
+			const casterDistance = v2.manhattan(this.casterCoords, testCoords)
 
 			// targeting range
 			if (casterDistance >= this.minTargetDistance && casterDistance <= this.maxTargetDistance) {
@@ -27,9 +27,9 @@ export default class AOETargetingController extends BaseTargetingController {
 			}
 
 			// aoe range
-			const targetDistanceFromCaster = manhattan(this.casterCoords, pickedCoords)
+			const targetDistanceFromCaster = v2.manhattan(this.casterCoords, pickedCoords)
 			if (targetDistanceFromCaster >= this.minTargetDistance && targetDistanceFromCaster <= this.maxTargetDistance) {
-				const targetDistance = manhattan(pickedCoords, testCoords)
+				const targetDistance = v2.manhattan(pickedCoords, testCoords)
 				if (targetDistance === 0) {
 					colour = overlayColourOptions.SOLID_RED
 				}
@@ -48,7 +48,7 @@ export default class AOETargetingController extends BaseTargetingController {
 		if (mousePick.hasTileCoords()) {
 
 			// clicked on a valid target tile?
-			const targetDistanceFromCaster = manhattan(this.casterCoords, mousePick.getTileCoords())
+			const targetDistanceFromCaster = v2.manhattan(this.casterCoords, mousePick.getTileCoords())
 			if (targetDistanceFromCaster >= this.minTargetDistance && targetDistanceFromCaster <= this.maxTargetDistance) {
 				//console.log(`TARGET: ${mousePick.getTileCoords()}`)
 				decisionCallback(mousePick.getTileCoords())

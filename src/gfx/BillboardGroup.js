@@ -10,6 +10,7 @@ const depthBonus = 0.00002 // closer than FieldOverlay
 const vertexShaderSource = `
 	uniform mat4 u_viewProjectionMatrix;
 	uniform vec2 u_scaleXY;
+	uniform float u_cameraFacing;
 
 	attribute vec3 a_position;
 	attribute float a_glow;
@@ -26,8 +27,15 @@ const vertexShaderSource = `
 		vec4 origin = u_viewProjectionMatrix * vec4(a_position, 1.0);
 		origin += vec4(1.0, 0.0, 0.0, 0.0) * a_bboffset.x * u_scaleXY.x;
 		origin += vec4(0.0, 1.0, 0.0, 0.0) * a_bboffset.y * u_scaleXY.y;
+
+		float x;
+		float z;
+		if      (u_cameraFacing == 0.0) { x = ceil(a_position.x); z = ceil(a_position.z); }
+		else if (u_cameraFacing == 1.0) { x = ceil(a_position.x); z = floor(a_position.z); }
+		else if (u_cameraFacing == 2.0) { x = floor(a_position.x); z = floor(a_position.z); }
+		else                            { x = floor(a_position.x); z = ceil(a_position.z); }
 		
-		origin.z = (u_viewProjectionMatrix * vec4(a_position.x, 0.0, a_position.z, 1.0)).z - ${depthBonus}; // at y=0, and a little bit closer
+		origin.z = (u_viewProjectionMatrix * vec4(x, 0.0, z, 1.0)).z - ${depthBonus}; // depth at y=0, and a little bit closer
 
 		gl_Position = origin;
 	}
@@ -240,6 +248,7 @@ export default class BillboardGroup {
 			u_scaleXY: camera.getAspectScaleXY(),
 			u_texture: this.texture,
 			u_glowStrength: (Math.sin(glowPulsesPerSecond * tt / 1000 * Math.PI * 2) + 1) / 2,
+			u_cameraFacing: camera.getFacing(),
 		}
 		gl.useProgram(programInfo.program)
 		twgl.setBuffersAndAttributes(gl, programInfo, this.bufferInfo)

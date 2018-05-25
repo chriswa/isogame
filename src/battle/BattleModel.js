@@ -1,3 +1,5 @@
+import * as v2 from '../util/v2.js'
+
 export default class BattleModel {
 	constructor(data) {
 		this.data = data
@@ -7,7 +9,7 @@ export default class BattleModel {
 	get turn() { return this.data.turn }
 	get myTeamId() { return this.data.myTeamId }
 	clone() {
-		const newData = _.clone(this.data, true)
+		const newData = _.cloneDeep(this.data)
 		return new BattleModel(newData)
 	}
 
@@ -19,7 +21,7 @@ export default class BattleModel {
 	}
 	getUnitCoordsById(unitId) {
 		const unit = this.getUnitById(unitId)
-		return [ unit.x, unit.z ]
+		return unit.pos
 	}
 	isItMyTurn() {
 		const activeUnit = this.getUnitById(this.getActiveUnitId())
@@ -30,10 +32,9 @@ export default class BattleModel {
 	}
 	findUnitIdAtPos(pos) {
 		if (!pos) { return undefined }
-		const [x, z] = pos
 		for (let unitId in this.units) {
 			const unit = this.units[unitId]
-			if (unit.x === x && unit.z === z) {
+			if (v2.isEqual(pos, unit.pos)) {
 				return unitId
 			}
 		}

@@ -11,7 +11,7 @@ export function buildSampleBattleController(decisionCallback) {
 		0: {
 			unitId: 0,
 			teamId: 0,
-			name: "Hanz", spriteSet: "human_red", x: 11, z: 11, facing: 0, hp: 7, maxHp: 7, mana: 4, maxMana: 4, time: 47, turnbreaker: 0.454563,
+			name: "Hanz", spriteSet: "human_red", pos: [11, 11], facing: 0, hp: 7, maxHp: 7, mana: 4, maxMana: 4, time: 47, turnbreaker: 0.454563,
 			buffs: {
 				0: { buffId: 0, buffType: "Poison", power: 1, turnsRemaining: 2, },
 			},
@@ -22,7 +22,7 @@ export function buildSampleBattleController(decisionCallback) {
 		1: {
 			unitId: 1,
 			teamId: 1,
-			name: "Mordeqai", spriteSet: "goblin_purple", x: 7, z: 9, facing: 1, hp: 7, maxHp: 7, mana: 4, maxMana: 4, time: 69, turnbreaker: 0.873465,
+			name: "Mordeqai", spriteSet: "goblin_purple", pos: [7, 9], facing: 1, hp: 7, maxHp: 7, mana: 4, maxMana: 4, time: 69, turnbreaker: 0.873465,
 			buffs: {
 			},
 			abilities: {
@@ -35,7 +35,7 @@ export function buildSampleBattleController(decisionCallback) {
 		unitsModel[i] = {
 			unitId: i,
 			teamId: 1,
-			name: "Rando", spriteSet: "goblin_green", x: Math.floor(Math.random() * 32), z: Math.floor(Math.random() * 32), facing: Math.floor(Math.random() * 4), hp: 7, maxHp: 7, mana: 4, maxMana: 4, time: 69, turnbreaker: 0.873465,
+			name: "Rando", spriteSet: "goblin_green", pos: [ Math.floor(Math.random() * 32), Math.floor(Math.random() * 32) ], facing: Math.floor(Math.random() * 4), hp: 7, maxHp: 7, mana: 4, maxMana: 4, time: 69, turnbreaker: 0.873465,
 			buffs: {
 			},
 			abilities: {

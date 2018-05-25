@@ -56,8 +56,9 @@ export default class BattleView {
 			unitBillboard.pickId = parseInt(unitId)
 
 			const unitSprite = new Sprite(unitBillboard, unitModel.spriteSet, unitModel.facing)
-			const tileData = this.fieldView.tileData[this.fieldView.size * unitModel.z + unitModel.x]
-			unitSprite.setPosition([unitModel.x, tileData.y, unitModel.z])
+			const tileData = this.fieldView.tileData[this.fieldView.size * unitModel.pos[1] + unitModel.pos[0]]
+			unitSprite.setPosition([unitModel.pos[0], tileData.y, unitModel.pos[1]])
+			unitSprite.startAnimation('IDLE')
 			this.unitSprites[unitId] = unitSprite
 		}
 
@@ -80,9 +81,13 @@ export default class BattleView {
 
 	}
 
-	getYForTileCenter(x, z) {
+	getYForTileCenter([x, z]) {
 		const tileData = this.fieldView.tileData[this.fieldView.size * z + x]
 		return tileData.y
+	}
+	getWorldCoordsForTileCenter([x, z], dy = 0) {
+		const y = this.getYForTileCenter([x, z]) + dy
+		return [x, y, z]
 	}
 
 	setTopText(message) {
@@ -91,8 +96,7 @@ export default class BattleView {
 
 	showActiveUnitIndicator(unitId) {
 		const unit = this.battleModel.getUnitById(unitId)
-		this.indicatorBillboardBaseHeight = this.getYForTileCenter(unit.x, unit.z) - 2.2
-		this.indicatorBillboard.setPosition(twgl.v3.create(unit.x, this.indicatorBillboardBaseHeight, unit.z))
+		this.indicatorBillboard.setPosition(this.getWorldCoordsForTileCenter(unit.pos, -2.2))
 		this.indicatorBillboard.show()
 	}
 	hideActiveUnitIndicator() {
@@ -100,8 +104,10 @@ export default class BattleView {
 	}
 	centerOnUnit(unitId) {
 		const unit = this.battleModel.getUnitById(unitId)
-		const y = this.getYForTileCenter(unit.x, unit.z)
-		cameraTweener.setTargetCenter([unit.x, y, unit.z])
+		this.centerOnPos(this.getWorldCoordsForTileCenter(unit.pos))
+	}
+	centerOnPos(pos) {
+		cameraTweener.setTargetCenter(pos)
 	}
 
 	selectUnit(unitId) { // called by UITargetState
@@ -142,13 +148,6 @@ export default class BattleView {
 		}
 	}
 
-	allUnitsIdle() {
-		_.each(this.unitSprites, unitSprite => { unitSprite.startAnimation('IDLE') })
-	}
-	
-	allUnitsStand() {
-		_.each(this.unitSprites, unitSprite => { unitSprite.startAnimation('STAND') })
-	}
 
 	update(dt) {
 		this.tt += dt

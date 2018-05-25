@@ -1,6 +1,6 @@
 import BaseTargetingController from './base.js'
 import { colourOptions as overlayColourOptions } from './../field/FieldOverlayRenderer.js'
-import { manhattan } from '../../util/mathUtils.js'
+import * as v2 from '../../util/v2.js'
 import WalkPathing from './../WalkPathing.js'
 
 export default class AOETargetingController extends BaseTargetingController {
@@ -27,13 +27,13 @@ export default class AOETargetingController extends BaseTargetingController {
 
 			// part of path
 			appealingPath.forEach(pathCoords => {
-				if (manhattan(pathCoords, testCoords) === 0) {
+				if (v2.manhattan(pathCoords, testCoords) === 0) {
 					colour = overlayColourOptions.SOLID_YELLOW
 				}
 			})
 
 			// picked tile
-			const targetDistance = manhattan(pickedCoords, testCoords)
+			const targetDistance = v2.manhattan(pickedCoords, testCoords)
 			if (targetDistance === 0) {
 				colour = overlayColourOptions.SOLID_RED
 			}

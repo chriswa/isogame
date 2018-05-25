@@ -4,8 +4,8 @@ const billboardAnimations = {
 	],
 	CAST: [
 		//{ frameName: 'cast', duration: undefined, },
-		{ frameName: 'idle', duration: 50, },
 		{ frameName: 'cast', duration: 150, },
+		{ frameName: 'idle', duration: 150, },
 	],
 	ACT: [
 		{ frameName: 'act', duration: undefined, },
@@ -17,10 +17,10 @@ const billboardAnimations = {
 		{ frameName: 'walk2', duration: 250, },
 	],
 	WALK: [
-		{ frameName: 'idle', duration: 150, },
-		{ frameName: 'walk1', duration: 150, },
-		{ frameName: 'idle', duration: 150, },
-		{ frameName: 'walk2', duration: 150, },
+		{ frameName: 'idle', duration: 100, },
+		{ frameName: 'walk1', duration: 100, },
+		{ frameName: 'idle', duration: 100, },
+		{ frameName: 'walk2', duration: 100, },
 	],
 }
 

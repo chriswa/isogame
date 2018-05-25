@@ -40,7 +40,6 @@ class ResultPlayingSubController extends BaseSubController {
 		this.queuedResults.push(result)
 	}
 	onStateEnter() {
-		this.view.allUnitsStand()
 		this.view.fieldView.updateOverlay(testCoords => { return 0 }) // clear targeting overlay
 		this.view.setTopText('')
 		this.startNextResult()
@@ -102,7 +101,6 @@ class TargetingSubController extends BaseSubController {
 		this.activeTargetingUI.render()
 	}
 	onStateEnter() {
-		this.view.allUnitsIdle()
 		this.selectUnit(undefined)
 		this.battleController.mouseController.activate()
 		this.view.showActiveUnitIndicator(this.model.getActiveUnitId())

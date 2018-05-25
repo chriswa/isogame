@@ -1,5 +1,5 @@
 import Grid from './Grid.js'
-import { distance } from './mathUtils.js'
+import * as v2 from './v2.js'
 
 const cardinalVectors = [[1, 0], [-1, 0], [0, 1], [0, -1]]
 
@@ -78,8 +78,8 @@ export default class Dijkstra {
 					continue
 				} // not the right direction, into an obstacle, or off the grid
 
-				var distFromStart = distance(neighbourCoords, this.startCoords)
-				var distFromTarget = distance(neighbourCoords, targetCoords)
+				var distFromStart = v2.distance(neighbourCoords, this.startCoords)
+				var distFromTarget = v2.distance(neighbourCoords, targetCoords)
 				var totalDist = distFromStart + distFromTarget
 				if (totalDist < best.dist) {
 					best.dist = totalDist
