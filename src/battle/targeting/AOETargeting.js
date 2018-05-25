@@ -6,21 +6,20 @@ import Grid from './../../util/Grid.js'
 
 export default class AOETargetingController extends BaseTargetingController {
 	init() {
-		this.minTargetDistance = this.extraArgs.minTargetDistance
-		this.maxTargetDistance = this.extraArgs.maxTargetDistance
-		this.aoeRange = this.extraArgs.aoeRange
+		this.minTargetDistance = this.abilityArgs.minTargetDistance
+		this.maxTargetDistance = this.abilityArgs.maxTargetDistance
+		this.aoeRange = this.abilityArgs.aoeRange
 	}
 	render() {
-		const [pickedCoords, pickedUnitId, pickedTileCoordsBehindUnit] = this.view.mousePick()
+		const mousePick = this.view.mousePick()
 
-		const casterCoords = this.model.getUnitCoordsById(this.castingUnitId)
+		this.updateUnitGlows(mousePick.getUnitId()) // caster is solid white, mouseover unit is flashing white-black
 
-		this.updateUnitGlows(pickedUnitId) // caster is solid white, mouseover unit is flashing white-black
-
+		const pickedCoords = mousePick.getTileCoords()
 		this.view.fieldView.updateOverlay(testCoords => {
 			//if (!pickedCoords) { return 0 }
 			let colour = overlayColourOptions.NONE
-			const casterDistance = manhattan(casterCoords, testCoords)
+			const casterDistance = manhattan(this.casterCoords, testCoords)
 
 			// targeting range
 			if (casterDistance >= this.minTargetDistance && casterDistance <= this.maxTargetDistance) {
@@ -28,7 +27,7 @@ export default class AOETargetingController extends BaseTargetingController {
 			}
 
 			// aoe range
-			const targetDistanceFromCaster = manhattan(casterCoords, pickedCoords)
+			const targetDistanceFromCaster = manhattan(this.casterCoords, pickedCoords)
 			if (targetDistanceFromCaster >= this.minTargetDistance && targetDistanceFromCaster <= this.maxTargetDistance) {
 				const targetDistance = manhattan(pickedCoords, testCoords)
 				if (targetDistance === 0) {
@@ -43,19 +42,16 @@ export default class AOETargetingController extends BaseTargetingController {
 		})
 
 	}
-	onClick(pickedTileCoords, pickedUnitId, pickedTileCoordsBehindUnit) {
-		//pickedTileCoords = pickedTileCoordsBehindUnit // ignore pickedUnitId!
-		if (!this.isCasterActiveAndOwned()) {
-			return false // default click behaviour: select the active unit
-		}
+	onClick(mousePick, decisionCallback) {
+		if (!this.isCasterActiveAndOwned()) { return false } // default click behaviour: select the active unit
 		// clicked on a tile?
-		if (pickedTileCoords !== undefined) {
+		if (mousePick.hasTileCoords()) {
 
 			// clicked on a valid target tile?
-			const casterCoords = this.model.getUnitCoordsById(this.castingUnitId)
-			const targetDistanceFromCaster = manhattan(casterCoords, pickedTileCoords)
+			const targetDistanceFromCaster = manhattan(this.casterCoords, mousePick.getTileCoords())
 			if (targetDistanceFromCaster >= this.minTargetDistance && targetDistanceFromCaster <= this.maxTargetDistance) {
-				console.log(`TARGET: ${pickedTileCoords}`)
+				//console.log(`TARGET: ${mousePick.getTileCoords()}`)
+				decisionCallback(mousePick.getTileCoords())
 				return true // handled click!
 			}
 		}

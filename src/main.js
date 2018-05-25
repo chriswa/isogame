@@ -3,17 +3,17 @@ import * as gfx from './gfx/gfx.js'
 import * as battleBuilder from './battle/battleBuilder.js'
 import * as debugCanvas from './gfx/debugCanvas.js'
 
-const decisionCallback = (unitId, abilityId, target) => {
+const decisionCallback = (abilityId, target) => {
+	const unitId = battleController.model.getActiveUnitId()
 	console.log(`battleAuthority.onSendDecision(${unitId}, ${abilityId}, ${target})`)
-	battleController.addResult({ type: 'Spellcast', unitId, name: `${target}` })
+	battleController.addResult({ type: 'Spellcast', unitId, name: `target = ${target}` })
 }
 
 const battleController = battleBuilder.buildSampleBattleController(decisionCallback)
 
 setTimeout(() => {
-	battleController.addResult({ type: 'Spellcast', unitId: 0, name: 'Hello World!' })
-	battleController.addResult({ type: 'Spellcast', unitId: 1, name: 'foobar' })
-}, 1000)
+	battleController.addResult({ type: 'Spellcast', unitId: 1, name: 'Bar' })
+}, 500)
 
 gfx.startLoop(dt => {
 

@@ -1,4 +1,4 @@
-import Animations from './Animations.js'
+import billboardAnimations from './billboardAnimations.js'
 
 const directions = ['n', 'e', 's', 'w']
 
@@ -26,7 +26,7 @@ export default class Sprite {
 		this.animationTime += dt
 		
 		while (true) {
-			const currentFrame = Animations[this.animationName][this.animationFrame]
+			const currentFrame = billboardAnimations[this.animationName][this.animationFrame]
 			const currentFrameDuration = currentFrame.duration
 			if (currentFrameDuration === undefined || this.animationTime < currentFrameDuration) {
 				break
@@ -35,7 +35,7 @@ export default class Sprite {
 			this.animationTime -= currentFrameDuration
 			this.animationNeedsUpdate = true
 			this.animationFrame += 1
-			if (this.animationFrame >= Animations[this.animationName].length) {
+			if (this.animationFrame >= billboardAnimations[this.animationName].length) {
 				this.animationFrame = 0
 			}
 		}
@@ -46,7 +46,7 @@ export default class Sprite {
 		}
 
 		if (this.animationNeedsUpdate) {
-			const currentFrameName = Animations[this.animationName][this.animationFrame].frameName
+			const currentFrameName = billboardAnimations[this.animationName][this.animationFrame].frameName
 			const facingName = directions[(this.facing + cameraFacing) % 4]
 			const spriteName = this.spriteSetName + '-' + currentFrameName + '-' + facingName
 			this.billboard.setSpriteName(spriteName)
@@ -58,6 +58,11 @@ export default class Sprite {
 		this.animationFrame = 0
 		this.animationTime = animationTime
 		this.animationNeedsUpdate = true
+	}
+	playAnimation(animationName) {
+		if (animationName !== this.animationName) {
+			this.startAnimation(animationName)
+		}
 	}
 
 }

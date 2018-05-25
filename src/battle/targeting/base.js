@@ -3,13 +3,16 @@ import BattleView from '../BattleView.js'
 import billboardGlowOptions from '../../gfx/billboardGlowOptions.js'
 
 export default class BaseTargetingController {
-	constructor(model, view, castingUnitId, extraArgs) {
+	constructor(model, view, castingUnitId, abilityArgs) {
 		/** @type BattleModel */
 		this.model = model
 		/** @type BattleView */
 		this.view = view
 		this.castingUnitId = castingUnitId
-		this.extraArgs = extraArgs
+		this.abilityArgs = abilityArgs
+
+		this.casterCoords = this.model.getUnitCoordsById(this.castingUnitId)
+
 		this.init()
 	}
 	init() {
@@ -22,7 +25,7 @@ export default class BaseTargetingController {
 	render() {
 	}
 
-	onClick(pickedTileCoords, pickedUnitId, pickedTileCoordsBehindUnit) {
+	onClick(mousePick, decisionCallback) {
 	}
 
 	isCasterActiveAndOwned() {

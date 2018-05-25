@@ -1,4 +1,4 @@
-const Animations = {
+const billboardAnimations = {
 	STAND: [
 		{ frameName: 'idle', duration: undefined, },
 	],
@@ -24,4 +24,4 @@ const Animations = {
 	],
 }
 
-export default Animations
+export default billboardAnimations

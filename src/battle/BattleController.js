@@ -40,18 +40,15 @@ class ResultPlayingSubController extends BaseSubController {
 		this.queuedResults.push(result)
 	}
 	onStateEnter() {
+		this.view.allUnitsStand()
 		this.view.fieldView.updateOverlay(testCoords => { return 0 }) // clear targeting overlay
 		this.view.setTopText('')
 		this.startNextResult()
 	}
 	onStateExit() {
-		this.view.allUnitsIdle()
 	}
 	startNextResult() {
 		if (this.queuedResults.length) {
-			
-			this.view.allUnitsStand()
-			
 			const activeResult = this.queuedResults.shift()
 			const resultPlayer = ResultPlayers[activeResult.type]
 			this.activePlayerAnimation = resultPlayer.startAnimation(this.model, this.view, activeResult)
@@ -105,6 +102,7 @@ class TargetingSubController extends BaseSubController {
 		this.activeTargetingUI.render()
 	}
 	onStateEnter() {
+		this.view.allUnitsIdle()
 		this.selectUnit(undefined)
 		this.battleController.mouseController.activate()
 		this.view.showActiveUnitIndicator(this.model.getActiveUnitId())
@@ -122,14 +120,18 @@ class TargetingSubController extends BaseSubController {
 		}
 	}
 	onClick(mousePos) {
-		const [pickedTileCoords, pickedUnitId, pickedTileCoordsBehindUnit] = this.view.mousePick()
+		const mousePick = this.view.mousePick()
 		let clickHandled = false
 		if (this.activeTargetingUI) {
-			clickHandled = this.activeTargetingUI.onClick(pickedTileCoords, pickedUnitId, pickedTileCoordsBehindUnit)
+			const decisionCallback = (target) => {
+				if (!this.model.isItMyTurn()) { throw new Error(`assertion failed: targetingUi tried to send decision but selected unit is not owned by player`) }
+				this.battleController.onSendDecision(this.selectedAbilityId, target)
+			}
+			clickHandled = this.activeTargetingUI.onClick(mousePick, decisionCallback)
 		}
 		if (!clickHandled) {
-			if (pickedUnitId !== undefined && pickedUnitId >= 0) { // negative pickIds are used for obstructions
-				this.selectUnit(pickedUnitId)
+			if (mousePick.hasUnit()) {
+				this.selectUnit(mousePick.getUnitId())
 			}
 			else {
 				const activeUnitId = this.model.getActiveUnitId()
@@ -166,11 +168,6 @@ class TargetingSubController extends BaseSubController {
 		this.removeActiveTargetingUi() // call this first, so everything is cleaned up for TargetingUi constructor created next
 		this.activeTargetingUI = abilityArch.createTargetingController(this.model, this.view, this.selectedUnitId, this.selectedAbilityId)
 		this.battleController.log(`TargetingController started: `, this.activeTargetingUI)
-	}
-	onSelectTarget(target) {
-		if (!this.model.isItMyTurn()) { return }
-		if (this.selectedUnitId !== this.model.getActiveUnitId()) {}
-		this.battleController.onSendDecision(this.selectedUnitId, this.selectedAbilityId, target)
 	}
 }
 
@@ -227,8 +224,8 @@ export default class BattleController {
 		}
 	}
 
-	onSendDecision(unitId, abilityId, target) { // called by TargetingSubController
-		decisionCallback(unitId, abilityId, target)
+	onSendDecision(abilityId, target) { // called by TargetingSubController
+		this.decisionCallback(abilityId, target)
 		this.view.setWaiting(true)
 	}
 
