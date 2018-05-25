@@ -30,8 +30,10 @@ export default new class WalkAbility {
 	//isTargetValid(battleModel, casterUnitId, abilityId, target) {
 	//	return false
 	//}
-	//execute(battleModel, casterUnitId, abilityId, target, simulator) {
-	//	//getUnit(battleModel, casterUnitId).mana -= 10
-	//	//simulator.addResult(battleModel, { type: 'unitCast', unitId: casterUnitId, facing: getFacingFromPointToPoint(getUnitPos(battleModel, casterUnitId), target) })
-	//}
+	execute(battleModel, casterUnitId, abilityId, target, simulator) {
+		simulator.addResult({ type: 'Spellcast', unitId: casterUnitId, name: `target = ${target}` })
+
+		//getUnit(battleModel, casterUnitId).mana -= 10
+		//simulator.addResult(battleModel, { type: 'unitCast', unitId: casterUnitId, facing: getFacingFromPointToPoint(getUnitPos(battleModel, casterUnitId), target) })
+	}
 }
