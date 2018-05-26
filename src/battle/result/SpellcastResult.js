@@ -26,5 +26,6 @@ export default class SpellcastResult extends BaseResultPlayer {
 	 * @param {*} result 
 	 */
 	static updateModel(model, result) {
+		model.turn.actionUsed = true
 	}
 }

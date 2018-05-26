@@ -3,7 +3,7 @@ import { colourOptions as overlayColourOptions } from './../field/FieldOverlayRe
 import * as v2 from '../../util/v2.js'
 import WalkPathing from './../WalkPathing.js'
 
-export default class AOETargetingController extends BaseTargetingController {
+export default class WalkTargetingController extends BaseTargetingController {
 	init() {
 		this.distance = this.abilityArgs.distance
 		this.walkPathing = new WalkPathing(this.model, this.casterCoords, this.distance)
@@ -11,7 +11,7 @@ export default class AOETargetingController extends BaseTargetingController {
 	render() {
 		const mousePick = this.view.mousePick()
 
-		this.updateUnitGlows(mousePick.getUnitId()) // caster is solid white, mouseover unit is flashing white-black
+		this.updateUnitGlows() // caster is solid white
 
 		const pickedCoords = mousePick.getTileCoords()
 		const appealingPath = this.walkPathing.findAppealingPath(pickedCoords)

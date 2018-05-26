@@ -120,7 +120,7 @@ class ButtonState {
 	}
 	disableLayer(layer) {
 		if (this.targetLayer === layer) {
-			console.log(`layer disabled`)
+			//console.log(`layer disabled`)
 			this.targetLayer = undefined
 		}
 	}

@@ -11,7 +11,7 @@ export default class Sprite {
 		this.animationTime = 0
 		this.animationFrame = 0
 		this.animationNeedsUpdate = true
-		this.lastCameraFacing = 0
+		this.lastCameraFacing = undefined
 	}
 	setPosition(pos) {
 		this.billboard.setPosition(pos)
@@ -40,14 +40,16 @@ export default class Sprite {
 			}
 		}
 
-		if (cameraFacing !== this.lastCameraFacing) {
-			this.lastCameraFacing = cameraFacing
+		const effectiveFacing = (this.facing + cameraFacing) % 4
+
+		if (effectiveFacing !== this.lastCameraFacing) {
+			this.lastCameraFacing = effectiveFacing
 			this.animationNeedsUpdate = true
 		}
 
 		if (this.animationNeedsUpdate) {
 			const currentFrameName = billboardAnimations[this.animationName][this.animationFrame].frameName
-			const facingName = directions[(this.facing + cameraFacing) % 4]
+			const facingName = directions[effectiveFacing]
 			const spriteName = this.spriteSetName + '-' + currentFrameName + '-' + facingName
 			this.billboard.setSpriteName(spriteName)
 			this.animationNeedsUpdate = false

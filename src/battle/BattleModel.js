@@ -41,4 +41,5 @@ export default class BattleModel {
 		return undefined
 	}
 
+
 }

@@ -47,7 +47,10 @@ const decisionCallback = (abilityId, target) => {
 
 const battleController = battleBuilder.buildSampleBattleController(decisionCallback)
 
+
 const simulation = new Simulation(battleController.model) // this is a bit backwards: the BattleController should get its model from the authority
+
+window.model = battleController.model.data
 
 //setTimeout(() => {
 //	battleController.addResult({ type: 'Spellcast', unitId: 1, name: 'Bar' })

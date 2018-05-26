@@ -141,6 +141,7 @@ export function setZoom(targetZoom_) {
 // --------
 
 const targetCenter = twgl.v3.create()
+let isPosLerping = false
 
 // work vectors
 const posStart = twgl.v3.create()
@@ -149,13 +150,21 @@ const zeroVector = twgl.v3.create()
 const workV3 = twgl.v3.create()
 
 export function rawMoveCenter(dx, dy, dz) {
+	isPosLerping = false
 	posTween.halt()
 	camera.position[0] += dx
 	camera.position[1] += dy
 	camera.position[2] += dz
 }
 
+export function lerpToPos(pos) {
+	posTween.halt()
+	twgl.v3.negate(pos, targetCenter)
+	isPosLerping = true
+}
+
 export function setTargetCenter(targetCenter_) {
+	isPosLerping = false
 	twgl.v3.negate(targetCenter_, targetCenter)
 	twgl.v3.copy(camera.position, posStart)
 	twgl.v3.subtract(targetCenter, posStart, posDelta) // set posDelta
@@ -175,18 +184,10 @@ const posTween = new Tween({
 	},
 })
 
-function updatePos(dt) {
-	if (posActive) {
-		posT += dt / posDuration
-		if (posT < 1) {
-			const x = posEasing(posT)
-			twgl.v3.mulScalar(posDelta, x, workV3)
-			twgl.v3.add(workV3, posStart, camera.position)
-		}
-		else {
-			posActive = false
-			twgl.v3.copy(targetCenter, camera.position)
-		}
+function updatePosLerp(dt) {
+	if (isPosLerping) {
+		const t = 1 - Math.pow(0.5, dt / 100) // frame rate independent damping using lerp
+		twgl.v3.lerp(camera.position, targetCenter, t, camera.position)
 	}
 }
 
@@ -198,4 +199,5 @@ export function update(dt) {
 	yawTween.update(dt)
 	posTween.update(dt)
 	zoomTween.update(dt)
+	updatePosLerp(dt)
 }

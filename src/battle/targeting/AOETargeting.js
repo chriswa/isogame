@@ -13,9 +13,9 @@ export default class AOETargetingController extends BaseTargetingController {
 	render() {
 		const mousePick = this.view.mousePick()
 
-		this.updateUnitGlows(mousePick.getUnitId()) // caster is solid white, mouseover unit is flashing white-black
+		this.updateUnitGlows() // caster is solid white, mouseover unit is flashing white-black
 
-		const pickedCoords = mousePick.getTileCoords()
+		const pickedCoords = mousePick.getTileCoords(true)
 		this.view.fieldView.updateOverlay(testCoords => {
 			//if (!pickedCoords) { return 0 }
 			let colour = overlayColourOptions.NONE
@@ -45,13 +45,15 @@ export default class AOETargetingController extends BaseTargetingController {
 	onClick(mousePick, decisionCallback) {
 		if (!this.isCasterActiveAndOwned()) { return false } // default click behaviour: select the active unit
 		// clicked on a tile?
-		if (mousePick.hasTileCoords()) {
+		if (mousePick.hasTileCoords(true)) {
+
+			const tileCoords = mousePick.getTileCoords(true)
 
 			// clicked on a valid target tile?
-			const targetDistanceFromCaster = v2.manhattan(this.casterCoords, mousePick.getTileCoords())
+			const targetDistanceFromCaster = v2.manhattan(this.casterCoords, tileCoords)
 			if (targetDistanceFromCaster >= this.minTargetDistance && targetDistanceFromCaster <= this.maxTargetDistance) {
-				//console.log(`TARGET: ${mousePick.getTileCoords()}`)
-				decisionCallback(mousePick.getTileCoords())
+				//console.log(`TARGET: ${tileCoords}`)
+				decisionCallback(tileCoords)
 				return true // handled click!
 			}
 		}

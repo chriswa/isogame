@@ -2,7 +2,7 @@ import { BaseResultPlayer, BaseResultAnimation } from './base.js'
 import BattleModel from './../BattleModel.js'
 import * as v2 from './../../util/v2.js'
 
-class SpellcastAnimation extends BaseResultAnimation {
+class WalkAnimation extends BaseResultAnimation {
 	init() {
 		this.duration = 200
 		const startPosV2 = this.model.units[this.result.unitId].pos
@@ -15,7 +15,7 @@ class SpellcastAnimation extends BaseResultAnimation {
 	onPartial(ratio) {
 		const newPos = twgl.v3.lerp(this.startPos, this.endPos, ratio)
 		this.view.unitSprites[this.result.unitId].setPosition(newPos)
-		this.view.centerOnPos(newPos)
+		this.view.lerpCameraToPos(newPos)
 	}
 	onComplete() {
 		this.view.unitSprites[this.result.unitId].startAnimation('IDLE')
@@ -23,9 +23,9 @@ class SpellcastAnimation extends BaseResultAnimation {
 	}
 }
 
-export default class SpellcastResult extends BaseResultPlayer {
+export default class WalkResult extends BaseResultPlayer {
 	static getAnimationClass() {
-		return SpellcastAnimation
+		return WalkAnimation
 	}
 	/**
 	 * @param {BattleModel} model 
@@ -34,6 +34,6 @@ export default class SpellcastResult extends BaseResultPlayer {
 	static updateModel(model, result) {
 		const unit = model.getUnitById(result.unitId)
 		v2.copy(result.target, unit.pos)
-		model.turn.movementUsed += 1
+		model.turn.movementUsed = (model.turn.movementUsed || 0) + 1
 	}
 }

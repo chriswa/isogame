@@ -3,7 +3,7 @@ import BattleView from '../BattleView.js'
 import billboardGlowOptions from '../../gfx/billboardGlowOptions.js'
 
 export default class BaseTargetingController {
-	constructor(model, view, castingUnitId, abilityArgs) {
+	constructor(model, view, castingUnitId, abilityArgs = {}) {
 		/** @type BattleModel */
 		this.model = model
 		/** @type BattleView */

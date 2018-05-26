@@ -33,6 +33,7 @@ export function lerp(a, b, t, c) {
 }
 
 export function getFacing(a, b) {
+	if (!a || !b) { return 0 }
 	const dx = b[0] - a[0]
 	const dz = b[1] - a[1]
 	if (Math.abs(dx) > Math.abs(dz)) {

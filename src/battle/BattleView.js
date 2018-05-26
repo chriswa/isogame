@@ -109,6 +109,9 @@ export default class BattleView {
 	centerOnPos(pos) {
 		cameraTweener.setTargetCenter(pos)
 	}
+	lerpCameraToPos(pos) {
+		cameraTweener.lerpToPos(pos)
+	}
 
 	selectUnit(unitId) { // called by UITargetState
 		this.centerOnUnit(unitId)
@@ -119,6 +122,9 @@ export default class BattleView {
 	
 	mousePick(allowUnits = true) {
 		const screenPos = input.latestMousePos
+
+		//const mouseoverElement = document.elementFromPoint(screenPos[0], screenPos[1])
+
 		const { origin, direction } = camera.getRayFromScreenPos(screenPos)
 		let [pickedTileCoords, tileDistance] = this.fieldView.rayPick(origin, direction)
 		const pickedTileCoordsBehindUnit = pickedTileCoords // callers can use this to ignore unit picking
