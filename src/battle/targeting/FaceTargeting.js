@@ -12,6 +12,7 @@ export default class FaceTargetingController extends BaseTargetingController {
 
 		this.updateUnitGlows() // caster is solid white
 
+		//const mousePos = mousePick.getScreenPos()
 		const pickedCoords = mousePick.getTileCoords(true)
 
 		const pickedFacing = v2.getFacing(this.casterCoords, pickedCoords)

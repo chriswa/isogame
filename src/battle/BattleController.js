@@ -154,7 +154,7 @@ class TargetingSubController extends BaseSubController {
 			this.view.setTopText("Waiting for opponent...")
 		}
 
-		this.onSelectAbility(0)
+		//this.onSelectAbility(1) // default to Walk (1), instead of Face (0)
 	}
 	onSelectAbility(abilityId) {
 		if (this.selectedUnitId === undefined) { return }
@@ -187,8 +187,12 @@ export default class BattleController {
 			myTeamId,
 		})
 
+		const onSelectAbility = (abilityId) => {
+			this.currentSubController.onSelectAbility(abilityId)
+		}
+
 		// BattleView
-		this.view = new BattleView(fieldView, this.model)
+		this.view = new BattleView(fieldView, this.model, onSelectAbility)
 
 		this.mouseController = new MouseController(this.view, (clickPos) => { this.currentSubController.onClick(clickPos) })
 

@@ -11,7 +11,7 @@ export default class WalkTargetingController extends BaseTargetingController {
 	render() {
 		const mousePick = this.view.mousePick()
 
-		this.updateUnitGlows() // caster is solid white
+		this.updateUnitGlows(mousePick.getUnitId()) // caster is solid white
 
 		const pickedCoords = mousePick.getTileCoords()
 		const appealingPath = this.walkPathing.findAppealingPath(pickedCoords)

@@ -8,14 +8,16 @@ import BattleModel from './BattleModel.js'
 import * as cameraTweener from '../gfx/cameraTweener.js'
 import TerrainTypes from './field/TerrainTypes.js'
 import Sprite from './../gfx/Sprite.js'
+import UnitPanel from './UnitPanel.js'
 
 const topTextElement = document.getElementById('topText')
 
 class MousePick {
-	constructor(tileCoords, unitId, tileCoordsBehindUnit) {
+	constructor(tileCoords, unitId, tileCoordsBehindUnit, screenPos) {
 		this.tileCoords = tileCoords
 		this.unitId = unitId >= 0 ? unitId : undefined // ignore negative pickIds (e.g. shrub obstructions)
 		this.tileCoordsBehindUnit = tileCoordsBehindUnit
+		this.screenPos = screenPos
 	}
 	getTileCoords(ignoreUnitPicking = false) {
 		return ignoreUnitPicking ? this.tileCoordsBehindUnit : this.tileCoords
@@ -29,17 +31,20 @@ class MousePick {
 	hasTileCoords(ignoreUnitPicking = false) {
 		return !!(this.getTileCoords(ignoreUnitPicking))
 	}
+	getScreenPos() {
+		return this.screenPos
+	}
 }
 
 export default class BattleView {
 
-	constructor(fieldView, battleModel) {
+	constructor(fieldView, battleModel, onSelectAbility) {
 		this.tt = 0
 
 		/** @type FieldView */
 		this.fieldView = fieldView
 		/** @type BattleModel */
-		this.battleModel = battleModel
+		this.model = battleModel
 
 		this.bbgroup = new BillboardGroup("assets/sprites.png", 1000, SpriteData)
 
@@ -50,8 +55,8 @@ export default class BattleView {
 
 		// create sprites for each unit
 		this.unitSprites = {}
-		for (let unitId in this.battleModel.units) {
-			const unitModel = this.battleModel.units[unitId]
+		for (let unitId in this.model.units) {
+			const unitModel = this.model.units[unitId]
 			const unitBillboard = this.bbgroup.acquire()
 			unitBillboard.pickId = parseInt(unitId)
 
@@ -79,6 +84,8 @@ export default class BattleView {
 			}
 		}
 
+		this.unitPanel = new UnitPanel(this.model, this, onSelectAbility)
+
 	}
 
 	getYForTileCenter([x, z]) {
@@ -95,7 +102,7 @@ export default class BattleView {
 	}
 
 	showActiveUnitIndicator(unitId) {
-		const unit = this.battleModel.getUnitById(unitId)
+		const unit = this.model.getUnitById(unitId)
 		this.indicatorBillboard.setPosition(this.getWorldCoordsForTileCenter(unit.pos, -2.2))
 		this.indicatorBillboard.show()
 	}
@@ -103,7 +110,7 @@ export default class BattleView {
 		this.indicatorBillboard.hide()
 	}
 	centerOnUnit(unitId) {
-		const unit = this.battleModel.getUnitById(unitId)
+		const unit = this.model.getUnitById(unitId)
 		this.centerOnPos(this.getWorldCoordsForTileCenter(unit.pos))
 	}
 	centerOnPos(pos) {
@@ -115,7 +122,7 @@ export default class BattleView {
 
 	selectUnit(unitId) { // called by UITargetState
 		this.centerOnUnit(unitId)
-		//TODO: init unitPanel to display selected unit's stats and abilities
+		this.unitPanel.initForUnit(unitId)
 	}
 	selectAbility(abilityId) { } // called by UITargetState
 	setWaiting(isWaiting) { } // called by BattleController to show that we're waiting for a response from the server
@@ -142,7 +149,7 @@ export default class BattleView {
 				//}
 			}
 		}
-		return new MousePick(pickedTileCoords, pickedUnitId, pickedTileCoordsBehindUnit)
+		return new MousePick(pickedTileCoords, pickedUnitId, pickedTileCoordsBehindUnit, screenPos)
 	}
 
 	updateUnitGlows(callback) {
@@ -161,8 +168,8 @@ export default class BattleView {
 		const directions = ['n', 'e', 's', 'w']
 		
 		// unit sprites should be updated now (before mouseover picking is done)
-		for (let unitId in this.battleModel.units) {
-			const unitModel = this.battleModel.units[unitId]
+		for (let unitId in this.model.units) {
+			const unitModel = this.model.units[unitId]
 			const unitSprite = this.unitSprites[unitId]
 			
 			unitSprite.update(dt, camera.getFacing(0))
