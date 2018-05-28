@@ -30,7 +30,7 @@ export default new class WalkAbility {
 	//isTargetValid(model, casterUnitId, abilityId, target) {
 	//	return false
 	//}
-	execute(model, casterUnitId, abilityId, target, simulator) {
+	execute(model, casterUnitId, abilityId, target, addResultCallback) {
 
 		const unit = model.getUnitById(casterUnitId)
 		const ability = model.getAbilityById(casterUnitId, abilityId)
@@ -40,12 +40,12 @@ export default new class WalkAbility {
 		const path = walkPathing.findAppealingPath(target)
 
 		_.each(path, (nextCoords) => {
-			simulator.addResult({ type: 'Walk', unitId: casterUnitId, target: nextCoords })
+			addResultCallback({ type: 'Walk', unitId: casterUnitId, target: nextCoords })
 		})
 
-		//simulator.addResult({ type: 'Spellcast', unitId: casterUnitId, name: `target = ${target}`, target: target })
+		//addResultCallback({ type: 'Spellcast', unitId: casterUnitId, name: `target = ${target}`, target: target })
 
 		//getUnit(model, casterUnitId).mana -= 10
-		//simulator.addResult(model, { type: 'unitCast', unitId: casterUnitId, facing: getFacingFromPointToPoint(getUnitPos(model, casterUnitId), target) })
+		//addResultCallback({ type: 'unitCast', unitId: casterUnitId, facing: getFacingFromPointToPoint(getUnitPos(model, casterUnitId), target) })
 	}
 }

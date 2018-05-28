@@ -1,9 +1,9 @@
-import * as fieldBuilder from './field/fieldBuilder.js'
 import BattleModel from './BattleModel.js'
 import BattleView from './BattleView.js'
 import ResultPlayers from './ResultPlayers.js'
 import AbilityArchetypes from './AbilityArchetypes.js'
 import MouseController from './MouseController.js'
+import FieldBuilder from './field/FieldBuilder.js'
 
 
 /*
@@ -98,7 +98,9 @@ class TargetingSubController extends BaseSubController {
 	update(dt) {
 	}
 	render() {
-		this.activeTargetingUI.render()
+		if (this.activeTargetingUI) {
+			this.activeTargetingUI.render()
+		}
 	}
 	onStateEnter() {
 		this.selectUnit(undefined)
@@ -172,20 +174,16 @@ class TargetingSubController extends BaseSubController {
 
 export default class BattleController {
 
-	constructor(fieldDescriptor, unitsModel, turnModel, myTeamId, decisionCallback) {
+	constructor(battleBlueprint, myTeamId, decisionCallback) {
 
 		this.decisionCallback = decisionCallback
 
 		// convert the fieldDescriptor (e.g. { type: "randomwoods", seed: 123 } into a view and model
-		const { fieldView, fieldModel } = fieldBuilder.build(fieldDescriptor)
+		const fieldBuilder = new FieldBuilder(battleBlueprint.fieldDescriptor)
+		const fieldView = fieldBuilder.getView()
 
 		// Battle Model
-		this.model = new BattleModel({
-			field: fieldModel,
-			units: unitsModel,
-			turn: turnModel,
-			myTeamId,
-		})
+		this.model = BattleModel.createFromBlueprint(battleBlueprint, myTeamId)
 
 		const onSelectAbility = (abilityId) => {
 			this.currentSubController.onSelectAbility(abilityId)
@@ -210,7 +208,7 @@ export default class BattleController {
 	}
 
 	log(arg0, ...args) {
-		console.log('%cBattleController: ' + arg0, 'color: #09c;', ...args)
+		//console.log('%cBattleController: ' + arg0, 'color: #09c;', ...args)
 	}
 
 	setSubController(newState) {

@@ -52,6 +52,7 @@ export default class BattleView {
 		this.indicatorBillboard = this.bbgroup.acquire()
 		this.indicatorBillboard.setSpriteName('drop_indicator')
 		this.indicatorBillboard.setGlow(1)
+		this.indicatorBillboardBaseHeight = 0
 
 		// create sprites for each unit
 		this.unitSprites = {}
@@ -102,8 +103,11 @@ export default class BattleView {
 	}
 
 	showActiveUnitIndicator(unitId) {
+		if (unitId === undefined) { return }
 		const unit = this.model.getUnitById(unitId)
-		this.indicatorBillboard.setPosition(this.getWorldCoordsForTileCenter(unit.pos, -2.2))
+		const worldPos = this.getWorldCoordsForTileCenter(unit.pos, -2.2)
+		this.indicatorBillboard.setPosition(worldPos)
+		this.indicatorBillboardBaseHeight = worldPos[1]
 		this.indicatorBillboard.show()
 	}
 	hideActiveUnitIndicator() {

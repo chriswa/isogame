@@ -26,7 +26,7 @@ export default new class FireballAbility {
 	//isTargetValid(model, casterUnitId, abilityId, target) {
 	//	return false
 	//}
-	execute(model, casterUnitId, abilityId, target, simulator) {
-		simulator.addResult({ type: 'Spellcast', unitId: casterUnitId, name: `target = ${target}`, target: target })
+	execute(model, casterUnitId, abilityId, target, addResultCallback) {
+		addResultCallback({ type: 'Spellcast', unitId: casterUnitId, name: `target = ${target}`, target: target })
 	}
 }

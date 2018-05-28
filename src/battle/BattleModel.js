@@ -1,6 +1,20 @@
 import * as v2 from '../util/v2.js'
+import FieldBuilder from './field/FieldBuilder.js'
 
 export default class BattleModel {
+
+	static createFromBlueprint(battleBlueprint, myTeamId = undefined) {
+		
+		const fieldBuilder = new FieldBuilder(battleBlueprint.fieldDescriptor)
+		const fieldModel = fieldBuilder.getModel()
+		
+		return new BattleModel({
+			..._.omit(battleBlueprint, 'fieldDescriptor'), // simply copy all keys except fieldDescriptor
+			field: fieldModel,
+			myTeamId: myTeamId,
+		})
+	}
+
 	constructor(data) {
 		this.data = data
 	}
@@ -39,6 +53,10 @@ export default class BattleModel {
 			}
 		}
 		return undefined
+	}
+
+	clearTurn() {
+		this.data.turn = {}
 	}
 
 

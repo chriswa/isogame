@@ -1,12 +1,26 @@
 import FieldView from './FieldView.js'
 import FBM from '../../util/FBM.js'
 
+export default class FieldBuilder {
+	constructor(fieldDescriptor) {
+		const { fieldView, fieldModel } = build(fieldDescriptor)
+		this.fieldView = fieldView
+		this.fieldModel = fieldModel
+	}
+	getView() {
+		return this.fieldView
+	}
+	getModel() {
+		return this.fieldModel
+	}
+}
+
 function quantize(v) {
 	//return Math.floor(v * 8) / 3
 	return (v * 5 - 3)
 }
 
-export function build(fieldDescriptor) {
+function build(fieldDescriptor) {
 
 	const { type, seed } = fieldDescriptor
 	if (type !== 'randomwoods') { throw new Error(`field type unsupported`) }

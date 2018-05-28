@@ -24,6 +24,7 @@ export default class FaceResult extends BaseResultPlayer {
 	static updateModel(model, result) {
 		const unit = model.getUnitById(result.unitId)
 		unit.facing = result.target
-		model.turn.isComplete = true
+		unit.nextTurnTime += 100 // FIXME: this is too simple of a solution to support time magic
+		model.turn.stage = 'end'
 	}
 }

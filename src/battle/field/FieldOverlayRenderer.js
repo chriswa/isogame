@@ -78,7 +78,7 @@ export default class FieldOverlayRenderer {
 		})
 		this.bufferInfo.indices = gfx.quadIndexBuffer
 
-		//this.updateColourData() // FIXME: why is this required to avoid "glDrawElements: attempt to access out of range vertices in attribute 1"
+		this.updateColourData() // FIXME: why is this required to avoid "glDrawElements: attempt to access out of range vertices in attribute 1" when the game starts with no colour data?
 	}
 	getColourData() {
 		return this.colourData

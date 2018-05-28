@@ -20,7 +20,7 @@ export default new class FaceAbility {
 	//isTargetValid(model, casterUnitId, abilityId, target) {
 	//	return false
 	//}
-	execute(model, casterUnitId, abilityId, target, simulator) {
-		simulator.addResult({ type: 'Face', unitId: casterUnitId, target: target })
+	execute(model, casterUnitId, abilityId, target, addResultCallback) {
+		addResultCallback({ type: 'Face', unitId: casterUnitId, target: target })
 	}
 }

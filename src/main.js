@@ -1,60 +1,28 @@
 import * as input from './util/input.js'
 import * as gfx from './gfx/gfx.js'
-import * as battleBuilder from './battle/battleBuilder.js'
 import * as debugCanvas from './gfx/debugCanvas.js'
-import AbilityArchetypes from './battle/AbilityArchetypes.js'
-import ResultPlayers from './battle/ResultPlayers.js'
+import BattleController from './battle/BattleController.js'
+import FieldBuilder from './battle/field/FieldBuilder.js'
+import BattleModel from './battle/BattleModel.js'
+import LocalAuthority from './LocalAuthority.js'
 
-class Simulation {
-	constructor(model) {
-		this.model = model.clone()
-		this.results = []
-		this.takeModelBackup()
-	}
-	takeModelBackup() {
-		this.modelBackup = this.model.clone()
-	}
-	verifyModelBackup() {
-		const serializedModel = JSON.stringify(this.model)
-		const serializedBackup = JSON.stringify(this.modelBackup)
-		if (serializedModel !== serializedBackup) {
-			throw new Error(`model was updated outside of result!`)
-		}
-	}
-	addResult(result) {
-		this.verifyModelBackup()
-		this.results.push(result)
-		const resultPlayer = ResultPlayers[result.type]
-		resultPlayer.updateModel(this.model, result)
-		this.takeModelBackup()
-	}
-}
+/** @type BattleController */
+let battleController
 
-// this is essentially the LocalAuthority?
-const decisionCallback = (abilityId, target) => {
-	const unitId = battleController.model.getActiveUnitId()
-	console.log(`battleAuthority.onSendDecision(${unitId}, ${abilityId}, ${target})`)
+const localTeamId = 0
 
-	const activeUnit = battleController.model.getUnitById(unitId)
-	const abilityType = activeUnit.abilities[abilityId].abilityType
-	const abilityArch = AbilityArchetypes[abilityType]
-	abilityArch.execute(battleController.model, unitId, abilityId, target, simulation)
-
-	while (simulation.results.length) {
-		battleController.addResult(simulation.results.shift())
-	}
-}
-
-const battleController = battleBuilder.buildSampleBattleController(decisionCallback)
+const localAuthority = new LocalAuthority({
+	onBattleStart(battleBlueprint, decisionCallback) {
+		battleController = new BattleController(battleBlueprint, localTeamId, decisionCallback)
+	},
+	onResult(result) {
+		battleController.addResult(result)
+		window.clientModel = battleController.model // for debugging
+	},
+})
+window.authorityModel = localAuthority.model // for debugging
 
 
-const simulation = new Simulation(battleController.model) // this is a bit backwards: the BattleController should get its model from the authority
-
-window.model = battleController.model.data
-
-//setTimeout(() => {
-//	battleController.addResult({ type: 'Spellcast', unitId: 1, name: 'Bar' })
-//}, 500)
 
 gfx.startLoop(dt => {
 
