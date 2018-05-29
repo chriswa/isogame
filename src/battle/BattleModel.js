@@ -55,9 +55,4 @@ export default class BattleModel {
 		return undefined
 	}
 
-	clearTurn() {
-		this.data.turn = {}
-	}
-
-
 }

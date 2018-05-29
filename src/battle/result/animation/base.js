@@ -1,5 +1,5 @@
-import BattleModel from './../BattleModel.js'
-import BattleView from './../BattleView.js'
+import BattleModel from './../../BattleModel.js'
+import BattleView from './../../BattleView.js'
 
 export class BaseResultAnimation {
 	constructor(model, view, result) {

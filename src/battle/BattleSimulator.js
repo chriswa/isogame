@@ -1,4 +1,4 @@
-import ResultPlayers from "./ResultPlayers.js"
+import ResultAppliers from "./ResultAppliers.js"
 
 // BattleSimulator public API:
 //   battleSimulator = new BattleSimulator(model)
@@ -27,7 +27,8 @@ export default class BattleSimulator {
 		// check if this result should be cancelled/ignored (e.g. if the battle is already victorious)
 		if (this.getVictoryState()) { console.log(`ignoring addResult added after the battle is victorious`); return }
 		// immediately update the model with the result
-		ResultPlayers[result.type].updateModel(this.model, result)
+		const resultApplier = ResultAppliers[result.type]
+		resultApplier(this.model, result)
 		// queue the result
 		this.queuedResults.push(result)
 	}
@@ -104,7 +105,7 @@ export default class BattleSimulator {
 						if (didSomethingHappen) {
 							continue // check for victory and keep going
 						}
-						model.turn.stage = 'middle'
+						this.addResult({ type: 'Turn', stage: 'middle' })
 					}
 
 					if (model.turn.stage === 'middle') {
@@ -112,7 +113,7 @@ export default class BattleSimulator {
 							return // caller should check for victory state, then generate (or prompt for) a decision for the active unit
 							// n.b. turn.stage can also be advanced to 'end' by a decision (e.g. Face) or by the TurnTimer
 						}
-						model.turn.stage = 'end'
+						this.addResult({ type: 'Turn', stage: 'end' })
 					}
 
 					if (model.turn.stage === 'end') {
@@ -124,7 +125,7 @@ export default class BattleSimulator {
 				}
 
 				// either the active unit's turn is complete, or they ceased to exist during their turn
-				model.clearTurn() // model.turn = {}
+				this.addResult({ type: 'Turn', clear: true })
 				continue // check for victory and keep going
 			}
 
@@ -140,8 +141,7 @@ export default class BattleSimulator {
 
 			// initialize the next unit's turn, then start over so we can get into the 'start' stage logic
 			if (earliestUnitId === undefined) { throw new Error(`BattleSimulator logic error: victory should have triggered since there are no units to take turns`) }
-			this.addResult({ type: 'Turn', activeUnitId: earliestUnitId }) // this will set model.turn.activeUnitId = earliestUnitId
-			model.turn.stage = 'start'
+			this.addResult({ type: 'Turn', activeUnitId: earliestUnitId, stage: 'start' })
 			continue // check for victory and keep going (checking for victory is almost certainly redundant, but this simple control flow is preferred)
 		}
 	}

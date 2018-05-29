@@ -1,9 +1,10 @@
 import BattleModel from './BattleModel.js'
 import BattleView from './BattleView.js'
-import ResultPlayers from './ResultPlayers.js'
+import ResultAnimations from './ResultAnimations.js'
 import AbilityArchetypes from './AbilityArchetypes.js'
 import MouseController from './MouseController.js'
 import FieldBuilder from './field/FieldBuilder.js'
+import ResultAppliers from './ResultAppliers.js'
 
 
 /*
@@ -49,11 +50,12 @@ class ResultPlayingSubController extends BaseSubController {
 	startNextResult() {
 		if (this.queuedResults.length) {
 			const activeResult = this.queuedResults.shift()
-			const resultPlayer = ResultPlayers[activeResult.type]
-			this.activePlayerAnimation = resultPlayer.startAnimation(this.model, this.view, activeResult)
+			const resultAnimation = ResultAnimations[activeResult.type]
+			const resultApplier = ResultAppliers[activeResult.type]
+			this.activePlayerAnimation = new resultAnimation(this.model, this.view, activeResult)
 			this.activePlayerModelUpdater = () => {
-				this.battleController.log(`ResultPlayer model updater called: `, activeResult)
-				resultPlayer.updateModel(this.model, activeResult)
+				this.battleController.log(`resultAnimation model updater called: `, activeResult)
+				resultApplier(this.model, activeResult)
 			}
 			this.battleController.log(`ResultAnimation started: `, this.activePlayerAnimation)
 		}

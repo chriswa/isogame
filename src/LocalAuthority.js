@@ -2,7 +2,6 @@ import * as sampleBattleGenerator from './battle/sampleBattleGenerator.js'
 import BattleSimulator from './battle/BattleSimulator.js'
 import BattleModel from './battle/BattleModel.js'
 import AbilityArchetypes from './battle/AbilityArchetypes.js'
-import ResultPlayers from './battle/ResultPlayers.js'
 
 export default class LocalAuthority {
 	constructor(callbacks) {

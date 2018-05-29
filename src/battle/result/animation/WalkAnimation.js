@@ -1,8 +1,8 @@
 import { BaseResultPlayer, BaseResultAnimation } from './base.js'
-import BattleModel from './../BattleModel.js'
-import * as v2 from './../../util/v2.js'
+import BattleModel from './../../BattleModel.js'
+import * as v2 from './../../../util/v2.js'
 
-class WalkAnimation extends BaseResultAnimation {
+export default class WalkAnimation extends BaseResultAnimation {
 	init() {
 		this.duration = 200
 		const startPosV2 = this.model.units[this.result.unitId].pos
@@ -20,20 +20,5 @@ class WalkAnimation extends BaseResultAnimation {
 	onComplete() {
 		this.view.unitSprites[this.result.unitId].startAnimation('IDLE')
 		this.view.unitSprites[this.result.unitId].setPosition(this.endPos)
-	}
-}
-
-export default class WalkResult extends BaseResultPlayer {
-	static getAnimationClass() {
-		return WalkAnimation
-	}
-	/**
-	 * @param {BattleModel} model 
-	 * @param {*} result 
-	 */
-	static updateModel(model, result) {
-		const unit = model.getUnitById(result.unitId)
-		v2.copy(result.target, unit.pos)
-		model.turn.movementUsed = (model.turn.movementUsed || 0) + 1
 	}
 }
