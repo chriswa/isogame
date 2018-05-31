@@ -1,13 +1,14 @@
 {
   "name": "isogame",
   "version": "1.0.0",
-  "main": "main.js",
+  "description": "",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon --experimental-modules --loader ./mjs-loader.mjs src/server/server.js"
   },
   "author": "",
   "license": "UNLICENSED",
-  "dependencies": {},
-  "devDependencies": {},
-  "description": ""
+  "dependencies": {
+    "ws": "^5.2.0"
+  }
 }

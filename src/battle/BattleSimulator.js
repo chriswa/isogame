@@ -1,4 +1,5 @@
 import ResultAppliers from "./ResultAppliers.js"
+import AbilityArchetypes from './AbilityArchetypes.js'
 
 // BattleSimulator public API:
 //   battleSimulator = new BattleSimulator(model)
@@ -10,38 +11,33 @@ import ResultAppliers from "./ResultAppliers.js"
 //   }
 
 export default class BattleSimulator {
-	constructor(model) {
+	constructor(model, resultsQueue) {
 		this.model = model
+		this.resultsQueue = resultsQueue
 		this.victoryState = undefined
-		this.queuedResults = []
 	}
 	getVictoryState() {
 		return this.victoryState
 	}
-	getQueuedResults() {
-		const retval = this.queuedResults
-		this.queuedResults = []
-		return retval
-	}
-	addResult(result) { // called from Ability.execute (and this.advance)
+	applyResult(result) { // called from Ability.execute (and this.advance)
 		// check if this result should be cancelled/ignored (e.g. if the battle is already victorious)
-		if (this.getVictoryState()) { console.log(`ignoring addResult added after the battle is victorious`); return }
+		if (this.getVictoryState()) { console.log(`ignoring applyResult added after the battle is victorious`); return }
 		// immediately update the model with the result
 		const resultApplier = ResultAppliers[result.type]
 		resultApplier(this.model, result)
 		// queue the result
-		this.queuedResults.push(result)
+		this.resultsQueue.push(result)
 	}
-	executeDecision(requestorTeamId, abilityId, target) {
+	executeDecision(abilityId, target) {
 		if (this.getVictoryState()) { console.log(`ignoring decision made after the battle is victorious`); return }
-		if (this.model.getActiveUnit().teamId !== requestorTeamId) { console.log(`ignoring decision made by incorrect team`) }
+		//if (this.model.getActiveUnit().teamId !== requestorTeamId) { console.log(`ignoring decision made by incorrect team`) }
 		const unitId = this.model.getActiveUnitId()
 		const activeUnit = this.model.getUnitById(unitId)
 		const abilityType = activeUnit.abilities[abilityId].abilityType
 		const abilityArch = AbilityArchetypes[abilityType]
 		abilityArch.execute(this.model, unitId, abilityId, target, (result) => {
-			this.addResult(result)
-		}) // will call this.addResult()
+			this.applyResult(result)
+		})
 	}
 
 
@@ -90,7 +86,7 @@ export default class BattleSimulator {
 			// check for victory (or defeat)
 			this.victoryState = this._checkForVictory()
 			if (this.victoryState) {
-				this.addResult({ type: 'Victory', victoryState: this.victoryState })
+				this.applyResult({ type: 'Victory', victoryState: this.victoryState })
 				return // caller should check battleSimulator.isBattleComplete() to get victoryState
 			}
 
@@ -105,7 +101,7 @@ export default class BattleSimulator {
 						if (didSomethingHappen) {
 							continue // check for victory and keep going
 						}
-						this.addResult({ type: 'Turn', stage: 'middle' })
+						this.applyResult({ type: 'Turn', stage: 'middle' })
 					}
 
 					if (model.turn.stage === 'middle') {
@@ -113,7 +109,7 @@ export default class BattleSimulator {
 							return // caller should check for victory state, then generate (or prompt for) a decision for the active unit
 							// n.b. turn.stage can also be advanced to 'end' by a decision (e.g. Face) or by the TurnTimer
 						}
-						this.addResult({ type: 'Turn', stage: 'end' })
+						this.applyResult({ type: 'Turn', stage: 'end' })
 					}
 
 					if (model.turn.stage === 'end') {
@@ -125,7 +121,7 @@ export default class BattleSimulator {
 				}
 
 				// either the active unit's turn is complete, or they ceased to exist during their turn
-				this.addResult({ type: 'Turn', clear: true })
+				this.applyResult({ type: 'Turn', clear: true })
 				continue // check for victory and keep going
 			}
 
@@ -141,7 +137,7 @@ export default class BattleSimulator {
 
 			// initialize the next unit's turn, then start over so we can get into the 'start' stage logic
 			if (earliestUnitId === undefined) { throw new Error(`BattleSimulator logic error: victory should have triggered since there are no units to take turns`) }
-			this.addResult({ type: 'Turn', activeUnitId: earliestUnitId, stage: 'start' })
+			this.applyResult({ type: 'Turn', activeUnitId: earliestUnitId, stage: 'start' })
 			continue // check for victory and keep going (checking for victory is almost certainly redundant, but this simple control flow is preferred)
 		}
 	}

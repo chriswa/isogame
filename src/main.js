@@ -11,16 +11,46 @@ let battleController
 
 const localTeamId = 0
 
-const localAuthority = new LocalAuthority({
-	onBattleStart(battleBlueprint, decisionCallback) {
+const authorityCallbacks = {
+	onBattleStart(battleBlueprint) {
+		const decisionCallback = (abilityId, target) => { // called by TargetingUi
+			localAuthority.executeDecision(abilityId, target)
+		}
 		battleController = new BattleController(battleBlueprint, localTeamId, decisionCallback)
 	},
 	onResult(result) {
 		battleController.addResult(result)
 		window.clientModel = battleController.model // for debugging
 	},
-})
-window.authorityModel = localAuthority.model // for debugging
+}
+
+const authority = new LocalAuthority(authorityCallbacks)
+
+window.authorityModel = authority.model // for debugging
+
+
+
+class UserConnection {
+	constructor(socket) {
+		this.socket = socket
+	}
+}
+
+var socket = new WebSocket('ws://localhost:9090')
+socket.onopen = function () {
+	socket.send('client acknowledges "open"')
+}
+socket.onerror = function (error) {
+	console.log('WebSocket Error ' + error)
+}
+socket.onmessage = function (e) {
+	console.log('Server: ' + e.data)
+}
+
+
+
+
+
 
 
 
