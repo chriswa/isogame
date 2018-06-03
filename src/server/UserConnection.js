@@ -71,6 +71,7 @@ export default class UserConnection {
 		if (this.supervisedBattle) {
 			return this.send('log', `can't start a challenge while a supervised battle is ongoing`)
 		}
+		// n.b. UserConnection.onSupervisedBattleStart will call matchMaker.unsubscribeAll
 		supervisedBattleRegistrar.startBattle(payload.challengeId, [this])
 	}
 	handleMessageDecision(msg) { // called from messageHandlers['decision']
@@ -86,6 +87,7 @@ export default class UserConnection {
 	}
 	onSupervisedBattleStart(supervisedBattle, payload) {
 		this.supervisedBattle = supervisedBattle
+		matchMaker.unsubscribeAll(this)
 		this.send('startSupervisedBattle', payload)
 	}
 	onSupervisedBattleResults(results) {

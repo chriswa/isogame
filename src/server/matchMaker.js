@@ -35,8 +35,7 @@ const matchMaker = new class MatchMaker {
 		})
 	}
 	startBattle(matchType, userConnection0, userConnection1) {
-		this.unsubscribeAll(userConnection0)
-		this.unsubscribeAll(userConnection1)
+		// n.b. UserConnection.onSupervisedBattleStart will call matchMaker.unsubscribeAll
 		supervisedBattleRegistrar.startBattle(matchType, [ userConnection0, userConnection1 ])
 	}
 

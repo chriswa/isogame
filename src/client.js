@@ -22,9 +22,18 @@ socket.onmessage = (e) => {
 	console.log(`Server: ${type} - ${JSON.stringify(payload)}`)
 }
 
+window.wsSend = (type, payload) => {
+	socket.send(JSON.stringify([ type, payload ]))
+}
 
 
+setTimeout(() => {
+	wsSend('startChallenge', { challengeId: 'whatever' }) // TESTING
+}, 1000)
 
+setTimeout(() => {
+	wsSend('decision', { abilityId: 0, target: 0 })
+}, 2000)
 
 
 
