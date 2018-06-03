@@ -1,12 +1,11 @@
 import BaseAbility from './base.js'
-import FaceTargetingController from '../targeting/FaceTargeting.js'
 
 export default new class FaceAbility {
 	getSpriteName() {
 		return 'unknown'
 	}
-	createTargetingController(model, view, selectedUnitId, abilityId) {
-		return new FaceTargetingController(model, view, selectedUnitId)
+	determineTargetingController(model, view, selectedUnitId, abilityId) {
+		return { targetingId: 'Face', abilityArgs: {} }
 	}
 	//isCastable(model, casterUnitId, abilityId) {
 	//	return true

@@ -20,6 +20,9 @@ baseURL.pathname = `${process.cwd()}/`;
 
 export async function resolve(specifier, parentModuleURL = baseURL, defaultResolver) {
   //console.log("*** mjs-loader.mjs: resolving - ", specifier, parentModuleURL)
+  const parentFilename = parentModuleURL.toString().match(/[^\/]+$/)
+  const importFilename = specifier.match(/[^\/]+$/)[0]
+  console.log(`(mjs-loader) ${parentFilename} imports "${importFilename}"`)
 
   const isESM = (specifier[0] === '.' || specifier[0] === '/') // naive
 

@@ -5,6 +5,8 @@ import AbilityArchetypes from './AbilityArchetypes.js'
 import MouseController from './MouseController.js'
 import FieldBuilder from './field/FieldBuilder.js'
 import ResultAppliers from './ResultAppliers.js'
+import FieldView from './field/FieldView.js'
+import TargetingControllers from './TargetingControllers.js'
 
 
 /*
@@ -168,7 +170,9 @@ class TargetingSubController extends BaseSubController {
 		const abilityType = activeUnit.abilities[abilityId].abilityType
 		const abilityArch = AbilityArchetypes[abilityType]
 		this.removeActiveTargetingUi() // call this first, so everything is cleaned up for TargetingUi constructor created next
-		this.activeTargetingUI = abilityArch.createTargetingController(this.model, this.view, this.selectedUnitId, this.selectedAbilityId)
+		const { targetingId, abilityArgs } = abilityArch.determineTargetingController(this.model, this.view, this.selectedUnitId, this.selectedAbilityId)
+		const targetingClass = TargetingControllers[ targetingId ]
+		this.activeTargetingUI = new targetingClass(this.model, this.view, this.selectedUnitId, abilityArgs)
 		this.battleController.log(`TargetingController started: `, this.activeTargetingUI)
 	}
 }
@@ -182,7 +186,7 @@ export default class BattleController {
 
 		// convert the fieldDescriptor (e.g. { type: "randomwoods", seed: 123 } into a view and model
 		const fieldBuilder = new FieldBuilder(battleBlueprint.fieldDescriptor)
-		const fieldView = fieldBuilder.getView()
+		const fieldView = new FieldView(...fieldBuilder.getFieldViewCtorArgs())
 
 		// Battle Model
 		this.model = BattleModel.createFromBlueprint(battleBlueprint, myTeamId)

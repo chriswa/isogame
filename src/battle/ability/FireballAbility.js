@@ -1,18 +1,17 @@
 import BaseAbility from './base.js'
-import AOETargetingController from '../targeting/AOETargeting.js'
 
 export default new class FireballAbility {
 	getSpriteName() {
 		return 'unknown'
 	}
-	createTargetingController(model, view, selectedUnitId, abilityId) {
+	determineTargetingController(model, view, selectedUnitId, abilityId) {
 		const ability = model.getAbilityById(selectedUnitId, abilityId)
-		const extraArgs = {
+		const abilityArgs = {
 			minTargetDistance: 1,
 			maxTargetDistance: ability.distance,
 			aoeRange: 1,
 		}
-		return new AOETargetingController(model, view, selectedUnitId, extraArgs)
+		return { targetingId: 'AOE', abilityArgs }
 	}
 	//isCastable(model, casterUnitId, abilityId) {
 	//	return true

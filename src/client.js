@@ -6,6 +6,28 @@ import FieldBuilder from './battle/field/FieldBuilder.js'
 import BattleModel from './battle/BattleModel.js'
 import LocalAuthority from './LocalAuthority.js'
 
+
+
+var socket = new WebSocket('ws://localhost:9090')
+socket.onopen = () => {
+	socket.send(JSON.stringify(['login', { username: 'bob', password: 'pass', signup: undefined }])) // on the server, UserAuthenticator requires we send a login message first!
+	//socket.send(JSON.stringify({ username: 'bob', password: 'pass', isSignup: true }))
+}
+socket.onerror = (error) => {
+	console.log('WebSocket Error ' + error)
+}
+socket.onmessage = (e) => {
+	//console.log(e.data)
+	const [type, payload] = JSON.parse(e.data)
+	console.log(`Server: ${type} - ${JSON.stringify(payload)}`)
+}
+
+
+
+
+
+
+
 /** @type BattleController */
 let battleController
 
@@ -14,7 +36,7 @@ const localTeamId = 0
 const authorityCallbacks = {
 	onBattleStart(battleBlueprint) {
 		const decisionCallback = (abilityId, target) => { // called by TargetingUi
-			localAuthority.executeDecision(abilityId, target)
+			authority.executeDecision(abilityId, target)
 		}
 		battleController = new BattleController(battleBlueprint, localTeamId, decisionCallback)
 	},
@@ -27,30 +49,6 @@ const authorityCallbacks = {
 const authority = new LocalAuthority(authorityCallbacks)
 
 window.authorityModel = authority.model // for debugging
-
-
-
-class UserConnection {
-	constructor(socket) {
-		this.socket = socket
-	}
-}
-
-var socket = new WebSocket('ws://localhost:9090')
-socket.onopen = function () {
-	socket.send('client acknowledges "open"')
-}
-socket.onerror = function (error) {
-	console.log('WebSocket Error ' + error)
-}
-socket.onmessage = function (e) {
-	console.log('Server: ' + e.data)
-}
-
-
-
-
-
 
 
 

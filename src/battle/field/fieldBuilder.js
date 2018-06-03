@@ -1,14 +1,13 @@
-import FieldView from './FieldView.js'
 import FBM from '../../util/FBM.js'
 
 export default class FieldBuilder {
 	constructor(fieldDescriptor) {
-		const { fieldView, fieldModel } = build(fieldDescriptor)
-		this.fieldView = fieldView
+		const { fieldViewCtorArgs, fieldModel } = build(fieldDescriptor)
+		this.fieldViewCtorArgs = fieldViewCtorArgs
 		this.fieldModel = fieldModel
 	}
-	getView() {
-		return this.fieldView
+	getFieldViewCtorArgs() {
+		return this.fieldViewCtorArgs
 	}
 	getModel() {
 		return this.fieldModel
@@ -86,14 +85,14 @@ function build(fieldDescriptor) {
 
 	const meshData = drawMeshes(tileData, fieldWidth)
 
-	const fieldView = new FieldView(fieldWidth, tileData, meshData)
+	const fieldViewCtorArgs = [fieldWidth, tileData, meshData]
 
 	const fieldModel = {
 		size: fieldWidth,
 		squares: tileData.map(d => { return { terrainTypeId: d.terrainTypeId, height: d.y } })
 	}
 
-	return { fieldView, fieldModel }
+	return { fieldViewCtorArgs, fieldModel }
 }
 
 function drawOverlayMesh(tileData, fieldWidth) {

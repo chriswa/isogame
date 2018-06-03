@@ -3,8 +3,10 @@ import http from 'http'
 import path from 'path'
 import url from 'url'
 
+const PORT = 8080
+
 const server = http.createServer(function (req, res) {
-	console.log((new Date()) + ' Received req for ' + req.url)
+	//console.log((new Date()) + ' Received req for ' + req.url)
 
 	const parsedUrl = url.parse(req.url)
 	let filePath = '.' + parsedUrl.pathname
@@ -34,8 +36,8 @@ const server = http.createServer(function (req, res) {
 		})
 	})
 });
-server.listen(8080, function () {
-	console.log((new Date()) + ' Server is listening on port 8080')
+server.listen(PORT, function () {
+	console.log(`(staticServer) Listening on port ${PORT}`)
 });
 
 export default server

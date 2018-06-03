@@ -1,12 +1,11 @@
 import BaseAbility from './base.js'
-import WalkTargetingController from '../targeting/WalkTargeting.js'
 import WalkPathing from './../WalkPathing.js'
 
 export default new class WalkAbility {
 	getSpriteName() {
 		return 'unknown'
 	}
-	createTargetingController(model, view, selectedUnitId, abilityId) {
+	determineTargetingController(model, view, selectedUnitId, abilityId) {
 		const ability = model.getAbilityById(selectedUnitId, abilityId)
 		/*const extraArgs = {
 			minTargetDistance: 1,
@@ -16,7 +15,8 @@ export default new class WalkAbility {
 		return new AOETargetingController(model, view, selectedUnitId, extraArgs)
 		*/
 		const distance = ability.distance - (model.getActiveUnitId() === selectedUnitId ? (model.turn.movementUsed || 0) : 0)
-		return new WalkTargetingController(model, view, selectedUnitId, { distance })
+		const abilityArgs = { distance }
+		return { targetingId: 'Walk', abilityArgs }
 	}
 	//isCastable(model, casterUnitId, abilityId) {
 	//	return true
