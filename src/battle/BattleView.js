@@ -124,8 +124,15 @@ export default class BattleView {
 	mousePick(allowUnits = true) {
 		const screenPos = input.latestMousePos
 
+		// if the mouse is "captured" by a GUI element above the canvas, don't do a mouse pick
 		const isScreenPosCaptured = input.isScreenPosCaptured(screenPos)
 		if (isScreenPosCaptured) {
+			return new MousePick(undefined, Infinity, undefined, screenPos)
+		}
+
+		// if the user is currently dragging (any mouse button), don't do a mouse pick
+		const isDraggingAnyButton = input.isDraggingAnyButton()
+		if (isDraggingAnyButton) {
 			return new MousePick(undefined, Infinity, undefined, screenPos)
 		}
 

@@ -152,3 +152,7 @@ export function update() {
 	eventQueue.length = 0 // clear array
 	_.each(buttonStates, buttonState => { buttonState.update(latestMousePos) }) // allow drag processing
 }
+
+export function isDraggingAnyButton() {
+	return !_.every(buttonStates, (buttonState) => { return !buttonState.isDragging })
+}

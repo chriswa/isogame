@@ -1,3 +1,5 @@
+import BattleController from './BattleController.js'
+
 export default class BaseSubController {
 	constructor(battleController) {
 		/** @type BattleController */
