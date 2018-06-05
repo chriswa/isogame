@@ -43,7 +43,10 @@ export default class UserConnection {
 		}
 
 		// reconnect user?
-		supervisedBattleRegistrar.reconnectUser(this)
+		supervisedBattleRegistrar.reconnectUser(this) // this may call userConnection.onSupervisedBattleStart, thus setting this.supervisedBattle
+		if (!this.supervisedBattle) {
+			this.send('log', `no supervised battle to reconnect to`)
+		}
 
 		this.wsConnection.on('terminate', () => { // custom event emitted by websocketServer.js when a heartbeat fails, causing connection termination, or the connection is closed normally
 			matchMaker.unsubscribeAll(this)

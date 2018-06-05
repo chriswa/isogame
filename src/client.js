@@ -2,10 +2,7 @@ import * as input from './util/input.js'
 import * as gfx from './gfx/gfx.js'
 import * as debugCanvas from './gfx/debugCanvas.js'
 import BattleController from './battle/BattleController.js'
-import FieldBuilder from './battle/field/FieldBuilder.js'
-import BattleModel from './battle/BattleModel.js'
 import LocalAuthority from './LocalAuthority.js'
-
 
 
 var socket = new WebSocket('ws://localhost:9090')
@@ -26,14 +23,9 @@ window.wsSend = (type, payload) => {
 	socket.send(JSON.stringify([ type, payload ]))
 }
 
-
-setTimeout(() => {
-	wsSend('startChallenge', { challengeId: 'whatever' }) // TESTING
-}, 1000)
-
-setTimeout(() => {
-	wsSend('decision', { abilityId: 0, target: 0 })
-}, 2000)
+// MORE TESTING
+//setTimeout(() => { wsSend('startChallenge', { challengeId: 'whatever' }) }, 1000)
+//setTimeout(() => { wsSend('decision', { abilityId: 0, target: 0 }) }, 2000)
 
 
 

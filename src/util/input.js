@@ -4,6 +4,11 @@ export const eventQueue = []
 
 const eventElement = document.getElementById('inputEventHelper')
 
+export function isScreenPosCaptured(screenPos) {
+	const elementAtPoint = document.elementFromPoint(screenPos[0], screenPos[1])
+	return elementAtPoint !== eventElement
+}
+
 document.addEventListener('mousemove', e => {
 	latestMousePos[0] = e.clientX
 	latestMousePos[1] = e.clientY

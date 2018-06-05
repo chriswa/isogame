@@ -2,4 +2,3 @@
 
 global._ = require('lodash')
 global.Noise = require('noisejs').Noise
-console.log(global.Noise)

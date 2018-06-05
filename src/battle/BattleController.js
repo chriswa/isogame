@@ -1,13 +1,13 @@
 import BattleModel from './BattleModel.js'
 import BattleView from './BattleView.js'
-import ResultAnimations from './ResultAnimations.js'
-import AbilityArchetypes from './AbilityArchetypes.js'
 import MouseController from './MouseController.js'
 import FieldBuilder from './field/FieldBuilder.js'
-import ResultAppliers from './ResultAppliers.js'
 import FieldView from './field/FieldView.js'
-import TargetingControllers from './TargetingControllers.js'
 
+import ResultPlayingSubController from './ResultPlayingSubController.js'
+import TargetingSubController from './TargetingSubController.js'
+
+import BattleGUI from '../gui/battle/BattleGUI.js'
 
 /*
 	FSM relationship:
@@ -17,166 +17,6 @@ import TargetingControllers from './TargetingControllers.js'
 		}
 		BattleController.currentSubController : BaseSubController
 */
-
-class BaseSubController {
-	constructor(battleController) {
-		/** @type BattleController */
-		this.battleController = battleController
-	}
-	get view() { return this.battleController.view } // shortcut
-	get model() { return this.battleController.model } // shortcut
-	update(dt) { }
-	render() { }
-	onStateEnter() { }
-	onStateExit() { }
-	onClick(mousePos) { } // ignore this event
-}
-
-class ResultPlayingSubController extends BaseSubController {
-	constructor(battleController) {
-		super(battleController)
-		this.queuedResults = []
-		this.activePlayerAnimation = undefined
-		this.activePlayerModelUpdater = undefined
-	}
-	addResult(result) {
-		this.queuedResults.push(result)
-	}
-	onStateEnter() {
-		this.view.fieldView.updateOverlay(testCoords => { return 0 }) // clear targeting overlay
-		this.view.setTopText('')
-		this.startNextResult()
-	}
-	onStateExit() {
-	}
-	startNextResult() {
-		if (this.queuedResults.length) {
-			const activeResult = this.queuedResults.shift()
-			const resultAnimation = ResultAnimations[activeResult.type]
-			const resultApplier = ResultAppliers[activeResult.type]
-			this.activePlayerAnimation = new resultAnimation(this.model, this.view, activeResult)
-			this.activePlayerModelUpdater = () => {
-				this.battleController.log(`resultAnimation model updater called: `, activeResult)
-				resultApplier(this.model, activeResult)
-			}
-			this.battleController.log(`ResultAnimation started: `, this.activePlayerAnimation)
-		}
-		else {
-			this.activePlayerAnimation = undefined
-		}
-	}
-	update(dt) {
-		let remainingDt = dt
-		while (this.activePlayerAnimation) {
-
-			// update the animation
-			remainingDt = this.activePlayerAnimation.update(remainingDt)
-
-			// if the animation used all the time, it's not done yet, so we're done for now
-			if (!remainingDt) {
-				return
-			}
-
-			// the animation is complete, update the model and move on to the next result (if there is one)
-			this.activePlayerModelUpdater()
-			this.startNextResult()
-		}
-
-		// check for end of results
-		if (!this.activePlayerAnimation) {
-			this.battleController.onResultsComplete()
-		}
-	}
-	render() {
-		this.activePlayerAnimation.render()
-	}
-}
-
-class TargetingSubController extends BaseSubController {
-	constructor(battleController) {
-		super(battleController)
-		this.selectedUnitId = undefined
-		this.selectedAbilityId = undefined
-		this.activeTargetingUI = undefined
-	}
-	update(dt) {
-	}
-	render() {
-		if (this.activeTargetingUI) {
-			this.activeTargetingUI.render()
-		}
-	}
-	onStateEnter() {
-		this.selectUnit(undefined)
-		this.battleController.mouseController.activate()
-		this.view.showActiveUnitIndicator(this.model.getActiveUnitId())
-	}
-	onStateExit() {
-		this.removeActiveTargetingUi()
-		this.battleController.mouseController.deactivate()
-		this.view.hideActiveUnitIndicator()
-		this.view.setTopText('')
-	}
-	removeActiveTargetingUi() {
-		if (this.activeTargetingUI) {
-			this.activeTargetingUI.destroy()
-			this.activeTargetingUI = undefined
-		}
-	}
-	onClick(mousePos) {
-		const mousePick = this.view.mousePick()
-		let clickHandled = false
-		if (this.activeTargetingUI) {
-			const decisionCallback = (target) => {
-				if (!this.model.isItMyTurn()) { throw new Error(`assertion failed: targetingUi tried to send decision but selected unit is not owned by player`) }
-				this.battleController.onSendDecision(this.selectedAbilityId, target)
-			}
-			clickHandled = this.activeTargetingUI.onClick(mousePick, decisionCallback)
-		}
-		if (!clickHandled) {
-			if (mousePick.hasUnit()) {
-				this.selectUnit(mousePick.getUnitId())
-			}
-			else {
-				const activeUnitId = this.model.getActiveUnitId()
-				if (activeUnitId !== undefined) {
-					this.selectUnit(activeUnitId)
-				}
-			}
-		}
-	}
-	selectUnit(unitId) {
-		if (unitId === undefined) {
-			unitId = this.model.getActiveUnitId()
-		}
-		this.selectedUnitId = unitId
-		if (this.selectedUnitId === undefined) { return }
-		this.view.selectUnit(unitId)
-		
-		if (this.model.isItMyTurn()) {
-			this.view.setTopText("Your turn")
-		}
-		else {
-			this.view.setTopText("Waiting for opponent...")
-		}
-
-		//this.onSelectAbility(1) // default to Walk (1), instead of Face (0)
-	}
-	onSelectAbility(abilityId) {
-		if (this.selectedUnitId === undefined) { return }
-		this.selectedAbilityId = abilityId
-		this.view.selectAbility(abilityId)
-		const activeUnit = this.model.getUnitById(this.selectedUnitId)
-		const abilityType = activeUnit.abilities[abilityId].abilityType
-		const abilityArch = AbilityArchetypes[abilityType]
-		this.removeActiveTargetingUi() // call this first, so everything is cleaned up for TargetingUi constructor created next
-		const { targetingId, abilityArgs } = abilityArch.determineTargetingController(this.model, this.view, this.selectedUnitId, this.selectedAbilityId)
-		const targetingClass = TargetingControllers[ targetingId ]
-		this.activeTargetingUI = new targetingClass(this.model, this.view, this.selectedUnitId, abilityArgs)
-		this.battleController.log(`TargetingController started: `, this.activeTargetingUI)
-	}
-}
-
 
 export default class BattleController {
 
@@ -195,8 +35,10 @@ export default class BattleController {
 			this.currentSubController.onSelectAbility(abilityId)
 		}
 
+		BattleGUI.init(this.model, onSelectAbility)
+
 		// BattleView
-		this.view = new BattleView(fieldView, this.model, onSelectAbility)
+		this.view = new BattleView(fieldView, this.model)
 
 		this.mouseController = new MouseController(this.view, (clickPos) => { this.currentSubController.onClick(clickPos) })
 

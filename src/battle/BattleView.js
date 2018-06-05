@@ -8,9 +8,7 @@ import BattleModel from './BattleModel.js'
 import * as cameraTweener from '../gfx/cameraTweener.js'
 import TerrainTypes from './field/TerrainTypes.js'
 import Sprite from './../gfx/Sprite.js'
-import UnitPanel from './UnitPanel.js'
-
-const topTextElement = document.getElementById('topText')
+import BattleGUI from '../gui/battle/BattleGUI.js'
 
 class MousePick {
 	constructor(tileCoords, unitId, tileCoordsBehindUnit, screenPos) {
@@ -38,7 +36,7 @@ class MousePick {
 
 export default class BattleView {
 
-	constructor(fieldView, battleModel, onSelectAbility) {
+	constructor(fieldView, battleModel) {
 		this.tt = 0
 
 		/** @type FieldView */
@@ -84,9 +82,6 @@ export default class BattleView {
 				}
 			}
 		}
-
-		this.unitPanel = new UnitPanel(this.model, this, onSelectAbility)
-
 	}
 
 	getYForTileCenter([x, z]) {
@@ -98,8 +93,8 @@ export default class BattleView {
 		return [x, y, z]
 	}
 
-	setTopText(message) {
-		topTextElement.innerText = message
+	setTopText(text) {
+		BattleGUI.setTopText(text)
 	}
 
 	showActiveUnitIndicator(unitId) {
@@ -113,7 +108,7 @@ export default class BattleView {
 	hideActiveUnitIndicator() {
 		this.indicatorBillboard.hide()
 	}
-	centerOnUnit(unitId) {
+	centerOnUnitId(unitId) {
 		const unit = this.model.getUnitById(unitId)
 		this.centerOnPos(this.getWorldCoordsForTileCenter(unit.pos))
 	}
@@ -124,17 +119,15 @@ export default class BattleView {
 		cameraTweener.lerpToPos(pos)
 	}
 
-	selectUnit(unitId) { // called by UITargetState
-		this.centerOnUnit(unitId)
-		this.unitPanel.initForUnit(unitId)
-	}
-	selectAbility(abilityId) { } // called by UITargetState
 	setWaiting(isWaiting) { } // called by BattleController to show that we're waiting for a response from the server
 	
 	mousePick(allowUnits = true) {
 		const screenPos = input.latestMousePos
 
-		//const mouseoverElement = document.elementFromPoint(screenPos[0], screenPos[1])
+		const isScreenPosCaptured = input.isScreenPosCaptured(screenPos)
+		if (isScreenPosCaptured) {
+			return new MousePick(undefined, Infinity, undefined, screenPos)
+		}
 
 		const { origin, direction } = camera.getRayFromScreenPos(screenPos)
 		let [pickedTileCoords, tileDistance] = this.fieldView.rayPick(origin, direction)
