@@ -7,10 +7,19 @@
 		<style>
 			#mrdoob-stats-mount > div { left: auto !important; right: 0; } /* reposition mrdoob's stats */
 
+			/* meyer reset reloaded - http://meyerweb.com/eric/thoughts/2007/05/01/reset-reloaded/ */
+			html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, font, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td
+			{ margin: 0; padding: 0; border: 0; outline: 0; font-weight: inherit; font-style: inherit; font-size: 100%; font-family: inherit; vertical-align: baseline; }
+			:focus { outline: 0; }
+			body { line-height: 1; color: black; background: white; }
+			ol, ul { list-style: none; }
+			table { border-collapse: separate; border-spacing: 0; } /* tables still need 'cellspacing="0"' in the markup */
+			caption, th, td { text-align: left; font-weight: normal; }
+			blockquote:before, blockquote:after, q:before, q:after { content: ""; }
+			blockquote, q { quotes: "" ""; }
+			/* /meyer reset reloaded */
 
 			body {
-				margin: 0;
-
 				/* no text selection! */
 				-webkit-touch-callout: none; /* iOS Safari */
 					-webkit-user-select: none; /* Safari */
@@ -20,26 +29,13 @@
 									user-select: none; /* Non-prefixed version, currently
 																				supported by Chrome and Opera */
 			}
-			button:focus {
-				outline: none;
-			}
 
 			#mainCanvas {
 				width: 100vw;
 				height: 100vh;
 				display: block;
 			}
-			.guiRoot {
-				position: absolute;
-				top: 0;
-				left: 0;
-				width: 100vw;
-				height: 100vh;
-				pointer-events: none; /* never the target of mouse events; however, mouse events may target its descendant elements if those descendants have pointer-events set to some other value. See below. */
-			}
-			.guiRoot > * {
-				pointer-events: auto; /* accept pointer events. See above! */
-			}
+
 			#inputEventHelper {
 				position: absolute;
 				top: 0;
@@ -47,6 +43,19 @@
 				width: 100vw;
 				height: 100vh;
 			}
+			
+			.guiRoot {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100vw;
+				height: 100vh;
+				pointer-events: none; /* never the target of mouse events (parent element, which covers the entire viewport) */
+			}
+			.guiRoot > * {
+				pointer-events: auto; /* accept pointer events (child elements) */
+			}
+
 		</style>
 	</head>
 	<body>

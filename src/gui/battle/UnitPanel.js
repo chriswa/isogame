@@ -43,16 +43,17 @@ export default Vue.component(COMPONENT_NAME, {
 				<AbilityButton
 					v-for="abilityId in abilityIds"
 					:key="abilityId"
+					:unitId="selectedUnitId"
 					:abilityId="abilityId"
+					:isSelected="selectedAbilityId === abilityId"
 					@click="$emit('selectAbilityId', abilityId)"
-					:isActive="selectedAbilityId === abilityId"
 				></AbilityButton>
 			</div>
 		</div>
 	`,
 	computed: {
 		abilityIds() {
-			return _.range(10)
+			return [ ..._.range(1,10), 0 ]
 		},
 		name() {
 			const unit = battleModel.getUnitById(this.selectedUnitId)

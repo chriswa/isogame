@@ -1,8 +1,19 @@
 import BaseAbility from './base.js'
 
-export default new class FireballAbility {
-	getSpriteName() {
-		return 'unknown'
+export default new class FireballAbility extends BaseAbility {
+	getImage() {
+		return 'fireball'
+	}
+	getTooltip(model, selectedUnitId, abilityId) {
+		return `
+			<h1>Fireball</h1>
+			<p style="color: cyan; font-size: 80%;">30 mana</p>
+			<p>Does damage in a small blast radius.</p>
+			<p>Does not require line-of-sight.</p>
+		`
+	}
+	getCastable(model, selectedUnitId, abilityId) {
+		return false // TODO: check mana
 	}
 	determineTargetingController(model, view, selectedUnitId, abilityId) {
 		const ability = model.getAbilityById(selectedUnitId, abilityId)

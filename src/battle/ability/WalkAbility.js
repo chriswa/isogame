@@ -1,20 +1,26 @@
 import BaseAbility from './base.js'
 import WalkPathing from './../WalkPathing.js'
 
-export default new class WalkAbility {
-	getSpriteName() {
-		return 'unknown'
+export default new class WalkAbility extends BaseAbility {
+	getImage() {
+		return 'tread'
+	}
+	getTooltip(model, selectedUnitId, abilityId) {
+		return `
+			<h1>Walk</h1>
+			<p>Move across the field.</p>
+		`
+	}
+	getCastable(model, selectedUnitId, abilityId) {
+		return this.getAvailableDistance(model, selectedUnitId, abilityId) > 0
+	}
+	getAvailableDistance(model, selectedUnitId, abilityId) {
+		const ability = model.getAbilityById(selectedUnitId, abilityId)
+		const distance = ability.distance - (model.getActiveUnitId() === selectedUnitId ? (model.turn.movementUsed || 0) : 0)
+		return distance
 	}
 	determineTargetingController(model, view, selectedUnitId, abilityId) {
-		const ability = model.getAbilityById(selectedUnitId, abilityId)
-		/*const extraArgs = {
-			minTargetDistance: 1,
-			maxTargetDistance: ability.distance,
-			aoeRange: 1,
-		}
-		return new AOETargetingController(model, view, selectedUnitId, extraArgs)
-		*/
-		const distance = ability.distance - (model.getActiveUnitId() === selectedUnitId ? (model.turn.movementUsed || 0) : 0)
+		const distance = this.getAvailableDistance(model, selectedUnitId, abilityId)
 		const abilityArgs = { distance }
 		return { targetingId: 'Walk', abilityArgs }
 	}
