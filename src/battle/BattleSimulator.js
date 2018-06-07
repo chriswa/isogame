@@ -1,5 +1,5 @@
 import ResultAppliers from "./ResultAppliers.js"
-import AbilityArchetypes from './AbilityArchetypes.js'
+import Abilities from './Abilities.js'
 
 // BattleSimulator public API:
 //   battleSimulator = new BattleSimulator(model)
@@ -32,10 +32,8 @@ export default class BattleSimulator {
 		if (this.getVictoryState()) { console.log(`ignoring decision made after the battle is victorious`); return }
 		//if (this.model.getActiveUnit().teamId !== requestorTeamId) { console.log(`ignoring decision made by incorrect team`) }
 		const unitId = this.model.getActiveUnitId()
-		const activeUnit = this.model.getUnitById(unitId)
-		const abilityType = activeUnit.abilities[abilityId].abilityType
-		const abilityArch = AbilityArchetypes[abilityType]
-		abilityArch.execute(this.model, unitId, abilityId, target, (result) => {
+		const ability = this.model.getAbilityById(unitId, abilityId)
+		ability.execute(target, (result) => {
 			this.applyResult(result)
 		})
 	}

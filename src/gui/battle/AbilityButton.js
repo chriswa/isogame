@@ -1,6 +1,6 @@
 import { battleModel } from './battleModel.js'
 import addCssRule from './../addCssRule.js'
-import AbilityArchetypes from '../../battle/AbilityArchetypes.js'
+import Abilities from '../../battle/Abilities.js'
 
 const COMPONENT_NAME = 'AbilityButton'
 
@@ -69,18 +69,16 @@ export default Vue.component(COMPONENT_NAME, {
 	},
 	computed: {
 		ability() {
-			const unitAbility = battleModel.units[this.unitId].abilities[this.abilityId]
-			const ability = unitAbility ? AbilityArchetypes[unitAbility.abilityType] : undefined
-			return ability
+			return battleModel.getAbilityById(this.unitId, this.abilityId)
 		},
 		abilityImage() {
 			return this.ability ? 'assets/game-icons-net/' + this.ability.getImage() + '.png' : undefined
 		},
 		isCastable() {
-			return this.ability ? this.ability.getCastable(battleModel, this.unitId, this.abilityId) : false
+			return this.ability ? this.ability.getCastable() : false
 		},
 		tooltip() {
-			return this.ability ? this.ability.getTooltip(battleModel, this.unitId, this.abilityId) : undefined
+			return this.ability ? this.ability.getTooltip() : undefined
 		},
 	},
 })

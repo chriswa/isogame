@@ -1,6 +1,5 @@
 import BaseSubController from './BaseSubController.js'
 import TargetingControllers from './TargetingControllers.js'
-import AbilityArchetypes from './AbilityArchetypes.js'
 import BattleGUI from '../gui/battle/BattleGUI.js'
 
 export default class TargetingSubController extends BaseSubController {
@@ -71,13 +70,9 @@ export default class TargetingSubController extends BaseSubController {
 	onSelectAbility(abilityId) { // n.b. this is called by BattleGUI (via the callback that BattleController provides: onSelectAbility)
 		if (this.selectedUnitId === undefined) { return }
 		this.selectedAbilityId = abilityId
-		const activeUnit = this.model.getUnitById(this.selectedUnitId)
-		const ability = activeUnit.abilities[abilityId]
-		if (!ability) { return }
-		const abilityType = ability.abilityType
-		const abilityArch = AbilityArchetypes[abilityType]
 		this.removeActiveTargetingUi() // call this first, so everything is cleaned up for TargetingUi constructor created next
-		const { targetingId, abilityArgs } = abilityArch.determineTargetingController(this.model, this.view, this.selectedUnitId, this.selectedAbilityId)
+		const ability = this.model.getAbilityById(this.selectedUnitId, this.selectedAbilityId)
+		const { targetingId, abilityArgs } = ability.determineTargetingController()
 		const targetingClass = TargetingControllers[ targetingId ]
 		this.activeTargetingUI = new targetingClass(this.model, this.view, this.selectedUnitId, abilityArgs)
 		this.battleController.log(`TargetingController started: `, this.activeTargetingUI)

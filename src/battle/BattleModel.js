@@ -1,5 +1,6 @@
 import * as v2 from '../util/v2.js'
 import FieldBuilder from './field/FieldBuilder.js'
+import Abilities from './Abilities.js'
 
 export default class BattleModel {
 
@@ -41,8 +42,15 @@ export default class BattleModel {
 		const activeUnit = this.getUnitById(this.getActiveUnitId())
 		return activeUnit && activeUnit.teamId === this.myTeamId
 	}
+	getUnitAbilityArgsById(unitId, abilityId) {
+		const unit = this.getUnitById(unitId)
+		const unitAbility = unit.abilities[abilityId]
+		return unitAbility
+	}
 	getAbilityById(unitId, abilityId) {
-		return this.getUnitById(unitId).abilities[abilityId]
+		const unitAbility = this.getUnitAbilityArgsById(unitId, abilityId)
+		const ability = unitAbility ? new Abilities[unitAbility.abilityType](this, unitId, abilityId) : undefined
+		return ability
 	}
 	findUnitIdAtPos(pos) {
 		if (!pos) { return undefined }

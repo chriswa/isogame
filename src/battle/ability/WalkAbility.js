@@ -1,26 +1,25 @@
 import BaseAbility from './base.js'
 import WalkPathing from './../WalkPathing.js'
 
-export default new class WalkAbility extends BaseAbility {
+export default class WalkAbility extends BaseAbility {
 	getImage() {
 		return 'tread'
 	}
-	getTooltip(model, selectedUnitId, abilityId) {
+	getTooltip() {
 		return `
 			<h1>Walk</h1>
 			<p>Move across the field.</p>
 		`
 	}
-	getCastable(model, selectedUnitId, abilityId) {
-		return this.getAvailableDistance(model, selectedUnitId, abilityId) > 0
+	getCastable() {
+		return this.getAvailableDistance() > 0
 	}
-	getAvailableDistance(model, selectedUnitId, abilityId) {
-		const ability = model.getAbilityById(selectedUnitId, abilityId)
-		const distance = ability.distance - (model.getActiveUnitId() === selectedUnitId ? (model.turn.movementUsed || 0) : 0)
+	getAvailableDistance() {
+		const distance = this.unitArgs.distance - (this.model.getActiveUnitId() === this.unitId ? (this.model.turn.movementUsed || 0) : 0)
 		return distance
 	}
-	determineTargetingController(model, view, selectedUnitId, abilityId) {
-		const distance = this.getAvailableDistance(model, selectedUnitId, abilityId)
+	determineTargetingController() {
+		const distance = this.getAvailableDistance()
 		const abilityArgs = { distance }
 		return { targetingId: 'Walk', abilityArgs }
 	}
@@ -36,17 +35,15 @@ export default new class WalkAbility extends BaseAbility {
 	//isTargetValid(model, casterUnitId, abilityId, target) {
 	//	return false
 	//}
-	execute(model, casterUnitId, abilityId, target, addResultCallback) {
+	execute(target, addResultCallback) {
 
-		const unit = model.getUnitById(casterUnitId)
-		const ability = model.getAbilityById(casterUnitId, abilityId)
-		const distance = ability.distance - (model.getActiveUnitId() === casterUnitId ? (model.turn.movementUsed || 0) : 0)
-		const walkPathing = new WalkPathing(model, unit.pos, distance)
+		const distance = this.unitArgs.distance - (this.model.getActiveUnitId() === this.unitId ? (this.model.turn.movementUsed || 0) : 0)
+		const walkPathing = new WalkPathing(this.model, this.unit.pos, distance)
 
 		const path = walkPathing.findAppealingPath(target)
 
 		_.each(path, (nextCoords) => {
-			addResultCallback({ type: 'Walk', unitId: casterUnitId, target: nextCoords })
+			addResultCallback({ type: 'Walk', unitId: this.unitId, target: nextCoords })
 		})
 
 		//addResultCallback({ type: 'Spellcast', unitId: casterUnitId, name: `target = ${target}`, target: target })

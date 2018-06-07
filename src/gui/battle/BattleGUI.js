@@ -43,7 +43,6 @@ const vm = new Vue({
 	computed: {
 		battleModel() {
 			this.battleModelHack // force computed to depend on watched key
-			console.log(`computed battleModel`, battleModel)
 			return battleModel
 		}
 	},
@@ -58,12 +57,17 @@ const vm = new Vue({
 		},
 		selectUnitId(unitId) {
 			this.selectedUnitId = unitId
-			this.selectAbilityId(1) // TODO: find appropriate ability to select (always 1(move) unless unit is ownedAndActive, then it depends on battleModel.turn.*)
 			if (this.battleModel.isItMyTurn()) {
 				this.topText = 'Your turn'
 			}
 			else {
 				this.topText = 'Waiting for opponent...'
+			}
+			// pre-select either "move"(1) or "face"(0), depending on whether moves remain
+			if (this.selectedUnitId !== undefined) {
+				const moveAbility = battleModel.getAbilityById(this.selectedUnitId, 1)
+				const preSelectedAbilityId = moveAbility.getCastable() ? 1 : 0
+				this.selectAbilityId(preSelectedAbilityId)
 			}
 		},
 		selectAbilityId(abilityId) {

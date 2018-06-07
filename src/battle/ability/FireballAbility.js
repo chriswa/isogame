@@ -1,10 +1,10 @@
 import BaseAbility from './base.js'
 
-export default new class FireballAbility extends BaseAbility {
+export default class FireballAbility extends BaseAbility {
 	getImage() {
 		return 'fireball'
 	}
-	getTooltip(model, selectedUnitId, abilityId) {
+	getTooltip() {
 		return `
 			<h1>Fireball</h1>
 			<p style="color: cyan; font-size: 80%;">30 mana</p>
@@ -12,14 +12,13 @@ export default new class FireballAbility extends BaseAbility {
 			<p>Does not require line-of-sight.</p>
 		`
 	}
-	getCastable(model, selectedUnitId, abilityId) {
-		return false // TODO: check mana
+	getCastable() {
+		return true // TODO: check mana
 	}
-	determineTargetingController(model, view, selectedUnitId, abilityId) {
-		const ability = model.getAbilityById(selectedUnitId, abilityId)
+	determineTargetingController() {
 		const abilityArgs = {
 			minTargetDistance: 1,
-			maxTargetDistance: ability.distance,
+			maxTargetDistance: this.unitArgs.distance,
 			aoeRange: 1,
 		}
 		return { targetingId: 'AOE', abilityArgs }
@@ -36,7 +35,7 @@ export default new class FireballAbility extends BaseAbility {
 	//isTargetValid(model, casterUnitId, abilityId, target) {
 	//	return false
 	//}
-	execute(model, casterUnitId, abilityId, target, addResultCallback) {
-		addResultCallback({ type: 'Spellcast', unitId: casterUnitId, name: `target = ${target}`, target: target })
+	execute(target, addResultCallback) {
+		addResultCallback({ type: 'Spellcast', unitId: this.unitId, name: `target = ${target}`, target: target })
 	}
 }
