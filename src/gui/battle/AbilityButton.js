@@ -11,7 +11,7 @@ addCssRule(`.${COMPONENT_NAME} {
 	color: white;
 	padding: 5px;
 
-	border: 2px solid rgb(54, 54, 54);
+	border: 2px solid #333;
 	margin: 0;
 	overflow: visible;
 	font: inherit;
@@ -21,13 +21,17 @@ addCssRule(`.${COMPONENT_NAME} {
 	-webkit-appearance: none;
 }`)
 addCssRule(`.${COMPONENT_NAME}.selected {
-	border: 2px solid rgb(255, 255, 255);
+	border: 2px solid #fff;
 }`)
 addCssRule(`.${COMPONENT_NAME}.enabled:hover {
 	background-color: #666;
 }`)
 addCssRule(`.${COMPONENT_NAME}.enabled:active {
 	background-color: #ccc;
+}`)
+addCssRule(`.${COMPONENT_NAME}.disabled {
+	border: 2px solid #333;
+	background-color: #222;
 }`)
 addCssRule(`.${COMPONENT_NAME}.disabled > img {
 	opacity: 0.5;

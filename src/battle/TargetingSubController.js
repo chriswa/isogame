@@ -25,8 +25,9 @@ export default class TargetingSubController extends BaseSubController {
 		this.removeActiveTargetingUi()
 		this.battleController.mouseController.deactivate()
 		this.view.hideActiveUnitIndicator()
-		BattleGUI.selectUnitId(undefined)
+		this.view.resetUnitGlows()
 		this.view.setTopText('')
+		BattleGUI.selectUnitId(undefined)
 	}
 	removeActiveTargetingUi() {
 		if (this.activeTargetingUI) {

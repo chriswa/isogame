@@ -7,12 +7,13 @@ addCssRule(`.${COMPONENT_NAME} {
 	bottom: calc(4vw + 20px);
 	right: 10px;
 	max-width: 30vw;
+	min-width: 20vw;
 
-	padding: 5px;
+	padding: 2px;
 	border-radius: 25px;
 	border: 3px solid black;
 
-	background-color: blue;
+	background-color: white;
 	color: white;
 
 }`)
@@ -21,9 +22,8 @@ addCssRule(`.${COMPONENT_NAME} > .inner {
 	padding: 12px;
 
 	border-radius: 20px;
-	border: 4px solid cyan;
 
-	background-color: black;
+	background-color: #333;
 	color: white;
 
 }`)
@@ -32,6 +32,10 @@ addCssRule(`.${COMPONENT_NAME} h1 {
 	font-size: 130%;
 	font-weight: bold;
 	margin-bottom: 15px;
+}`)
+addCssRule(`.${COMPONENT_NAME} .manaCost {
+	float: right;
+	color: cyan;
 }`)
 addCssRule(`.${COMPONENT_NAME} p {
 	margin-top: 10px;

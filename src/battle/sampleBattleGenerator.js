@@ -10,7 +10,7 @@ export function build() {
 	const unitsModel = {
 		0: {
 			teamId: 0,
-			name: "Hanz", spriteSet: "human_red", pos: [11, 11], facing: 0, hp: 7, maxHp: 7, mana: 4, maxMana: 4, nextTurnTime: 47, turnbreaker: 0.454563,
+			name: "Hanz", spriteSet: "human_red", pos: [11, 11], facing: 0, hp: 6, hpMax: 7, mana: 4, manaMax: 5, nextTurnTime: 47, turnbreaker: 0.454563,
 			buffs: {
 				0: { buffType: "Poison", power: 1, turnsRemaining: 2, },
 			},
@@ -22,7 +22,7 @@ export function build() {
 		},
 		1: {
 			teamId: 1,
-			name: "Mordeqai", spriteSet: "goblin_purple", pos: [7, 9], facing: 1, hp: 7, maxHp: 7, mana: 4, maxMana: 4, nextTurnTime: 69, turnbreaker: 0.873465,
+			name: "Mordeqai", spriteSet: "goblin_purple", pos: [7, 9], facing: 1, hp: 7, hpMax: 7, mana: 4, manaMax: 4, nextTurnTime: 69, turnbreaker: 0.873465,
 			buffs: {
 			},
 			abilities: {
@@ -37,7 +37,7 @@ export function build() {
 		const name = sampleNames[Math.floor(Math.random() * sampleNames.length)]
 		unitsModel[unitId] = {
 			teamId: 1,
-			name: "Rando", spriteSet: "goblin_green", pos: [ Math.floor(Math.random() * 32), Math.floor(Math.random() * 32) ], facing: Math.floor(Math.random() * 4), hp: 7, maxHp: 7, mana: 4, maxMana: 4, nextTurnTime: 69, turnbreaker: 0.873465,
+			name: "Rando", spriteSet: "goblin_green", pos: [ Math.floor(Math.random() * 32), Math.floor(Math.random() * 32) ], facing: Math.floor(Math.random() * 4), hp: 7, hpMax: 7, mana: 4, manaMax: 4, nextTurnTime: 69, turnbreaker: 0.873465,
 			buffs: {
 			},
 			abilities: {

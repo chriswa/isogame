@@ -19,6 +19,11 @@ export default class BaseAbility {
 		return `<h1>Error</h1><p>Abilities should override getTooltip</p>`
 	}
 	getCastable() {
-		return true
+		const actionAvailable = !this.model.turn.actionUsed
+		const manaRemaining = this.unit.mana || 0
+		return actionAvailable && manaRemaining >= this.getManaCost()
+	}
+	getManaCost() {
+		return 0 // override me!
 	}
 }

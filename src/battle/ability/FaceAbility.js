@@ -2,7 +2,7 @@ import BaseAbility from './base.js'
 
 export default class FaceAbility extends BaseAbility {
 	getImage() {
-		return 'stopwatch'
+		return 'cycle'
 	}
 	getTooltip() {
 		return `
@@ -11,7 +11,7 @@ export default class FaceAbility extends BaseAbility {
 		`
 	}
 	getCastable() {
-		return true // you can always end your own turn
+		return this.unitId === this.model.getActiveUnitId() // you can always end your own turn (but you can't pretend to end anyone else's)
 	}
 	determineTargetingController() {
 		return { targetingId: 'Face', abilityArgs: {} }

@@ -7,6 +7,7 @@ export default class WalkAbility extends BaseAbility {
 	}
 	getTooltip() {
 		return `
+			<div class="manaCost" style="color: yellow">${this.getAvailableDistance()} / ${this.unitArgs.distance} remaining</div>
 			<h1>Walk</h1>
 			<p>Move across the field.</p>
 		`

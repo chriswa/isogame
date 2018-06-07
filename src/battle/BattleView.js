@@ -9,6 +9,7 @@ import * as cameraTweener from '../gfx/cameraTweener.js'
 import TerrainTypes from './field/TerrainTypes.js'
 import Sprite from './../gfx/Sprite.js'
 import BattleGUI from '../gui/battle/BattleGUI.js'
+import billboardGlowOptions from '../gfx/billboardGlowOptions.js'
 
 class MousePick {
 	constructor(tileCoords, unitId, tileCoordsBehindUnit, screenPos) {
@@ -57,7 +58,7 @@ export default class BattleView {
 		for (let unitId in this.model.units) {
 			const unitModel = this.model.units[unitId]
 			const unitBillboard = this.bbgroup.acquire()
-			unitBillboard.pickId = parseInt(unitId)
+			unitBillboard.pickId = unitId
 
 			const unitSprite = new Sprite(unitBillboard, unitModel.spriteSet, unitModel.facing)
 			const tileData = this.fieldView.tileData[this.fieldView.size * unitModel.pos[1] + unitModel.pos[0]]
@@ -156,10 +157,12 @@ export default class BattleView {
 		return new MousePick(pickedTileCoords, pickedUnitId, pickedTileCoordsBehindUnit, screenPos)
 	}
 
+	resetUnitGlows() {
+		this.updateUnitGlows(unitId => { return billboardGlowOptions.NONE })
+	}
 	updateUnitGlows(callback) {
-		for (let unitIdStr in this.unitSprites) {
-			const unitSprite = this.unitSprites[unitIdStr]
-			const unitId = parseInt(unitIdStr)
+		for (let unitId in this.unitSprites) {
+			const unitSprite = this.unitSprites[unitId]
 			const glowValue = callback(unitId)
 			unitSprite.setGlow(glowValue)
 		}

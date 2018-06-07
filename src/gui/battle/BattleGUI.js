@@ -14,6 +14,7 @@ const vm = new Vue({
 			selectedAbilityId: undefined,
 			topText: "",
 			tooltipHtml: `
+				<div class="manaCost">30 mana</div>
 				<h1>Hello Tooltip!</h1>
 				<p>Testing 123</p>
 				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque interdum in tellus ac commodo. Duis sed ipsum et purus condimentum suscipit ac et enim. Suspendisse sit amet est ac enim pharetra ullamcorper. Mauris non maximus lectus. Aenean lacinia mauris mi, id pretium nisi fermentum id. Curabitur convallis risus quis facilisis porta. Integer quis eros est. Duis pretium risus vel lorem finibus imperdiet. Integer felis lorem, vehicula sed dapibus sit amet, congue sit amet tellus.</p>

@@ -6,14 +6,14 @@ export default class FireballAbility extends BaseAbility {
 	}
 	getTooltip() {
 		return `
+			<div class="manaCost">${this.getManaCost()} mana</div>
 			<h1>Fireball</h1>
-			<p style="color: cyan; font-size: 80%;">30 mana</p>
 			<p>Does damage in a small blast radius.</p>
 			<p>Does not require line-of-sight.</p>
 		`
 	}
-	getCastable() {
-		return true // TODO: check mana
+	getManaCost() {
+		return 2
 	}
 	determineTargetingController() {
 		const abilityArgs = {
@@ -36,6 +36,6 @@ export default class FireballAbility extends BaseAbility {
 	//	return false
 	//}
 	execute(target, addResultCallback) {
-		addResultCallback({ type: 'Spellcast', unitId: this.unitId, name: `target = ${target}`, target: target })
+		addResultCallback({ type: 'Spellcast', unitId: this.unitId, name: `Fireball`, manaCost: this.getManaCost(), target: target })
 	}
 }

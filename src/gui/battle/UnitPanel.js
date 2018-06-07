@@ -1,5 +1,6 @@
 import { battleModel } from './battleModel.js'
 import addCssRule from './../addCssRule.js'
+import UnitStats from './UnitStats.js'
 import AbilityButton from './AbilityButton.js'
 
 const COMPONENT_NAME = 'UnitPanel'
@@ -13,16 +14,19 @@ addCssRule(`.${COMPONENT_NAME} {
 	width: 100vw;
 }`)
 
-addCssRule(`.${COMPONENT_NAME} #unitName {
+addCssRule(`.${COMPONENT_NAME} .unitStats {
 	float: left;
 	margin-left: 120px;
+	margin-bottom: 5px;
+	margin-top: 5px;
+	height: calc(4vw);
 }`)
-addCssRule(`.${COMPONENT_NAME} #unitAbilities {
+addCssRule(`.${COMPONENT_NAME} .unitAbilities {
 	float: right;
 	margin: 5px;
 	text-align: right;
 }`)
-addCssRule(`.${COMPONENT_NAME} #unitPortrait {
+addCssRule(`.${COMPONENT_NAME} .unitPortrait {
 	position: absolute;
 	left: 0;
 	bottom: 0;
@@ -36,10 +40,14 @@ export default Vue.component(COMPONENT_NAME, {
 		}
 	},
 	template: `
-		<div class="${COMPONENT_NAME}" id="unitPanel">
-			<img id="unitPortrait" src="assets/sample_portrait.png">
-			<div id="unitName">{{ name }}</div>
-			<div id="unitAbilities">
+		<div class="${COMPONENT_NAME}">
+			<img class="unitPortrait" :src="portraitSrc">
+			<div class="unitStats">
+				<UnitStats
+					:unitId="selectedUnitId"
+				></UnitStats>
+			</div>
+			<div class="unitAbilities">
 				<AbilityButton
 					v-for="abilityId in abilityIds"
 					:key="abilityId"
@@ -55,9 +63,11 @@ export default Vue.component(COMPONENT_NAME, {
 		abilityIds() {
 			return [ ..._.range(1,10), 0 ]
 		},
-		name() {
-			const unit = battleModel.getUnitById(this.selectedUnitId)
-			return unit ? unit.name : 'UNDEFINED'
+		unit() {
+			return battleModel.getUnitById(this.selectedUnitId)
+		},
+		portraitSrc() {
+			return `assets/portraits/${this.unit.spriteSet}.png`
 		},
 	},
 })
