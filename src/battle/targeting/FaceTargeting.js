@@ -1,5 +1,5 @@
 import BaseTargetingController from './base.js'
-import { colourOptions as overlayColourOptions } from './../field/FieldOverlayRenderer.js'
+import { colourOptions as overlayColourOptions } from '../view/FieldOverlayRenderer.js'
 import * as v2 from '../../util/v2.js'
 import Dijkstra from './../../util/Dijkstra.js'
 import Grid from './../../util/Grid.js'

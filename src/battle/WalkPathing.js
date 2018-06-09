@@ -1,6 +1,6 @@
 import Grid from './../util/Grid.js'
 import Dijkstra from './../util/Dijkstra.js'
-import TerrainTypes from './field/TerrainTypes.js'
+import TerrainTypes from './TerrainTypes.js'
 
 export default class WalkPathing {
 	constructor(model, startCoords, maxDistance) {

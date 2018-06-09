@@ -1,5 +1,5 @@
 import * as v2 from '../util/v2.js'
-import FieldBuilder from './field/FieldBuilder.js'
+import FieldBuilder from './FieldBuilder.js'
 import Abilities from './Abilities.js'
 
 export default class BattleModel {

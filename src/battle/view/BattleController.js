@@ -1,8 +1,8 @@
 import BattleModel from '../BattleModel.js'
 import BattleView from './BattleView.js'
 import MouseController from './MouseController.js'
-import FieldBuilder from '../field/FieldBuilder.js'
-import FieldView from '../field/FieldView.js'
+import FieldBuilder from '../FieldBuilder.js'
+import FieldView from './FieldView.js'
 
 import ResultPlayingSubController from './ResultPlayingSubController.js'
 import TargetingSubController from './TargetingSubController.js'

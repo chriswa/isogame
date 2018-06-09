@@ -1,12 +1,12 @@
 import * as camera from '../../gfx/camera.js'
 import BillboardGroup from '../../gfx/BillboardGroup.js'
 import SpriteData from '../../../assets/sprites.js'
-import FieldView from '../field/FieldView.js' // imported for type hinting
+import FieldView from './FieldView.js' // imported for type hinting
 import * as input from '../../util/input.js'
 import * as TextTexture from '../../gfx/TextTexture.js'
 import BattleModel from '../BattleModel.js'
 import * as cameraTweener from '../../gfx/cameraTweener.js'
-import TerrainTypes from '../field/TerrainTypes.js'
+import TerrainTypes from '../TerrainTypes.js'
 import Sprite from '../../gfx/Sprite.js'
 import BattleGUI from '../../gui/battle/BattleGUI.js'
 import billboardGlowOptions from '../../gfx/billboardGlowOptions.js'

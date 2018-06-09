@@ -1,4 +1,4 @@
-import FBM from '../../util/FBM.js'
+import FBM from '../util/FBM.js'
 
 export default class FieldBuilder {
 	constructor(fieldDescriptor) {
