@@ -1,4 +1,4 @@
-import { BaseResultPlayer, BaseResultAnimation } from './base.js'
+import BaseResultAnimation from './base.js'
 import BattleModel from './../../BattleModel.js'
 
 export default class SpellcastAnimation extends BaseResultAnimation {

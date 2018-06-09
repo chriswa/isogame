@@ -7,18 +7,17 @@ import Grid from './../../util/Grid.js'
 export default class FaceTargetingController extends BaseTargetingController {
 	init() {
 	}
-	render() {
-		const mousePick = this.view.mousePick()
+	render(view, mousePick) {
 
-		this.updateUnitGlows() // caster is solid white
+		this.updateUnitGlows(view, undefined) // caster is solid white
 
 		//const mousePos = mousePick.getScreenPos()
 		const pickedCoords = mousePick.getTileCoords(true)
 
 		const pickedFacing = v2.getFacing(this.casterCoords, pickedCoords)
-		this.view.unitSprites[this.castingUnitId].setFacing(pickedFacing)
+		view.unitSprites[this.castingUnitId].setFacing(pickedFacing)
 
-		this.view.fieldView.updateOverlay(testCoords => {
+		view.fieldView.updateOverlay(testCoords => {
 			let colour = overlayColourOptions.NONE
 			
 			const testDistanceFromCaster = v2.manhattan(this.casterCoords, testCoords)

@@ -1,8 +1,8 @@
-import { EventSubscriber } from '../util/domUtils.js'
-import * as cameraTweener from '../gfx/cameraTweener.js'
-import * as input from '../util/input.js'
-import gl from '../gfx/gl.js'
-import * as camera from '../gfx/camera.js'
+import { EventSubscriber } from '../../util/domUtils.js'
+import * as cameraTweener from '../../gfx/cameraTweener.js'
+import * as input from '../../util/input.js'
+import gl from '../../gfx/gl.js'
+import * as camera from '../../gfx/camera.js'
 
 const dragThreshold = 4 // pixels
 

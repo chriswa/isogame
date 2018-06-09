@@ -10,13 +10,12 @@ export default class AOETargetingController extends BaseTargetingController {
 		this.maxTargetDistance = this.abilityArgs.maxTargetDistance
 		this.aoeRange = this.abilityArgs.aoeRange
 	}
-	render() {
-		const mousePick = this.view.mousePick()
+	render(view, mousePick) {
 
-		this.updateUnitGlows() // caster is solid white, mouseover unit is flashing white-black
+		this.updateUnitGlows(view, undefined) // caster is solid white, mouseover unit is flashing white-black
 
 		const pickedCoords = mousePick.getTileCoords(true)
-		this.view.fieldView.updateOverlay(testCoords => {
+		view.fieldView.updateOverlay(testCoords => {
 			//if (!pickedCoords) { return 0 }
 			let colour = overlayColourOptions.NONE
 			const casterDistance = v2.manhattan(this.casterCoords, testCoords)

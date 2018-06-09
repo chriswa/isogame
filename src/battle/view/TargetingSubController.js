@@ -1,6 +1,6 @@
 import BaseSubController from './BaseSubController.js'
-import TargetingControllers from './TargetingControllers.js'
-import BattleGUI from '../gui/battle/BattleGUI.js'
+import TargetingControllers from '../TargetingControllers.js'
+import BattleGUI from '../../gui/battle/BattleGUI.js'
 
 export default class TargetingSubController extends BaseSubController {
 	constructor(battleController) {
@@ -13,7 +13,8 @@ export default class TargetingSubController extends BaseSubController {
 	}
 	render() {
 		if (this.activeTargetingUI) {
-			this.activeTargetingUI.render()
+			const mousePick = this.view.mousePick()
+			this.activeTargetingUI.render(this.view, mousePick)
 		}
 	}
 	onStateEnter() {

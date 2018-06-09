@@ -1,7 +1,7 @@
 import * as input from './util/input.js'
 import * as gfx from './gfx/gfx.js'
 import * as debugCanvas from './gfx/debugCanvas.js'
-import BattleController from './battle/BattleController.js'
+import BattleController from './battle/view/BattleController.js'
 import LocalAuthority from './LocalAuthority.js'
 
 

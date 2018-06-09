@@ -1,7 +1,6 @@
 import BattleModel from './../../BattleModel.js'
-import BattleView from './../../BattleView.js'
 
-export class BaseResultAnimation {
+export default class BaseResultAnimation {
 	constructor(model, view, result) {
 		/** @type BattleModel */
 		this.model = model
@@ -39,15 +38,5 @@ export class BaseResultAnimation {
 	}
 	onComplete() {
 		this.onPartial(1)
-	}
-}
-
-export class BaseResultPlayer {
-	constructor() {
-		throw new Error(`ResultPlayer classes are intended to be used staticly - do not instantiate!`)
-	}
-	static startAnimation(model, view, result) {
-		const animationClass = this.getAnimationClass()
-		return new animationClass(model, view, result)
 	}
 }

@@ -1,13 +1,10 @@
 import BattleModel from '../BattleModel.js'
-import BattleView from '../BattleView.js'
 import billboardGlowOptions from '../../gfx/billboardGlowOptions.js'
 
 export default class BaseTargetingController {
 	constructor(model, view, castingUnitId, abilityArgs = {}) {
 		/** @type BattleModel */
 		this.model = model
-		/** @type BattleView */
-		this.view = view
 		this.castingUnitId = castingUnitId
 		this.abilityArgs = abilityArgs
 
@@ -22,7 +19,7 @@ export default class BaseTargetingController {
 	}
 	update(dt) {
 	}
-	render() {
+	render(view) {
 	}
 
 	onClick(mousePick, decisionCallback) {
@@ -31,8 +28,8 @@ export default class BaseTargetingController {
 	isCasterActiveAndOwned() {
 		return this.model.isItMyTurn() && this.model.getActiveUnitId() == this.castingUnitId
 	}
-	updateUnitGlows(targetUnitId) {
-		this.view.updateUnitGlows(unitId => {
+	updateUnitGlows(view, targetUnitId) {
+		view.updateUnitGlows(unitId => {
 			if (unitId === this.castingUnitId) { return billboardGlowOptions.SOLID_WHITE }
 			else if (unitId === targetUnitId) { return billboardGlowOptions.PULSE_WHITE_BLACK }
 			else { return billboardGlowOptions.NONE }

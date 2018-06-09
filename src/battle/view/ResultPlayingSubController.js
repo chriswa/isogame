@@ -1,6 +1,6 @@
 import BaseSubController from './BaseSubController.js'
-import ResultAppliers from './ResultAppliers.js'
-import ResultAnimations from './ResultAnimations.js'
+import ResultAppliers from '../ResultAppliers.js'
+import ResultAnimations from '../ResultAnimations.js'
 
 export default class ResultPlayingSubController extends BaseSubController {
 	constructor(battleController) {

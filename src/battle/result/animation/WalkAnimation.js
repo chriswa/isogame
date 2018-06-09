@@ -1,4 +1,4 @@
-import { BaseResultPlayer, BaseResultAnimation } from './base.js'
+import BaseResultAnimation from './base.js'
 import BattleModel from './../../BattleModel.js'
 import * as v2 from './../../../util/v2.js'
 

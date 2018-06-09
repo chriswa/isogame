@@ -34,7 +34,6 @@ export default Vue.component(COMPONENT_NAME, {
 			return battleModel.getUnitById(this.unitId)
 		},
 		isActiveUnit() {
-			console.log(this.unitId, battleModel.getActiveUnitId(), this.unitId === battleModel.getActiveUnitId())
 			return this.unitId === battleModel.getActiveUnitId()
 		},
 		nextTurnDelta() {

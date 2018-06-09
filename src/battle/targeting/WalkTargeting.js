@@ -8,15 +8,14 @@ export default class WalkTargetingController extends BaseTargetingController {
 		this.distance = this.abilityArgs.distance
 		this.walkPathing = new WalkPathing(this.model, this.casterCoords, this.distance)
 	}
-	render() {
-		const mousePick = this.view.mousePick()
+	render(view, mousePick) {
 
-		this.updateUnitGlows(mousePick.getUnitId()) // caster is solid white
+		this.updateUnitGlows(view, mousePick.getUnitId()) // caster is solid white
 
 		const pickedCoords = mousePick.getTileCoords()
 		const appealingPath = this.walkPathing.findAppealingPath(pickedCoords)
 
-		this.view.fieldView.updateOverlay(testCoords => {
+		view.fieldView.updateOverlay(testCoords => {
 
 			// targeting range
 			if (!this.walkPathing.isValidTarget(testCoords)) {
