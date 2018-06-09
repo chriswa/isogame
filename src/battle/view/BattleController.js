@@ -18,11 +18,10 @@ import BattleGUI from '../../gui/battle/BattleGUI.js'
 		BattleController.currentSubController : BaseSubController
 */
 
-export default class BattleController {
+export default class BattleController extends EventEmitter3 {
 
-	constructor(battleBlueprint, myTeamId, decisionCallback) {
-
-		this.decisionCallback = decisionCallback
+	constructor(battleBlueprint, myTeamId) {
+		super()
 
 		// convert the fieldDescriptor (e.g. { type: "randomwoods", seed: 123 } into a view and model
 		const fieldBuilder = new FieldBuilder(battleBlueprint.fieldDescriptor)
@@ -73,7 +72,7 @@ export default class BattleController {
 	}
 
 	onSendDecision(abilityId, target) { // called by TargetingSubController
-		this.decisionCallback(abilityId, target)
+		this.emit('decision', { abilityId, target })
 		this.view.setWaiting(true)
 	}
 

@@ -1,20 +1,22 @@
-import * as sampleBattleGenerator from './battle/sampleBattleGenerator.js'
 import AIBattleSimulator from './battle/AIBattleSimulator.js'
 import BattleModel from './battle/BattleModel.js'
 
-export default class LocalAuthority {
-	constructor(callbacks) {
-		this.callbacks = callbacks
+export default class LocalBattleAuthority extends EventEmitter3 {
+	constructor() {
+		super()
+		//this.eventEmitter = new EventEmitter3()
 
 		this.resultsQueue = []
-
-		const battleBlueprint = sampleBattleGenerator.build()
-		this.model = BattleModel.createFromBlueprint(_.cloneDeep(battleBlueprint))
+		this.battleBlueprint = undefined
+		this.model = undefined
+		this.simulator = undefined
+	}
+	start(battleBlueprint) {
+		this.battleBlueprint = _.cloneDeep(battleBlueprint)
+		this.model = BattleModel.createFromBlueprint(_.cloneDeep(this.battleBlueprint))
 		this.simulator = new AIBattleSimulator(this.model, this.resultsQueue)
 
-		// tell caller to start the battle
-		this.callbacks.onBattleStart(_.cloneDeep(battleBlueprint))
-
+		this.emit('start', _.cloneDeep(this.battleBlueprint))
 		this.advanceBattle()
 	}
 	advanceBattle() {
@@ -28,7 +30,7 @@ export default class LocalAuthority {
 	}
 	sendQueuedResults() {
 		while (this.resultsQueue.length) {
-			this.callbacks.onResult(this.resultsQueue.shift())
+			this.emit('result', this.resultsQueue.shift())
 		}
 	}
 }
