@@ -8,7 +8,13 @@
   },
   "nodemonConfig": {
     "ignore": [
-      "server-db/*"
+      "server-db/*",
+      "src/client/*",
+      "src/gfx/*",
+      "src/gui/*",
+      "src/battle/view/*",
+      "src/battle/targeting/*",
+      "src/battle/result/animation/*"
     ]
   },
   "author": "",

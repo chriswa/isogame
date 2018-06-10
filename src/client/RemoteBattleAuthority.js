@@ -10,14 +10,7 @@ export default class RemoteBattleAuthority {
 
 		this.model = BattleModel.createFromBlueprint(_.cloneDeep(this.battleBlueprint))
 
-		this.battleController = new BattleController(this.battleBlueprint, this.myTeamId)
-
-		if (previousResults) {
-			// TODO: don't play the animations for these!
-			_.each(previousResults, result => {
-				this.battleController.addResult(result)
-			})
-		}
+		this.battleController = new BattleController(this.battleBlueprint, this.myTeamId, previousResults)
 
 		this.battleController.on('decision', ({ abilityId, target }) => {
 			onDecisionCallback(abilityId, target)

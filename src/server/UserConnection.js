@@ -53,7 +53,7 @@ export default class UserConnection {
 		})
 
 		this.wsConnection.on('message', (messageStr) => {
-			console.log(`${this.userAccount.username} received a message from client: ${messageStr}`)
+			//console.log(`(UserConnection) ${this.userAccount.username} received a message from client: ${messageStr}`)
 			const message = JSON.parse(messageStr)
 
 			const [type, payload] = message
@@ -63,7 +63,7 @@ export default class UserConnection {
 				handler(this, payload)
 			}
 			else {
-				console.error(`Error: Unknown ws message type from ${this.userAccount.username}!`)
+				console.error(`(UserConnection) Error: Unknown ws message type "${type}" from ${this.userAccount.username}!`)
 			}
 		})
 	}

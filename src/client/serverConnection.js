@@ -22,12 +22,13 @@ export default new class ServerConnection extends EventEmitter3 {
 		}
 
 		openingSocket.onclose = () => {
-			console.log('WebSocket Closed')
+			console.log('(serverConnection) WebSocket closed! Attempting reconnection...')
 			this.socket = undefined
+			this.connect()
 		}
 
 		openingSocket.onerror = (error) => {
-			console.log('WebSocket Error', error)
+			console.log('(serverConnection) WebSocket error', error)
 		}
 
 		openingSocket.onmessage = (e) => {
@@ -36,6 +37,10 @@ export default new class ServerConnection extends EventEmitter3 {
 			//console.log(messageStr)
 			const [type, payload] = JSON.parse(messageStr)
 			this.emit(type, payload)
+
+			if (this.listenerCount(type) === 0) {
+				console.warn(`(serverConnection) message type "${type}" has no listener!`)
+			}
 		}
 	}
 	send(type, payload) {

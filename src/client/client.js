@@ -57,7 +57,9 @@ function startLocalBattle() {
 window.TEST.startLocal = () => {
 	startLocalBattle()
 }
-console.log(`window.TEST functions available: ` + _.keys(window.TEST).join(', '))
+setTimeout(() => {
+	console.log(`window.TEST functions available: ` + _.map(_.keys(window.TEST), k => `TEST.${k}()`).join(', '))
+}, 500)
 
 
 

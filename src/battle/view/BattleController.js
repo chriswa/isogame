@@ -3,6 +3,7 @@ import BattleView from './BattleView.js'
 import MouseController from './MouseController.js'
 import FieldBuilder from '../FieldBuilder.js'
 import FieldView from './FieldView.js'
+import ResultAppliers from '../ResultAppliers.js'
 
 import ResultPlayingSubController from './ResultPlayingSubController.js'
 import TargetingSubController from './TargetingSubController.js'
@@ -20,7 +21,7 @@ import BattleGUI from '../../gui/battle/BattleGUI.js'
 
 export default class BattleController extends EventEmitter3 {
 
-	constructor(battleBlueprint, myTeamId) {
+	constructor(battleBlueprint, myTeamId, previousResults) {
 		super()
 
 		// convert the fieldDescriptor (e.g. { type: "randomwoods", seed: 123 } into a view and model
@@ -29,6 +30,14 @@ export default class BattleController extends EventEmitter3 {
 
 		// Battle Model
 		this.model = BattleModel.createFromBlueprint(battleBlueprint, myTeamId)
+
+		// fast forward previousResults
+		if (previousResults) {
+			_.each(previousResults, result => {
+				const resultApplier = ResultAppliers[result.type]
+				resultApplier(this.model, result)
+			})
+		}
 
 		const onSelectAbility = (abilityId) => {
 			this.currentSubController.onSelectAbility(abilityId)

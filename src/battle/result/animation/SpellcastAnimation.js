@@ -4,7 +4,7 @@ import BattleModel from './../../BattleModel.js'
 export default class SpellcastAnimation extends BaseResultAnimation {
 	init() {
 		//console.log(`SpellcastAnimation.init`, this.result)
-		this.duration = 1000
+		this.duration = 500
 		this.view.unitSprites[ this.result.unitId ].startAnimation('CAST')
 		this.view.setTopText(JSON.stringify(this.result))
 		this.view.centerOnUnitId(this.result.unitId)

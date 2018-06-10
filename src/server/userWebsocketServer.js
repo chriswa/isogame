@@ -15,18 +15,18 @@ const userAuthenticator = new UserAuthenticator(wsServer, newUserData)
 userAuthenticator.on('authenticated', ({ wsConnection, userAccount }) => {
 	const previousConnection = userConnections[userAccount.username]
 	if (previousConnection) {
-		console.error(`user ${userAccount.username} is already connected! terminating previous connection`)
+		console.error(chalk.cyan(`(userWebsocketServer) user ${userAccount.username} is already connected! terminating previous connection`))
 		previousConnection.send('userConnectedElsewhere') // tell previous client not to try to automatically reconnect!
 		previousConnection.disconnect()
 	}
 
-	console.log(chalk.cyan(`(userWebsocketServer) connected: '${userAccount.username}'`))
-
 	userConnections[userAccount.username] = new UserConnection(wsConnection, userAccount)
 
+	console.log(chalk.cyan(`(userWebsocketServer) connected: '${userAccount.username}' - now ${_.size(userConnections)} user(s) connected`))
+	
 	wsConnection.on('terminate', () => { // custom event emitted by websocketServer.js when a heartbeat fails, causing connection termination, or the connection is closed normally
-		console.log(chalk.cyan(`(userWebsocketServer) disconnected: '${userAccount.username}'`))
 		delete userConnections[userAccount.username]
+		console.log(chalk.cyan(`(userWebsocketServer) disconnected: '${userAccount.username}' - now ${_.size(userConnections)} user(s) connected`))
 		// n.b. UserConnection also listens for this event
 	})
 })

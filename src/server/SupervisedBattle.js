@@ -17,7 +17,6 @@ export default class SupervisedBattle {
 		/** @type {Array<UserConnection>} */
 		this.userConnections = _.fromPairs(_.map(userConnections, (userConnection) => [ userConnection.getUsername(), userConnection ])) // { 'username0': uc0 }
 		this.teamIds = _.fromPairs(_.map(userConnections, (userConnection, index) => [userConnection.getUsername(), index]))
-		console.log(this.teamIds)
 		this.onBattleCompleteCallback = onBattleCompleteCallback
 
 		this.completeBattleLog = [] // [{type:'result',payload:{}},{type:'decision',payload:{abilityId, target}}]
@@ -68,7 +67,7 @@ export default class SupervisedBattle {
 		userConnection.onSupervisedBattleStart(this, { battleBlueprint: this.battleBlueprint, myTeamId, previousResults })
 	}
 	advanceSimAndSendResults() {
-		console.log(`SupervisedBattle: advanceSimAndSendResults`)
+		//console.log(`(SupervisedBattle) advanceSimAndSendResults`)
 		this.simulator.advanceWithAI()
 		this.sendQueuedResults()
 		const victoryState = this.simulator.getVictoryState()
