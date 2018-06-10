@@ -16,6 +16,8 @@ export default class SupervisedBattle {
 		this.battleDescriptor = battleDescriptor
 		/** @type {Array<UserConnection>} */
 		this.userConnections = _.fromPairs(_.map(userConnections, (userConnection) => [ userConnection.getUsername(), userConnection ])) // { 'username0': uc0 }
+		this.teamIds = _.fromPairs(_.map(userConnections, (userConnection, index) => [userConnection.getUsername(), index]))
+		console.log(this.teamIds)
 		this.onBattleCompleteCallback = onBattleCompleteCallback
 
 		this.completeBattleLog = [] // [{type:'result',payload:{}},{type:'decision',payload:{abilityId, target}}]
@@ -29,7 +31,8 @@ export default class SupervisedBattle {
 		this.simulator = new AIBattleSimulator(this.model, this.resultsQueue)
 
 		_.each(this.userConnections, (userConnection) => {
-			userConnection.onSupervisedBattleStart(this, { battleBlueprint: this.battleBlueprint })
+			const myTeamId = this.teamIds[userConnection.getUsername()]
+			userConnection.onSupervisedBattleStart(this, { battleBlueprint: this.battleBlueprint, myTeamId })
 		})
 
 		this.advanceSimAndSendResults()
@@ -55,9 +58,17 @@ export default class SupervisedBattle {
 	}
 	reconnectUser(userConnection) {
 		this.userConnections[userConnection.getUsername()] = userConnection
-		userConnection.onSupervisedBattleStart(this, { battleBlueprint: this.battleBlueprint })
+		const myTeamId = this.teamIds[userConnection.getUsername()]
+		const previousResults = []
+		_.each(this.completeBattleLog, ({ type, payload }) => {
+			if (type === 'result') {
+				previousResults.push(payload)
+			}
+		})
+		userConnection.onSupervisedBattleStart(this, { battleBlueprint: this.battleBlueprint, myTeamId, previousResults })
 	}
 	advanceSimAndSendResults() {
+		console.log(`SupervisedBattle: advanceSimAndSendResults`)
 		this.simulator.advanceWithAI()
 		this.sendQueuedResults()
 		const victoryState = this.simulator.getVictoryState()

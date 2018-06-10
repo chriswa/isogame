@@ -49,10 +49,7 @@ export default class UserConnection {
 		}
 
 		this.wsConnection.on('terminate', () => { // custom event emitted by websocketServer.js when a heartbeat fails, causing connection termination, or the connection is closed normally
-			matchMaker.unsubscribeAll(this)
-			if (this.supervisedBattle) {
-				this.supervisedBattle.onUserDisconnected(this)
-			}
+			this.onDisconnect()
 		})
 
 		this.wsConnection.on('message', (messageStr) => {
@@ -69,6 +66,16 @@ export default class UserConnection {
 				console.error(`Error: Unknown ws message type from ${this.userAccount.username}!`)
 			}
 		})
+	}
+	disconnect() {
+		this.wsConnection.terminate()
+		this.onDisconnect()
+	}
+	onDisconnect() {
+		matchMaker.unsubscribeAll(this)
+		if (this.supervisedBattle) {
+			this.supervisedBattle.onUserDisconnected(this)
+		}
 	}
 	handleMessageStartChallenge(payload) { // called from messageHandlers['startChallenge']
 		if (this.supervisedBattle) {

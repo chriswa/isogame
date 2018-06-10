@@ -13,10 +13,11 @@ const newUserData = { version, campaign: 0, elo: 1500, }
 const userAuthenticator = new UserAuthenticator(wsServer, newUserData)
 
 userAuthenticator.on('authenticated', ({ wsConnection, userAccount }) => {
-	if (userConnections[userAccount.username]) {
-		console.error(`user ${userAccount.username} is already connected! aborting`)
-		wsConnection.close()
-		return
+	const previousConnection = userConnections[userAccount.username]
+	if (previousConnection) {
+		console.error(`user ${userAccount.username} is already connected! terminating previous connection`)
+		previousConnection.send('userConnectedElsewhere') // tell previous client not to try to automatically reconnect!
+		previousConnection.disconnect()
 	}
 
 	console.log(chalk.cyan(`(userWebsocketServer) connected: '${userAccount.username}'`))
