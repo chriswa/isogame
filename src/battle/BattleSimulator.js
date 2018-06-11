@@ -10,18 +10,43 @@ import Abilities from './Abilities.js'
 //     ;;;
 //   }
 
+class ExecutionHelper {
+	constructor(model, applyResultCallback) {
+		this.model = model
+		this.applyResultCallback = applyResultCallback
+	}
+	result(type, payload) {
+		const result = { type, ...payload }
+		this.applyResultCallback(result)
+	}
+	hurt(unitId, damageAmount, damageType) {
+		// TODO: damage resistances (specific to damageTypes)
+		const unit = this.model.getUnitById(unitId)
+		this.result('Hurt', { unitId, damageAmount, damageType })
+		if (unit.hp <= 0) {
+			this.result('Death', { unitId })
+		}
+	}
+}
+
 export default class BattleSimulator {
 	constructor(model, resultsQueue) {
 		this.model = model
 		this.resultsQueue = resultsQueue
 		this.victoryState = undefined
+		this.executionHelper = new ExecutionHelper(this.model, (result) => {
+			this.applyResult(result)
+		})
 	}
 	getVictoryState() {
 		return this.victoryState
 	}
 	applyResult(result) { // called from Ability.execute (and this.advance)
 		// check if this result should be cancelled/ignored (e.g. if the battle is already victorious)
-		if (this.getVictoryState()) { console.log(`ignoring applyResult added after the battle is victorious`); return }
+		if (this.getVictoryState()) {
+			console.log(`ignoring applyResult added after the battle is victorious`, result)
+			return
+		}
 		// immediately update the model with the result
 		const resultApplier = ResultAppliers[result.type]
 		resultApplier(this.model, result)
@@ -33,9 +58,7 @@ export default class BattleSimulator {
 		//if (this.model.getActiveUnit().teamId !== requestorTeamId) { console.log(`ignoring decision made by incorrect team`) }
 		const unitId = this.model.getActiveUnitId()
 		const ability = this.model.getAbilityById(unitId, abilityId)
-		ability.execute(target, (result) => {
-			this.applyResult(result)
-		})
+		ability.execute(target, this.executionHelper) // n.b. calls this.applyResult()
 	}
 
 
@@ -43,7 +66,15 @@ export default class BattleSimulator {
 
 	_checkForVictory() {
 		// TODO:
-		const victoryState = undefined
+		let victoryState = undefined
+		const teamCount = _.countBy(this.model.units, unit => unit.teamId) // e.g. { 0: 4, 1: 3 }
+		const activeTeams = _.size(teamCount)
+		if (activeTeams === 0) { // no one is left alive!
+			victoryState = 'UNKNOWN_VICTORY'
+		}
+		else if (activeTeams === 1) { // only one team is still alive
+			victoryState = 'UNKNOWN_VICTORY'
+		}
 		return victoryState
 	}
 	_executeAndTapNextUntappedActiveUnitEvent(stage) {
@@ -84,7 +115,7 @@ export default class BattleSimulator {
 			// check for victory (or defeat)
 			this.victoryState = this._checkForVictory()
 			if (this.victoryState) {
-				this.applyResult({ type: 'Victory', victoryState: this.victoryState })
+				this.applyResult({ type: 'Victory', victoryState: this.victoryState }) // FIXME: this won't get applied because "ignoring applyResult added after the battle is victorious"
 				return // caller should check battleSimulator.isBattleComplete() to get victoryState
 			}
 

@@ -72,6 +72,7 @@ export default class SupervisedBattle {
 		this.sendQueuedResults()
 		const victoryState = this.simulator.getVictoryState()
 		if (victoryState) {
+			console.log(`(SupervisedBattle) victory state! ${victoryState}`)
 			this.terminate()
 		}
 	}

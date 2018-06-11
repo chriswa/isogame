@@ -5,6 +5,9 @@ import Spellcast from './result/animation/SpellcastAnimation.js'
 import Walk from './result/animation/WalkAnimation.js'
 import Face from './result/animation/FaceAnimation.js'
 
+import Hurt from './result/animation/HurtAnimation.js'
+import Death from './result/animation/DeathAnimation.js'
+
 export default {
 	Turn,
 	Victory,
@@ -12,4 +15,7 @@ export default {
 	Spellcast,
 	Walk,
 	Face,
+
+	Hurt,
+	Death,
 }

@@ -1,4 +1,5 @@
-import BattleModel from './../../BattleModel.js'
+import BattleModel from '../../BattleModel.js'
+import BattleView from '../../view/BattleView.js'
 
 export default class BaseResultAnimation {
 	constructor(model, view, result) {
@@ -10,7 +11,6 @@ export default class BaseResultAnimation {
 
 		this.t = 0
 		this.duration = 0
-
 
 		this.init()
 	}

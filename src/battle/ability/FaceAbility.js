@@ -1,6 +1,9 @@
 import BaseAbility from './base.js'
 
 export default class FaceAbility extends BaseAbility {
+	calcAbilityArgs() {
+		return {}
+	}
 	getImage() {
 		return 'cycle'
 	}
@@ -16,19 +19,7 @@ export default class FaceAbility extends BaseAbility {
 	determineTargetingController() {
 		return { targetingId: 'Face', abilityArgs: {} }
 	}
-	//isCastable(model, casterUnitId, abilityId) {
-	//	return true
-	//}
-	//getTooltipText(model, casterUnitId, abilityId) {
-	//	return "Oops, this Ability did not override getTooltipText"
-	//}
-	//getTargetingUIId(model, casterUnitId, abilityId) {
-	//	return 'aoe'
-	//}
-	//isTargetValid(model, casterUnitId, abilityId, target) {
-	//	return false
-	//}
-	execute(target, addResultCallback) {
-		addResultCallback({ type: 'Face', unitId: this.unitId, target: target })
+	execute(target, executionHelper) {
+		executionHelper.result('Face', { unitId: this.unitId, target: target })
 	}
 }

@@ -62,5 +62,16 @@ export default class BattleModel {
 		}
 		return undefined
 	}
+	findUnitIdsInRange(pos, range) {
+		const retval = []
+		if (!pos) { return retval }
+		for (let unitId in this.units) {
+			const unit = this.units[unitId]
+			if (v2.manhattan(pos, unit.pos) <= range) {
+				retval.push(unitId)
+			}
+		}
+		return retval
+	}
 
 }

@@ -220,7 +220,7 @@ export default class BillboardGroup {
 		return billboard
 	}
 	release(doomedBillboard) {
-		console.warn(`untested code!`)
+		if (doomedBillboard.dataOffset === undefined) { throw new Error(`BillboardGroup.release: not a billboard!`) }
 		this.count -= 1
 		if (doomedBillboard.arrayIndex !== this.count) {
 			const shuffledBillboard = this.list[this.count]

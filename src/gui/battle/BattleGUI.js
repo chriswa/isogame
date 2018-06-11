@@ -10,6 +10,7 @@ const vm = new Vue({
 	data() {
 		return {
 			battleModelHack: 0,
+			battleModelUpdateCounter: 0,
 			selectedUnitId: undefined,
 			selectedAbilityId: undefined,
 			topText: "",
@@ -24,7 +25,7 @@ const vm = new Vue({
 	},
 	template: `
 		<div class="guiRoot">
-			<div v-if="battleModel">
+			<div v-if="battleModel" :key="battleModelUpdateCounter">
 				<TopText
 					:text="topText"
 				></TopText>
@@ -52,6 +53,9 @@ const vm = new Vue({
 			battleControllerOnSelectAbility = battleControllerOnSelectAbility_
 			setBattleModel(battleModel_)
 			this.battleModelHack += 1 // force update
+		},
+		forceUpdateAll() {
+			this.battleModelUpdateCounter += 1
 		},
 		setTopText(text) {
 			this.topText = text

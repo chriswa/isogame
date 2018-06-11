@@ -85,6 +85,12 @@ export default class BattleView {
 		}
 	}
 
+	removeUnitSprite(unitId) {
+		const unitSprite = this.unitSprites[unitId]
+		this.bbgroup.release(unitSprite.billboard)
+		delete this.unitSprites[unitId]
+	}
+
 	getYForTileCenter([x, z]) {
 		const tileData = this.fieldView.tileData[this.fieldView.size * z + x]
 		return tileData.y

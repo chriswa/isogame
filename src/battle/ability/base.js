@@ -8,6 +8,10 @@ export default class BaseAbility {
 		this.abilityId = abilityId
 		this.unit = this.model.getUnitById(this.unitId)
 		this.unitArgs = this.model.getUnitAbilityArgsById(this.unitId, this.abilityId)
+		this.abilityArgs = this.calcAbilityArgs()
+	}
+	calcAbilityArgs() {
+		return {} // override me!
 	}
 	getUnit() {
 		return this.model.getUnitById(this.unitId)

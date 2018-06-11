@@ -100,6 +100,9 @@ export default class UserConnection {
 		matchMaker.unsubscribeAll(this)
 		this.send('startSupervisedBattle', payload)
 	}
+	onSupervisedBattleComplete(victoryState) {
+		this.send('battleComplete', { victoryState })
+	}
 	onSupervisedBattleResults(results) {
 		this.send('results', results)
 	}

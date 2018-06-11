@@ -1,5 +1,5 @@
-import BattleModel from '../BattleModel.js'
-import billboardGlowOptions from '../../gfx/billboardGlowOptions.js'
+import BattleModel from '../../BattleModel.js'
+import billboardGlowOptions from '../../../gfx/billboardGlowOptions.js'
 
 export default class BaseTargetingController {
 	constructor(model, view, castingUnitId, abilityArgs = {}) {

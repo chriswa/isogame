@@ -1,6 +1,14 @@
 import BaseAbility from './base.js'
+import DamageTypes from '../DamageTypes.js'
 
 export default class FireballAbility extends BaseAbility {
+	calcAbilityArgs() {
+		return {
+			minTargetDistance: 1,
+			maxTargetDistance: this.unitArgs.distance,
+			aoeRange: 1,
+		}
+	}
 	getImage() {
 		return 'fireball'
 	}
@@ -16,26 +24,13 @@ export default class FireballAbility extends BaseAbility {
 		return 2
 	}
 	determineTargetingController() {
-		const abilityArgs = {
-			minTargetDistance: 1,
-			maxTargetDistance: this.unitArgs.distance,
-			aoeRange: 1,
-		}
-		return { targetingId: 'AOE', abilityArgs }
+		return { targetingId: 'AOE', abilityArgs: this.abilityArgs }
 	}
-	//isCastable(model, casterUnitId, abilityId) {
-	//	return true
-	//}
-	//getTooltipText(model, casterUnitId, abilityId) {
-	//	return "Oops, this Ability did not override getTooltipText"
-	//}
-	//getTargetingUIId(model, casterUnitId, abilityId) {
-	//	return 'aoe'
-	//}
-	//isTargetValid(model, casterUnitId, abilityId, target) {
-	//	return false
-	//}
-	execute(target, addResultCallback) {
-		addResultCallback({ type: 'Spellcast', unitId: this.unitId, name: `Fireball`, manaCost: this.getManaCost(), target: target })
+	execute(target, executionHelper) {
+		executionHelper.result('Spellcast', { unitId: this.unitId, name: `Fireball`, manaCost: this.getManaCost(), target: target })
+		const unitIdsInRange = this.model.findUnitIdsInRange(target, this.abilityArgs.aoeRange)
+		_.each(unitIdsInRange, unitId => {
+			executionHelper.hurt(unitId, 10, 'fire')
+		})
 	}
 }

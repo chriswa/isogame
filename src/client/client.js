@@ -32,6 +32,10 @@ serverConnection.on('startSupervisedBattle', (payload) => {
 serverConnection.on('results', (payload) => {
 	battleAuthority.addResults(payload) // assuming battleAuthority is a RemoteBattleAuthority!
 })
+serverConnection.on('battleComplete', (payload) => {
+	console.log(`(client) supervised battle complete: ${payload.victoryState}`)
+	battleAuthority = undefined // assuming battleAuthority is the RemoteBattleAuthority!
+})
 serverConnection.setLoginPayload({
 	username: 'bob',
 	password: 'pass',
@@ -52,6 +56,10 @@ window.TEST.sendDecision = () => {
 function startLocalBattle() {
 	const battleBlueprint = sampleBattleGenerator.build()
 	battleAuthority = new LocalBattleAuthority(battleBlueprint)
+	battleAuthority.on('battleComplete', victoryState => {
+		console.log(`(client) local battle complete: ${victoryState}`)
+		battleAuthority = undefined
+	})
 }
 
 window.TEST.startLocal = () => {

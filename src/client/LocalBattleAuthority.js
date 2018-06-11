@@ -2,8 +2,9 @@ import AIBattleSimulator from '../battle/AIBattleSimulator.js'
 import BattleModel from '../battle/BattleModel.js'
 import BattleController from '../battle/view/BattleController.js'
 
-export default class LocalBattleAuthority {
+export default class LocalBattleAuthority extends EventEmitter3 {
 	constructor(battleBlueprint) {
+		super()
 
 		this.resultsQueue = []
 
@@ -26,6 +27,11 @@ export default class LocalBattleAuthority {
 	advanceBattle() {
 		this.simulator.advanceWithAI()
 		this.sendQueuedResults()
+		const victoryState = this.simulator.getVictoryState()
+		if (victoryState) {
+			console.log(`(LocalBattleAuthority) victory state! ${victoryState}`)
+			this.emit('battleComplete', victoryState)
+		}
 	}
 	sendQueuedResults() {
 		while (this.resultsQueue.length) {

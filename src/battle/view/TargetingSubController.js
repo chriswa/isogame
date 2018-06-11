@@ -1,5 +1,5 @@
 import BaseSubController from './BaseSubController.js'
-import TargetingControllers from '../TargetingControllers.js'
+import TargetingControllers from './TargetingControllers.js'
 import BattleGUI from '../../gui/battle/BattleGUI.js'
 
 export default class TargetingSubController extends BaseSubController {
@@ -19,6 +19,7 @@ export default class TargetingSubController extends BaseSubController {
 	}
 	onStateEnter() {
 		this.selectUnit(undefined)
+		BattleGUI.forceUpdateAll()
 		this.battleController.mouseController.activate()
 		this.view.showActiveUnitIndicator(this.model.getActiveUnitId())
 	}

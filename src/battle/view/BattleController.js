@@ -86,6 +86,7 @@ export default class BattleController extends EventEmitter3 {
 	}
 
 	onResultsComplete() { // called by ResultPlayingSubController
+		// TODO: check for victory, and switch to a new Victory subcontroller if so!
 		this.setSubController(this.allSubControllers.TARGETING)
 	}
 
