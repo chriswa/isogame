@@ -1,15 +1,6 @@
 import ResultAppliers from "./ResultAppliers.js"
 import Abilities from './Abilities.js'
 
-// BattleSimulator public API:
-//   battleSimulator = new BattleSimulator(model)
-// 	 battleSimulator.advance()
-//   const victoryState = battleSimulator.getVictoryState() // check if battle is complete
-//   if (!victoryState) {
-//     const activeUnitId = model.getActiveUnitId()
-//     ;;;
-//   }
-
 class ExecutionHelper {
 	constructor(model, applyResultCallback) {
 		this.model = model
@@ -33,17 +24,13 @@ export default class BattleSimulator {
 	constructor(model, resultsQueue) {
 		this.model = model
 		this.resultsQueue = resultsQueue
-		this.victoryState = undefined
 		this.executionHelper = new ExecutionHelper(this.model, (result) => {
 			this.applyResult(result)
 		})
 	}
-	getVictoryState() {
-		return this.victoryState
-	}
 	applyResult(result) { // called from Ability.execute (and this.advance)
 		// check if this result should be cancelled/ignored (e.g. if the battle is already victorious)
-		if (this.getVictoryState()) {
+		if (this.model.getVictoryState()) {
 			console.log(`ignoring applyResult added after the battle is victorious`, result)
 			return
 		}
@@ -54,7 +41,7 @@ export default class BattleSimulator {
 		this.resultsQueue.push(result)
 	}
 	executeDecision(abilityId, target) {
-		if (this.getVictoryState()) { console.log(`ignoring decision made after the battle is victorious`); return }
+		if (this.model.getVictoryState()) { console.log(`ignoring decision made after the battle is victorious`); return }
 		//if (this.model.getActiveUnit().teamId !== requestorTeamId) { console.log(`ignoring decision made by incorrect team`) }
 		const unitId = this.model.getActiveUnitId()
 		const ability = this.model.getAbilityById(unitId, abilityId)
@@ -70,10 +57,10 @@ export default class BattleSimulator {
 		const teamCount = _.countBy(this.model.units, unit => unit.teamId) // e.g. { 0: 4, 1: 3 }
 		const activeTeams = _.size(teamCount)
 		if (activeTeams === 0) { // no one is left alive!
-			victoryState = 'UNKNOWN_VICTORY'
+			victoryState = { winningTeamId: undefined }
 		}
 		else if (activeTeams === 1) { // only one team is still alive
-			victoryState = 'UNKNOWN_VICTORY'
+			victoryState = { winningTeamId: _.keys(teamCount)[0] }
 		}
 		return victoryState
 	}
@@ -113,10 +100,10 @@ export default class BattleSimulator {
 		while (true) {
 			
 			// check for victory (or defeat)
-			this.victoryState = this._checkForVictory()
-			if (this.victoryState) {
-				this.applyResult({ type: 'Victory', victoryState: this.victoryState }) // FIXME: this won't get applied because "ignoring applyResult added after the battle is victorious"
-				return // caller should check battleSimulator.isBattleComplete() to get victoryState
+			const victoryState = this._checkForVictory()
+			if (victoryState) {
+				this.applyResult({ type: 'Victory', victoryState })
+				return // caller should check this.model.getVictoryState()
 			}
 
 			// active unit's turn
@@ -135,7 +122,7 @@ export default class BattleSimulator {
 
 					if (model.turn.stage === 'middle') {
 						if (!this._isActiveUnitStunned()) {
-							return // caller should check for victory state, then generate (or prompt for) a decision for the active unit
+							return // caller should check this.model.getVictoryState(), then generate (or prompt for) a decision for the active unit
 							// n.b. turn.stage can also be advanced to 'end' by a decision (e.g. Face) or by the TurnTimer
 						}
 						this.applyResult({ type: 'Turn', stage: 'end' })
@@ -165,9 +152,9 @@ export default class BattleSimulator {
 			}
 
 			// initialize the next unit's turn, then start over so we can get into the 'start' stage logic
-			if (earliestUnitId === undefined) { throw new Error(`BattleSimulator logic error: victory should have triggered since there are no units to take turns`) }
+			if (earliestUnitId === undefined) { throw new Error(`BattleSimulator logic error: victory should have triggered since there are no units to take turns!`) }
 			this.applyResult({ type: 'Turn', activeUnitId: earliestUnitId, stage: 'start' })
-			continue // check for victory and keep going (checking for victory is almost certainly redundant, but this simple control flow is preferred)
+			continue // check for victory and keep going (checking for victory is almost certainly redundant, but this keeps the control flow simple)
 		}
 	}
 

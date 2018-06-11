@@ -6,12 +6,12 @@ export default class AIBattleSimulator extends BattleSimulator {
 		this.advance()
 		// if the next unit is ai-controlled, call makeAIDecision(), advance the simulator, and repeat
 		while (true) {
-			if (this.victoryState) {
-				return // caller should check battleSimulator.isBattleComplete() to get victoryState
+			if (this.model.getVictoryState()) {
+				return
 			}
 			const activeUnitId = this.model.getActiveUnitId()
 			const activeUnit = this.model.getUnitById(activeUnitId)
-			if (activeUnit.teamId !== 1) { break }
+			if (activeUnit.aiType === undefined) { break }
 			this.makeAIDecision(activeUnitId, activeUnit)
 			this.advance()
 		}

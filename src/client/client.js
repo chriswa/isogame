@@ -4,11 +4,23 @@ import * as sampleBattleGenerator from '../battle/sampleBattleGenerator.js'
 import serverConnection from './serverConnection.js'
 import RemoteBattleAuthority from './RemoteBattleAuthority.js'
 
+window.TEST = {}
+
 /** @type BattleController */
 
 let battleAuthority = undefined
 
 
+
+let loginPayload = window.localStorage.getItem('loginPayload')
+loginPayload = loginPayload ? JSON.parse(loginPayload) : {}
+console.log(loginPayload)
+
+window.TEST.login = (newLoginPayload) => {
+	loginPayload = newLoginPayload
+	window.localStorage.setItem('loginPayload', JSON.stringify(newLoginPayload))
+	location.reload()
+}
 
 
 
@@ -32,34 +44,30 @@ serverConnection.on('startSupervisedBattle', (payload) => {
 serverConnection.on('results', (payload) => {
 	battleAuthority.addResults(payload) // assuming battleAuthority is a RemoteBattleAuthority!
 })
-serverConnection.on('battleComplete', (payload) => {
-	console.log(`(client) supervised battle complete: ${payload.victoryState}`)
-	battleAuthority = undefined // assuming battleAuthority is the RemoteBattleAuthority!
-})
-serverConnection.setLoginPayload({
-	username: 'bob',
-	password: 'pass',
-	signup: undefined,
-})
+serverConnection.setLoginPayload(loginPayload)
 serverConnection.connect()
 
 // MORE TESTING
-window.TEST = {}
 window.TEST.startChallenge = () => {
-	setTimeout(() => { serverConnection.send('startChallenge', { challengeId: 'whatever' }) }, 1000)
+	serverConnection.send('startChallenge', { challengeId: 'whatever' })
 }
 window.TEST.sendDecision = () => {
-	setTimeout(() => { serverConnection.send('decision', { abilityId: 0, target: 0 }) }, 2000)
+	serverConnection.send('decision', { abilityId: 0, target: 0 })
+}
+window.TEST.matchMakerSubscribe = () => {
+	serverConnection.send('matchMakerSubscribe', { matchType: 'SIMPLE_PVP' })
+}
+window.TEST.matchMakerUnsubscribe = () => {
+	serverConnection.send('matchMakerUnsubscribe', { matchType: 'SIMPLE_PVP' })
+}
+window.TEST.matchMakerUnsubscribeAll = () => {
+	serverConnection.send('matchMakerUnsubscribeAll', {})
 }
 
 
 function startLocalBattle() {
 	const battleBlueprint = sampleBattleGenerator.build()
 	battleAuthority = new LocalBattleAuthority(battleBlueprint)
-	battleAuthority.on('battleComplete', victoryState => {
-		console.log(`(client) local battle complete: ${victoryState}`)
-		battleAuthority = undefined
-	})
 }
 
 window.TEST.startLocal = () => {

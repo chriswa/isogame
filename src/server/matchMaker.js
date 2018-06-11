@@ -28,15 +28,22 @@ const matchMaker = new class MatchMaker {
 	update() {
 		_.each(this.subscriptionsByMatchType, (subscriptionsForThisMatchType, matchType) => {
 			// TODO: look for acceptable pairings of players, depending on ELO difference and subscription age
-			const userConnections = _.values(subscriptionsForThisMatchType)
-			if (userConnections.length >= 2) {
-				this.startBattle(matchType, userConnections[0], userConnections[1])
+			const subscriptions = _.values(subscriptionsForThisMatchType)
+			if (subscriptions.length >= 2) {
+				const userConnection0 = subscriptions[0].userConnection
+				const userConnection1 = subscriptions[1].userConnection
+				this.unsubscribeAll(userConnection0)
+				this.unsubscribeAll(userConnection1)
+				this.startBattle(matchType, userConnection0, userConnection1)
 			}
 		})
 	}
 	startBattle(matchType, userConnection0, userConnection1) {
+		console.log(`(matchMaker) startBattle: ${userConnection0.getUsername()} vs ${userConnection1.getUsername()}`)
 		// n.b. UserConnection.onSupervisedBattleStart will call matchMaker.unsubscribeAll
-		supervisedBattleRegistrar.startBattle(matchType, [ userConnection0, userConnection1 ])
+		supervisedBattleRegistrar.startBattle(matchType, [userConnection0, userConnection1], (victoryState) => {
+			console.log(`(matchMaker) battle complete: TODO: update users' ELOs from victoryState: ${JSON.stringify(victoryState)}`)
+		})
 	}
 
 	// UserConnection API: subscribe, unsubscribe, unsubscribeAll

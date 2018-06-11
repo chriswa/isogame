@@ -7,6 +7,7 @@ import ResultAppliers from '../ResultAppliers.js'
 
 import ResultPlayingSubController from './ResultPlayingSubController.js'
 import TargetingSubController from './TargetingSubController.js'
+import VictorySubController from './VictorySubController.js'
 
 import BattleGUI from '../../gui/battle/BattleGUI.js'
 
@@ -15,6 +16,7 @@ import BattleGUI from '../../gui/battle/BattleGUI.js'
 		BattleController.SubControllers : {
 			RESULTPLAYING: ResultPlayingSubController,
 			TARGETING: TargetingSubController,
+			VICTORY: VictorySubController,
 		}
 		BattleController.currentSubController : BaseSubController
 */
@@ -54,9 +56,9 @@ export default class BattleController extends EventEmitter3 {
 		this.allSubControllers = {
 			RESULTPLAYING: new ResultPlayingSubController(this),
 			TARGETING: new TargetingSubController(this),
+			VICTORY: new VictorySubController(this),
 		}
-		this.currentSubController = this.allSubControllers.TARGETING
-		this.currentSubController.onStateEnter()
+		this.onResultsComplete() // start with either TARGETING or VICTORY
 	}
 
 	destroy() { // called by owner
@@ -68,7 +70,9 @@ export default class BattleController extends EventEmitter3 {
 	}
 
 	setSubController(newState) {
-		this.currentSubController.onStateExit()
+		if (this.currentSubController) {
+			this.currentSubController.onStateExit()
+		}
 		this.currentSubController = newState
 		this.currentSubController.onStateEnter()
 	}
@@ -86,8 +90,12 @@ export default class BattleController extends EventEmitter3 {
 	}
 
 	onResultsComplete() { // called by ResultPlayingSubController
-		// TODO: check for victory, and switch to a new Victory subcontroller if so!
-		this.setSubController(this.allSubControllers.TARGETING)
+		if (this.model.getVictoryState()) {
+			this.setSubController(this.allSubControllers.VICTORY)
+		}
+		else {
+			this.setSubController(this.allSubControllers.TARGETING)
+		}
 	}
 
 	update(dt) {

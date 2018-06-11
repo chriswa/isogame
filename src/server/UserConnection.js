@@ -32,6 +32,7 @@ export default class UserConnection {
 		this.userAccount = userAccount
 		/** @type {SupervisedBattle} */
 		this.supervisedBattle = undefined
+		this.supervisedBattleTeamId = undefined
 
 		//this.userAccount.data.foo = 'foo'
 		//this.userAccount.save()
@@ -82,7 +83,9 @@ export default class UserConnection {
 			return this.send('log', `can't start a challenge while a supervised battle is ongoing`)
 		}
 		// n.b. UserConnection.onSupervisedBattleStart will call matchMaker.unsubscribeAll
-		supervisedBattleRegistrar.startBattle(payload.challengeId, [this])
+		supervisedBattleRegistrar.startBattle(payload.challengeId, [this], (victoryState) => {
+			console.log(`(UserConnection) battle complete: TODO: update user's campaign state, depending on victoryState: ${JSON.stringify(victoryState)}`)
+		})
 	}
 	handleMessageDecision(msg) { // called from messageHandlers['decision']
 		if (this.supervisedBattle) {
@@ -97,14 +100,15 @@ export default class UserConnection {
 	}
 	onSupervisedBattleStart(supervisedBattle, payload) {
 		this.supervisedBattle = supervisedBattle
+		this.supervisedBattleTeamId = payload.myTeamId
 		matchMaker.unsubscribeAll(this)
 		this.send('startSupervisedBattle', payload)
 	}
-	onSupervisedBattleComplete(victoryState) {
-		this.send('battleComplete', { victoryState })
-	}
 	onSupervisedBattleResults(results) {
 		this.send('results', results)
+	}
+	onSupervisedBattleComplete() {
+		this.supervisedBattle = undefined
 	}
 	send(type, payload) {
 		this.wsConnection.send(JSON.stringify([ type, payload ]))

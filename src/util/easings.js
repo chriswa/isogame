@@ -18,7 +18,7 @@ const def = {
 		return -1/2 * (t*(t-2) - 1)
 	},
 	inCubic(t) {
-		return c*t*t*t
+		return t*t*t
 	},
 	outCubic(t) {
 		t--

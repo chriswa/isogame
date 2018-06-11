@@ -22,6 +22,7 @@ export function build() {
 		},
 		1: {
 			teamId: 1,
+			//aiType: 1,
 			name: "Mordeqai", spriteSet: "goblin_purple", pos: [7, 9], facing: 1, hp: 7, hpMax: 7, mana: 4, manaMax: 4, nextTurnTime: 69, turnbreaker: 0.873465,
 			buffs: {
 			},
@@ -37,6 +38,7 @@ export function build() {
 		const name = sampleNames[Math.floor(Math.random() * sampleNames.length)]
 		unitsModel[unitId] = {
 			teamId: 1,
+			aiType: 1,
 			name: "Rando", spriteSet: "goblin_green", pos: [ Math.floor(Math.random() * 32), Math.floor(Math.random() * 32) ], facing: Math.floor(Math.random() * 4), hp: 7, hpMax: 7, mana: 4, manaMax: 4, nextTurnTime: 69, turnbreaker: 0.873465,
 			buffs: {
 			},

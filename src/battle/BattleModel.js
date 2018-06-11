@@ -28,6 +28,9 @@ export default class BattleModel {
 		return new BattleModel(newData)
 	}
 
+	getVictoryState() {
+		return this.turn.victory
+	}
 	getActiveUnitId() {
 		return this.turn.activeUnitId
 	}

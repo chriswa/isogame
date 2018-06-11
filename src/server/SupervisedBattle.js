@@ -9,7 +9,7 @@ function createBattleBlueprintFromDescriptor(battleDescriptor, userConnections) 
 	return battleBlueprint
 }
 
-const INACTIVITY_TIMEOUT_SECONDS = 60 * 10
+const INACTIVITY_TIMEOUT_SECONDS = 60 * 5
 
 export default class SupervisedBattle {
 	constructor(battleDescriptor, userConnections, onBattleCompleteCallback) {
@@ -45,15 +45,17 @@ export default class SupervisedBattle {
 	setInactivityTimeout() {
 		this.clearInactivityTimeout()
 		this.timeout = setTimeout(() => {
-			this.resultsQueue.push({ type: 'Victory', victoryState: 'InactivityTimeout' })
+			console.log(`(SupervisedBattle) inactivity timeout! terminating battle.`)
+			this.simulator.applyResult({ type: 'Victory', victoryState: { winningTeamId: undefined, reason: 'InactivityTimeout' } })
 			this.sendQueuedResults()
 			this.terminate()
 		}, INACTIVITY_TIMEOUT_SECONDS * 1000)
 	}
 	terminate() {
 		this.clearInactivityTimeout()
+		const victoryState = this.model.getVictoryState()
 		// unregister with supervisedBattleRegistrar (so users don't get reconnected to this battle, and we can be garbage collected)
-		this.onBattleCompleteCallback()
+		this.onBattleCompleteCallback(victoryState)
 	}
 	reconnectUser(userConnection) {
 		this.userConnections[userConnection.getUsername()] = userConnection
@@ -70,9 +72,9 @@ export default class SupervisedBattle {
 		//console.log(`(SupervisedBattle) advanceSimAndSendResults`)
 		this.simulator.advanceWithAI()
 		this.sendQueuedResults()
-		const victoryState = this.simulator.getVictoryState()
+		const victoryState = this.model.getVictoryState()
 		if (victoryState) {
-			console.log(`(SupervisedBattle) victory state! ${victoryState}`)
+			console.log(`(SupervisedBattle) victory! terminating battle.`)
 			this.terminate()
 		}
 	}
