@@ -21,9 +21,12 @@ export default class VictorySubController extends BaseSubController {
 		this.view.setTopText('VictorySubController: ' + JSON.stringify(this.model.getVictoryState()))
 		this.age = 0
 		this.startY = camera.position[1]
+
+		// TODO: some kinda GUI instead of just waiting
+		setTimeout(() => {
+			this.battleController.onDismissBattle()
+		}, 2000)
 	}
 	onStateExit() {
-	}
-	onClick(mousePos) {
 	}
 }

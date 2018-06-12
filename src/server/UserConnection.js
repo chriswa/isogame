@@ -6,7 +6,7 @@ import SupervisedBattle from './SupervisedBattle.js'
 
 const messageHandlers = {
 	'matchMakerSubscribe': (uc, payload) => {
-		if (this.supervisedBattle) { return } // you can't subscribe for a pvp match while you're already in a pvp match or challenge
+		if (uc.supervisedBattle) { return } // you can't subscribe for a pvp match while you're already in a pvp match or challenge
 		matchMaker.subscribe(uc, payload.matchType)
 	},
 	'matchMakerUnsubscribe': (uc, payload) => {
@@ -47,7 +47,7 @@ export default class UserConnection {
 		// reconnect user?
 		supervisedBattleRegistrar.reconnectUser(this) // this may call userConnection.onSupervisedBattleStart, thus setting this.supervisedBattle
 		if (!this.supervisedBattle) {
-			this.send('log', `no supervised battle to reconnect to`)
+			this.send('noSupervisedBattle', undefined) // let the client know that they've connected successfully, but there is no supervisedBattle they will be reconnected to
 		}
 
 		this.wsConnection.on('terminate', () => { // custom event emitted by websocketServer.js when a heartbeat fails, causing connection termination, or the connection is closed normally

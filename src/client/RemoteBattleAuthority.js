@@ -2,8 +2,9 @@ import AIBattleSimulator from '../battle/AIBattleSimulator.js'
 import BattleModel from '../battle/BattleModel.js'
 import BattleController from '../battle/view/BattleController.js'
 
-export default class RemoteBattleAuthority {
+export default class RemoteBattleAuthority extends EventEmitter3 {
 	constructor(battleBlueprint, myTeamId, previousResults, onDecisionCallback) {
+		super()
 
 		this.battleBlueprint = _.cloneDeep(battleBlueprint)
 		this.myTeamId = myTeamId
@@ -13,8 +14,13 @@ export default class RemoteBattleAuthority {
 		this.battleController = new BattleController(this.battleBlueprint, this.myTeamId, previousResults)
 
 		this.battleController.on('decision', ({ abilityId, target }) => {
-			onDecisionCallback(abilityId, target)
+			this.emit('decision', { abilityId, target })
 		})
+
+		this.battleController.on('dismiss', () => {
+			this.emit('dismiss', undefined)
+		})
+
 	}
 	addResults(results) {
 		while (results.length) {

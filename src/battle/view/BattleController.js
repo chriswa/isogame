@@ -89,6 +89,10 @@ export default class BattleController extends EventEmitter3 {
 		this.view.setWaiting(true)
 	}
 
+	onDismissBattle() { // called by VictorySubController
+		this.emit('dismiss', undefined)
+	}
+
 	onResultsComplete() { // called by ResultPlayingSubController
 		if (this.model.getVictoryState()) {
 			this.setSubController(this.allSubControllers.VICTORY)

@@ -2,8 +2,9 @@ import AIBattleSimulator from '../battle/AIBattleSimulator.js'
 import BattleModel from '../battle/BattleModel.js'
 import BattleController from '../battle/view/BattleController.js'
 
-export default class LocalBattleAuthority {
+export default class LocalBattleAuthority extends EventEmitter3 {
 	constructor(battleBlueprint) {
+		super()
 
 		this.resultsQueue = []
 
@@ -19,6 +20,10 @@ export default class LocalBattleAuthority {
 		// TODO: make sure it's the player's turn?
 			this.simulator.executeDecision(abilityId, target)
 			this.advanceBattle()
+		})
+
+		this.battleController.on('dismiss', () => {
+			this.emit('dismiss', undefined)
 		})
 
 		this.advanceBattle()
