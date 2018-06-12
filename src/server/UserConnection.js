@@ -6,6 +6,7 @@ import SupervisedBattle from './SupervisedBattle.js'
 
 const messageHandlers = {
 	'matchMakerSubscribe': (uc, payload) => {
+		if (this.supervisedBattle) { return } // you can't subscribe for a pvp match while you're already in a pvp match or challenge
 		matchMaker.subscribe(uc, payload.matchType)
 	},
 	'matchMakerUnsubscribe': (uc, payload) => {

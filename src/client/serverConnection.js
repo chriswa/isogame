@@ -2,12 +2,27 @@ export default new class ServerConnection extends EventEmitter3 {
 	constructor() {
 		super()
 		this.socket = undefined
-		this.loginPayload = {}
+		this.loginPayload = undefined
+		this.isOkayToConnect = false
 	}
 	setLoginPayload(newLoginPayload) {
 		this.loginPayload = newLoginPayload
 	}
+	disconnect() {
+		this.isOkayToConnect = false
+		if (this.socket) {
+			this.socket.close()
+			this.socket = undefined
+		}
+	}
 	connect() {
+		this.isOkayToConnect = true
+		this.connectIfOkay()
+	}
+	connectIfOkay() {
+		if (!this.isOkayToConnect) {
+			return
+		}
 		if (this.socket) {
 			console.warn('serverConnection: attempted to connect() when already connected?!')
 			return
@@ -24,7 +39,7 @@ export default new class ServerConnection extends EventEmitter3 {
 		openingSocket.onclose = () => {
 			console.log('(serverConnection) WebSocket closed! Attempting reconnection...')
 			this.socket = undefined
-			this.connect()
+			this.connectIfOkay()
 		}
 
 		openingSocket.onerror = (error) => {

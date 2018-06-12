@@ -1,54 +1,100 @@
 import db from './db.js'
 import EventEmitter from 'events'
 import UserAccount from './UserAccount.js'
+import safeJsonParse from '../util/safeJsonParse.js'
 
 export default class UserAuthenticator extends EventEmitter {
 	constructor(wsServer, newUserRecord) {
 		super()
+		this.newUserRecord = newUserRecord
 
 		// authenticate websocket connections
 		wsServer.on('connection', (wsConnection) => {
 
-			function closeWithError(error) {
-				console.error(`(UserAuthenticator) closeWithError: ${error}`)
-				wsConnection.send(JSON.stringify(['error', error]))
-				wsConnection.close()
-			}
-
 			// wait for authentication message
 			wsConnection.once('message', (messageStr) => {
-				const [type, payload] = JSON.parse(messageStr)
-				if (type !== 'login') { return closeWithError(`expecting a 'login' message first`) }
-				const { username, password, isSignup } = payload
-				const userKey = username // TODO: check for filesystem vulnerabilities with special characters in usernames
-				let userRecord = db.user.get(userKey, undefined)
+				const message = safeJsonParse(messageStr)
+				if (!_.isArray(message)) { return this.closeWithError(wsConnection, `malformed message: not an array`) }
+				const [type, payload] = message
+				if (type !== 'login') { return this.closeWithError(wsConnection, `first message must be of type 'login'`) }
+
+				if (!payload) {
+					this.createGuestAccount(wsConnection)
+				}
+				else {
+					this.loginWithPayload(wsConnection, payload)
+				}
+
+				/*
+				const { username, password } = payload
+				const username = username // TODO: check for filesystem vulnerabilities with special characters in usernames
+				let userRecord = db.user.get(username, undefined)
 
 				const saveUserRecord = () => {
-					db.user.set(userKey, userRecord)
+					db.user.set(username, userRecord)
 				}
 
 				// signup?
 				if (isSignup) {
 					if (userRecord) {
-						return closeWithError("username already exists")
+						return this.closeWithError(wsConnection, "username already exists")
 					}
 					userRecord = { password, ...newUserRecord }
-					db.user.set(userKey, userRecord) // TODO: for production, this async call should be transactional to prevent two users creating the same username atst
+					db.user.set(username, userRecord) // TODO: for production, this async call should be transactional to prevent two users creating the same username atst
 				}
 
-				// authenticate password
-				if (!userRecord || userRecord.password !== password) {
-					return closeWithError("invalid username or password")
-				}
-
-				userRecord.lastLogin = new Date()
-				saveUserRecord()
-
-				const userAccount = new UserAccount(username, userRecord, saveUserRecord)
-
-				this.emit('authenticated', { wsConnection, userAccount })
-
+				*/
 			})
 		})
+	}
+	createGuestAccount(wsConnection) {
+		const characterSet = 'abcdefghijklmnopqrstuvwxyz'.split('')
+		let username = undefined
+		while (true) {
+			username = '_guest_' + _.map(_.range(10), () => _.sample(characterSet)).join('')
+			if (!db.user.get(username, undefined)) { break }
+		}
+		const password = '_pass_' + _.map(_.range(20), () => _.sample(characterSet)).join('')
+
+		let userRecord = {
+			username,
+			password,
+			created: new Date(),
+			...this.newUserRecord,
+		}
+
+		wsConnection.send(JSON.stringify(['updateLoginPayload', { username, password }]))
+
+		this.finalizeLogin(wsConnection, username, userRecord)
+	}
+	loginWithPayload(wsConnection, loginPayload) {
+		const { username, password } = loginPayload
+
+		let userRecord = db.user.get(username, undefined)
+
+		// authenticate password
+		if (!userRecord || userRecord.password !== password) {
+			return this.closeWithError(wsConnection, "invalid username or password")
+		}
+
+		this.finalizeLogin(wsConnection, username, userRecord)
+	}
+	finalizeLogin(wsConnection, username, userRecord) {
+
+		const saveUserRecord = () => {
+			db.user.set(username, userRecord)
+		}
+
+		userRecord.lastLogin = new Date()
+		saveUserRecord()
+
+		const userAccount = new UserAccount(username, userRecord, saveUserRecord)
+
+		this.emit('authenticated', { wsConnection, userAccount })
+	}
+	closeWithError(wsConnection, error) {
+		console.error(`(UserAuthenticator) closeWithError: ${error}`)
+		wsConnection.send(JSON.stringify(['error', error]))
+		wsConnection.close()
 	}
 }
