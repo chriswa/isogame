@@ -1,7 +1,5 @@
-import { EventSubscriber } from '../../util/domUtils.js'
 import * as cameraTweener from '../../gfx/cameraTweener.js'
 import * as input from '../../util/input.js'
-import gl from '../../gfx/gl.js'
 import * as camera from '../../gfx/camera.js'
 
 const dragThreshold = 4 // pixels
@@ -10,6 +8,9 @@ export default class MouseController {
 	constructor(view, onClickCallback) {
 		this.view = view
 		this.onClickCallback = onClickCallback
+
+		cameraTweener.reset()
+		camera.reset()
 
 		this.inputLayer = {
 			layerOrder: 10,
@@ -62,6 +63,9 @@ export default class MouseController {
 			},
 		}
 		input.addInputLayer(this.inputLayer)
+	}
+	destroy() {
+		input.removeInputLayer(this.inputLayer)
 	}
 	update(dt) {
 		cameraTweener.update(dt) // this must occur after anything which may update the cameraTweener

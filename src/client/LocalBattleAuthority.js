@@ -7,6 +7,7 @@ export default class LocalBattleAuthority extends EventEmitter3 {
 		super()
 
 		this.resultsQueue = []
+		this.resultsLog = []
 
 		this.battleBlueprint = _.cloneDeep(battleBlueprint)
 		this.model = BattleModel.createFromBlueprint(_.cloneDeep(this.battleBlueprint))
@@ -14,7 +15,10 @@ export default class LocalBattleAuthority extends EventEmitter3 {
 
 		this.myTeamId = 0
 
-		this.battleController = new BattleController(this.battleBlueprint, this.myTeamId)
+		this.start()
+	}
+	start() {
+		this.battleController = new BattleController(this.battleBlueprint, this.myTeamId, this.resultsLog)
 
 		this.battleController.on('decision', ({ abilityId, target }) => {
 			// TODO: make sure it's the player's turn?
@@ -28,6 +32,10 @@ export default class LocalBattleAuthority extends EventEmitter3 {
 
 		this.advanceBattle()
 	}
+	stop() {
+		this.battleController.destroy()
+		this.battleController = undefined
+	}
 	advanceBattle() {
 		this.simulator.advanceWithAI()
 		this.sendQueuedResults()
@@ -35,6 +43,7 @@ export default class LocalBattleAuthority extends EventEmitter3 {
 	sendQueuedResults() {
 		while (this.resultsQueue.length) {
 			const result = this.resultsQueue.shift()
+			this.resultsLog.push(result)
 			this.battleController.addResult(result)
 		}
 	}

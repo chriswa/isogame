@@ -43,7 +43,13 @@ class Tween {
 }
 
 
-
+export function reset() {
+	targetFacing = 0
+	targetZoom = -4
+	setCameraScaleFromZoom(targetZoom)
+	targetCenter[0] = targetCenter[1] = targetCenter[2] = 0
+	isPosLerping = false
+}
 
 // helper functions for facing
 

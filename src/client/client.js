@@ -41,7 +41,7 @@ const clientFSM = new FSM({
 		render() { battleAuthority.render() },
 	},
 })
-clientFSM.setState('authenticating')
+clientFSM.setState('authenticating') // initial state
 
 
 // ================
@@ -100,18 +100,28 @@ function startLocalBattle() {
 	})
 }
 
-function saveLocalBattle() {
+const supervisedBattleSystem = new EventEmitter3()
+
+supervisedBattleSystem.on('start', () => {
 	if (localBattleAuthority) {
+		localBattleAuthority.stop()
 	}
-}
-function resumeLocalBattleOrGotoTown() {
-	//if (localBattleAuthority) {
-	//	clientFSM.setState('localBattle')
-	//}
-	//else {
+})
+supervisedBattleSystem.on('victory', () => {
+	if (localBattleAuthority) {
+		localBattleAuthority.start()
+		battleAuthority = localBattleAuthority
+		clientFSM.setState('localBattle')
+	}
+	else {
 		clientFSM.setState('town')
-	//}
-}
+	}
+})
+supervisedBattleSystem.on('localControl', () => { // when we connect or reconnect and there is no supervised battle to resume
+	if (clientFSM.stateName === 'authenticating') { // we don't want to stop a local battle for a temporarily dropped connection
+		clientFSM.setState('town')
+	}
+})
 
 
 // ===================
@@ -136,24 +146,24 @@ serverConnection.on('userConnectedElsewhere', (payload) => {
 	clientFSM.setState('locked')
 })
 serverConnection.on('noSupervisedBattle', (payload) => { // login successful and there is no supervised battle to reconnect to (no payload)
-	clientFSM.setState('town')
+	supervisedBattleSystem.emit('localControl')
 })
 serverConnection.on('startSupervisedBattle', (payload) => {
+	supervisedBattleSystem.emit('start') // give local battle a chance to cleanly shutdown in preparation of continuing after the supervised battle
 	clientFSM.setState('supervisedBattle')
 	const battleBlueprint = payload.battleBlueprint
 	const previousResults = payload.previousResults
 	const myTeamId = payload.myTeamId
-	saveLocalBattle() // store current local battle (if it exists) so we can return to it after the supervised battle
 	battleAuthority = new RemoteBattleAuthority(battleBlueprint, myTeamId, previousResults)
 	battleAuthority.on('decision', ({ abilityId, target }) => {
 		serverConnection.send('decision', { abilityId, target })
 	})
 	battleAuthority.on('dismiss', () => {
-		resumeLocalBattleOrGotoTown()
+		supervisedBattleSystem.emit('victory') // either continue the paused local battle or go to town
 	})
 })
 serverConnection.on('results', (payload) => {
-	battleAuthority.addResults(payload) // assuming battleAuthority is a RemoteBattleAuthority!
+	battleAuthority.addResults(payload) // assuming battleAuthority is still a RemoteBattleAuthority!
 })
 serverConnection.setLoginPayload(loginPayload)
 serverConnection.connect()

@@ -1,10 +1,12 @@
 import * as gfx from './gfx.js'
 const gl = gfx.gl
 
-export const position = twgl.v3.create(0, 0, 0)
-export const rotation = twgl.v3.create(Math.PI * -0.25, Math.PI * 0.25, Math.PI * 0)
+export const position = twgl.v3.create()
+export const rotation = twgl.v3.create()
 export const scaleVector = twgl.v3.create(80, 80, 80)
 let scale = 1
+
+reset()
 
 function ortho(dstMatrix) {
 	twgl.m4.ortho(
@@ -16,6 +18,14 @@ function ortho(dstMatrix) {
 		10000,
 		dstMatrix
 	)
+}
+
+export function reset() {
+	setPosition(0, 0, 0)
+	rotation[0] = Math.PI * -0.25
+	rotation[1] = Math.PI * 0.25
+	rotation[2] = 0
+	scale = 1/16 // scaleVector will be recalculated before used
 }
 
 export function setScale(scale_) {
