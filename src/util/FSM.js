@@ -1,9 +1,8 @@
 export default class FSM {
-	constructor(initialStateName, stateDefaults, states) {
-		this.states = _.mapValues(states, state => { return _.defaults(state, stateDefaults) })
+	constructor(states) {
+		this.states = states
 		this.stateName = undefined
 		this.state = undefined
-		this.setState(initialStateName)
 	}
 	setState(newStateName) {
 		if (newStateName !== undefined && this.states[newStateName] === undefined) {
@@ -11,12 +10,18 @@ export default class FSM {
 		}
 		const oldStateName = this.stateName
 		if (this.state) {
-			this.state.onExitState(newStateName)
+			const onExitState = this.state.onExitState
+			if (onExitState) {
+				onExitState(newStateName)
+			}
 		}
 		this.stateName = newStateName
 		this.state = this.states[newStateName]
 		if (this.state) {
-			this.state.onEnterState(oldStateName)
+			const onEnterState = this.state.onEnterState
+			if (onEnterState) {
+				onEnterState(oldStateName)
+			}
 		}
 	}
 }

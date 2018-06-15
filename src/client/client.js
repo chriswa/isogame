@@ -6,34 +6,12 @@ import RemoteBattleAuthority from './RemoteBattleAuthority.js'
 import TownGUI from '../gui/town/TownGUI.js'
 import FSM from '../util/FSM.js'
 
-// ================
-//  MAIN GAME LOOP 
-// ================
-
-// main game loop (e.g. debugCanvas.clear, input.update, gfx.clear)
-clientGameLoop.start(
-	// update
-	(dt) => {
-		clientFSM.state.update(dt)
-	},
-	// render
-	() => {
-		clientFSM.state.render()
-	}
-)
-
 // ============
 //  CLIENT FSM
 // ============
 
 let battleAuthority = undefined // undefined if no active battle, otherwise either LocalBattleAuthority or RemoteBattleAuthority
-const stateDefaults = {
-	onEnterState() {},
-	onExitState() {},
-	update(dt) {},
-	render() {},
-}
-const clientFSM = new FSM('authenticating', stateDefaults, {
+const clientFSM = new FSM({
 	authenticating: {
 		onEnterState() {
 			console.log(`(clientFSM) authenticating...`)
@@ -63,6 +41,30 @@ const clientFSM = new FSM('authenticating', stateDefaults, {
 		render() { battleAuthority.render() },
 	},
 })
+clientFSM.setState('authenticating')
+
+
+// ================
+//  MAIN GAME LOOP 
+// ================
+
+// main game loop (e.g. debugCanvas.clear, input.update, gfx.clear)
+clientGameLoop.start(
+	// update
+	(dt) => {
+		const update = clientFSM.state.update
+		if (update) {
+			update(dt)
+		}
+	},
+	// render
+	() => {
+		const render = clientFSM.state.render
+		if (render) {
+			render()
+		}
+	}
+)
 
 
 // ======
@@ -73,7 +75,7 @@ TownGUI.$on('startLocal', () => {
 	startLocalBattle()
 })
 TownGUI.$on('startChallenge', () => {
-	serverConnection.send('startChallenge', { challengeId: 'whatever' })
+	serverConnection.send('startChallenge', { challengeId: 'CHALLENGE_1' })
 })
 TownGUI.$on('matchMakerSubscribe', () => {
 	serverConnection.send('matchMakerSubscribe', { matchType: 'SIMPLE_PVP' })
@@ -85,18 +87,30 @@ TownGUI.$on('matchMakerUnsubscribeAll', () => {
 	serverConnection.send('matchMakerUnsubscribeAll', undefined)
 })
 
-
-// ===============
-//  LOCAL BATTLES
-// ===============
+let localBattleAuthority = undefined
 
 function startLocalBattle() {
 	clientFSM.setState('localBattle')
 	const battleBlueprint = sampleBattleGenerator.build()
 	battleAuthority = new LocalBattleAuthority(battleBlueprint)
+	localBattleAuthority = battleAuthority
 	battleAuthority.on('dismiss', () => {
+		localBattleAuthority = undefined
 		clientFSM.setState('town')
 	})
+}
+
+function saveLocalBattle() {
+	if (localBattleAuthority) {
+	}
+}
+function resumeLocalBattleOrGotoTown() {
+	//if (localBattleAuthority) {
+	//	clientFSM.setState('localBattle')
+	//}
+	//else {
+		clientFSM.setState('town')
+	//}
 }
 
 
@@ -129,13 +143,13 @@ serverConnection.on('startSupervisedBattle', (payload) => {
 	const battleBlueprint = payload.battleBlueprint
 	const previousResults = payload.previousResults
 	const myTeamId = payload.myTeamId
-	// TODO: store any existing local battle to be returned to after
+	saveLocalBattle() // store current local battle (if it exists) so we can return to it after the supervised battle
 	battleAuthority = new RemoteBattleAuthority(battleBlueprint, myTeamId, previousResults)
 	battleAuthority.on('decision', ({ abilityId, target }) => {
 		serverConnection.send('decision', { abilityId, target })
 	})
 	battleAuthority.on('dismiss', () => {
-		clientFSM.setState('town')
+		resumeLocalBattleOrGotoTown()
 	})
 })
 serverConnection.on('results', (payload) => {
