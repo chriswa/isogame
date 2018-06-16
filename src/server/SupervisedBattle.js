@@ -5,7 +5,7 @@ import UserConnection from './UserConnection.js'
 
 function createBattleBlueprintFromDescriptor(battleDescriptor, userConnections) {
 	// TODO: depending on battleDescriptor, take some data from userConnections (e.g. if it's pvp, look for a hunting team config for this match type)
-	const battleBlueprint = sampleBattleGenerator.build()
+	const battleBlueprint = sampleBattleGenerator.build(battleDescriptor)
 	return battleBlueprint
 }
 

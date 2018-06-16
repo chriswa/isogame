@@ -1,6 +1,9 @@
 const sampleNames = 'Agmund Amleth Asgeir Bertil Bjarte Borphlum Byggvir Dagur Denkli Diederik Dominic Edgo Egon Einherjar Eirik Elof Erland Fenris Fixandu Gjurd Gorla Grendoz Grompl Halvdan Haukur Helheimr Helva Homlur Ignaas Ingefred Isak Jervis Kari Klemenz Kormorflo Leif Lodewijk Lorbo Lund Malto Mikko Morta Nestor Olander Ormur Ragnvald Remur Sigfinnur Smlorg Somerled Sven Tapani Toivo Torstein Trencha Tryggvi Ull Ulrik Urho Valdimar Valgrind Verdl Vihtori Vixja Wendig Wendirgl'.split(' ')
 
-export function build() {
+export function build(battleDescriptor) {
+
+	const battleType = battleDescriptor.type // 'local', 'challenge', or 'pvp'
+	const isPVP = battleType === 'pvp'
 	
 	const fieldDescriptor = {
 		type: "randomwoods",
@@ -22,7 +25,7 @@ export function build() {
 		},
 		1: {
 			teamId: 1,
-			//aiType: 1,
+			aiType: isPVP ? undefined : 1,
 			name: _.sample(sampleNames), spriteSet: "goblin_purple", pos: [7, 9], facing: 1, hp: 7, hpMax: 7, mana: 4, manaMax: 4, nextTurnTime: 69, turnbreaker: 0.873465,
 			buffs: {
 			},

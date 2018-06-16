@@ -27,6 +27,9 @@ export default class BaseAbility {
 		const manaRemaining = this.unit.mana || 0
 		return actionAvailable && manaRemaining >= this.getManaCost()
 	}
+	isValidTarget(target) {
+		return false // override me
+	}
 	getManaCost() {
 		return 0 // override me!
 	}

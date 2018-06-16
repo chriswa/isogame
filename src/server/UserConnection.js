@@ -84,7 +84,8 @@ export default class UserConnection {
 			return this.send('log', `can't start a challenge while a supervised battle is ongoing`)
 		}
 		// n.b. UserConnection.onSupervisedBattleStart will call matchMaker.unsubscribeAll
-		supervisedBattleRegistrar.startBattle(payload.challengeId, [this], (victoryState) => {
+		const battleDescriptor = { type: 'challenge', challengeId: payload.challengeId }
+		supervisedBattleRegistrar.startBattle(battleDescriptor, [this], (victoryState) => {
 			console.log(`(UserConnection) battle complete: TODO: update user's campaign state, depending on victoryState: ${JSON.stringify(victoryState)}`)
 		})
 	}

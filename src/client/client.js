@@ -71,17 +71,17 @@ clientGameLoop.start(
 //  TOWN 
 // ======
 
-TownGUI.$on('startLocal', () => {
-	startLocalBattle()
+TownGUI.$on('startLocal', (localBattleType) => {
+	startLocalBattle(localBattleType)
 })
-TownGUI.$on('startChallenge', () => {
-	serverConnection.send('startChallenge', { challengeId: 'CHALLENGE_1' })
+TownGUI.$on('startChallenge', (challengeId) => {
+	serverConnection.send('startChallenge', { challengeId })
 })
-TownGUI.$on('matchMakerSubscribe', () => {
-	serverConnection.send('matchMakerSubscribe', { matchType: 'SIMPLE_PVP' })
+TownGUI.$on('matchMakerSubscribe', (matchType) => {
+	serverConnection.send('matchMakerSubscribe', { matchType })
 })
-TownGUI.$on('matchMakerUnsubscribe', () => {
-	serverConnection.send('matchMakerUnsubscribe', { matchType: 'SIMPLE_PVP' })
+TownGUI.$on('matchMakerUnsubscribe', (matchType) => {
+	serverConnection.send('matchMakerUnsubscribe', { matchType })
 })
 TownGUI.$on('matchMakerUnsubscribeAll', () => {
 	serverConnection.send('matchMakerUnsubscribeAll', undefined)
@@ -89,9 +89,10 @@ TownGUI.$on('matchMakerUnsubscribeAll', () => {
 
 let localBattleAuthority = undefined
 
-function startLocalBattle() {
+function startLocalBattle(localBattleId) {
 	clientFSM.setState('localBattle')
-	const battleBlueprint = sampleBattleGenerator.build()
+	const battleDescriptor = { type: 'local', localBattleId }
+	const battleBlueprint = sampleBattleGenerator.build(battleDescriptor)
 	battleAuthority = new LocalBattleAuthority(battleBlueprint)
 	localBattleAuthority = battleAuthority
 	battleAuthority.on('dismiss', () => {

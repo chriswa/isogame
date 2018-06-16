@@ -41,7 +41,8 @@ const matchMaker = new class MatchMaker {
 	startBattle(matchType, userConnection0, userConnection1) {
 		console.log(`(matchMaker) startBattle: ${userConnection0.getUsername()} vs ${userConnection1.getUsername()}`)
 		// n.b. UserConnection.onSupervisedBattleStart will call matchMaker.unsubscribeAll
-		supervisedBattleRegistrar.startBattle(matchType, [userConnection0, userConnection1], (victoryState) => {
+		const battleDescriptor = { type: 'pvp', matchType }
+		supervisedBattleRegistrar.startBattle(battleDescriptor, [userConnection0, userConnection1], (victoryState) => {
 			console.log(`(matchMaker) battle complete: TODO: update users' ELOs from victoryState: ${JSON.stringify(victoryState)}`)
 		})
 	}

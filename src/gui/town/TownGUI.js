@@ -1,3 +1,38 @@
+import addCssRule from './../addCssRule.js'
+
+addCssRule(`#townGui h1 {
+	font-size: 300%;
+	color: white;
+	margin: 20px;
+}`)
+addCssRule(`#townGui h2 {
+	font-size: 150%;
+	color: white;
+	margin-bottom: 10px;
+}`)
+addCssRule(`#townGui .section {
+	border: 1px solid white;
+	margin: 10px;
+	padding: 20px;
+	max-width: 400px;
+	background-color: rgba(255, 255, 255, 0.1);
+	border-radius: 5px;
+}`)
+addCssRule(`#townGui button {
+	padding: 10px;
+	border-radius: 5px;
+	border: 2px solid black;
+	background-color: white;
+	display: block;
+	margin-bottom: 2px;
+}`)
+addCssRule(`#townGui button:hover {
+	background-color: #ffa;
+}`)
+addCssRule(`#townGui button:active {
+	background-color: #faa;
+}`)
+
 const vm = new Vue({
 	el: '#townGuiMount',
 	data() {
@@ -7,15 +42,24 @@ const vm = new Vue({
 		}
 	},
 	template: `
-		<div class="guiRoot">
+		<div class="guiRoot" id="townGui">
 			<div v-if="isActive">
-				<h1>Welcome to town.</h1>
-				<button @click="startLocal">Start Local Battle</button>
-				<button @click="startChallenge">Start Challenge Battle (supervised by server)</button>
-				<button @click="matchMakerSubscribe">MatchMaker Subscribe (SIMPLE_PVP)</button>
-				<button @click="matchMakerUnsubscribe">MatchMaker Unsubscribe (SIMPLE_PVP)</button>
-				<button @click="matchMakerUnsubscribeAll">MatchMaker Unsubscribe All</button>
-			</div>
+				<h1>TownGUI</h1>
+				<div class="section">
+					<h2>Local Battles</h2>
+					<button @click="startLocal('Local1')">Local1</button>
+				</div>
+				<div class="section">
+					<h2>Challenges (supervised by server)</h2>
+					<button @click="startChallenge('Challenge1')">Challenge1</button>
+				</div>
+				<div class="section">
+					<h2>PVP MatchMaking System</h2>
+					<button @click="matchMakerSubscribe('SIMPLE_PVP')">Subscribe (SIMPLE_PVP)</button>
+					<button @click="matchMakerUnsubscribe('SIMPLE_PVP')">Unsubscribe (SIMPLE_PVP)</button>
+					<button @click="matchMakerUnsubscribeAll">Unsubscribe All</button>
+					</div>
+		</div>
 		</div>
 	`,
 	computed: {
@@ -24,17 +68,17 @@ const vm = new Vue({
 		reset() {
 			this.matchMakerSubscriptions = []
 		},
-		startLocal() {
-			this.$emit('startLocal')
+		startLocal(localBattleType) {
+			this.$emit('startLocal', localBattleType)
 		},
-		startChallenge() {
-			this.$emit('startChallenge')
+		startChallenge(challengeId) {
+			this.$emit('startChallenge', challengeId)
 		},
-		matchMakerSubscribe() {
-			this.$emit('matchMakerSubscribe')
+		matchMakerSubscribe(matchType) {
+			this.$emit('matchMakerSubscribe', matchType)
 		},
-		matchMakerUnsubscribe() {
-			this.$emit('matchMakerUnsubscribe')
+		matchMakerUnsubscribe(matchType) {
+			this.$emit('matchMakerUnsubscribe', matchType)
 		},
 		matchMakerUnsubscribeAll() {
 			this.$emit('matchMakerUnsubscribeAll')
