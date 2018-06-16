@@ -79,7 +79,7 @@ export default Vue.component(COMPONENT_NAME, {
 			return this.ability ? 'assets/game-icons-net/' + this.ability.getImage() + '.png' : undefined
 		},
 		isCastable() {
-			return this.ability ? this.ability.getCastable() : false
+			return this.ability ? this.ability.isEnabled() : false
 		},
 		tooltip() {
 			return this.ability ? this.ability.getTooltip() : undefined

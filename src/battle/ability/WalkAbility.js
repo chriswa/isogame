@@ -2,10 +2,14 @@ import BaseAbility from './base.js'
 import WalkPathing from './../WalkPathing.js'
 
 export default class WalkAbility extends BaseAbility {
-	calcAbilityArgs() {
-		const distance = this.unitArgs.distance - (this.model.getActiveUnitId() === this.unitId ? (this.model.turn.movementUsed || 0) : 0)
+	initArgs(unitArgs) {
+		const distance = unitArgs.distance - (this.model.getActiveUnitId() === this.unitId ? (this.model.turn.movementUsed || 0) : 0)
+		const walkPathing = new WalkPathing(this.model, this.getUnitCoords(), distance)
+
 		return {
+			maxDistance: unitArgs.distance,
 			distance,
+			walkPathing,
 		}
 	}
 	getImage() {
@@ -13,21 +17,23 @@ export default class WalkAbility extends BaseAbility {
 	}
 	getTooltip() {
 		return `
-			<div class="manaCost" style="color: yellow">${this.abilityArgs.distance} / ${this.unitArgs.distance} remaining</div>
+			<div class="manaCost" style="color: yellow">${this.args.distance} / ${this.args.maxDistance} remaining</div>
 			<h1>Walk</h1>
 			<p>Move across the field.</p>
 		`
 	}
-	getCastable() {
-		return this.abilityArgs.distance > 0
+	isEnabled() {
+		return this.args.distance > 0
 	}
-	determineTargetingController() {
-		return { targetingId: 'Walk', abilityArgs: this.abilityArgs }
+	isValidTarget(target) {
+		return this.args.walkPathing.isValidTarget(target)
+	}
+	determineTargetingUI() {
+		return { type: 'Walk', ...this.args }
 	}
 	execute(target, executionHelper) {
 
-		const distance = this.unitArgs.distance - (this.model.getActiveUnitId() === this.unitId ? (this.model.turn.movementUsed || 0) : 0)
-		const walkPathing = new WalkPathing(this.model, this.unit.pos, distance)
+		const walkPathing = new WalkPathing(this.model, this.unit.pos, this.args.distance)
 
 		const path = walkPathing.findAppealingPath(target)
 

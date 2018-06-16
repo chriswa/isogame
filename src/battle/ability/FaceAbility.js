@@ -1,7 +1,7 @@
 import BaseAbility from './base.js'
 
 export default class FaceAbility extends BaseAbility {
-	calcAbilityArgs() {
+	initArgs(unitArgs) {
 		return {}
 	}
 	getImage() {
@@ -13,11 +13,15 @@ export default class FaceAbility extends BaseAbility {
 			<p>Choose which direction to face and advance time to the next turn.</p>
 		`
 	}
-	getCastable() {
-		return this.unitId === this.model.getActiveUnitId() // you can always end your own turn (but you can't pretend to end anyone else's)
+	isEnabled() {
+		// you can always end your own turn (but you can't pretend to end anyone else's)
+		return this.unitId === this.model.getActiveUnitId() /////// && this.model.isItMyTurn() ???
 	}
-	determineTargetingController() {
-		return { targetingId: 'Face', abilityArgs: {} }
+	isValidTarget(target) {
+		return target === 0 || target === 1 || target === 2 || target === 3
+	}
+	determineTargetingUI() {
+		return { type: 'Face', ...this.args }
 	}
 	execute(target, executionHelper) {
 		executionHelper.result('Face', { unitId: this.unitId, target: target })

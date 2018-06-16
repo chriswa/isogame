@@ -1,28 +1,29 @@
 import BaseTargetingController from './base.js'
 import { colourOptions as overlayColourOptions } from '../FieldOverlayRenderer.js'
 import * as v2 from '../../../util/v2.js'
-import WalkPathing from '../../WalkPathing.js'
 
 export default class WalkTargetingController extends BaseTargetingController {
 	init() {
-		this.distance = this.abilityArgs.distance
-		this.walkPathing = new WalkPathing(this.model, this.casterCoords, this.distance)
 	}
 	render(view, mousePick) {
 
 		this.updateUnitGlows(view, mousePick.getUnitId()) // caster is solid white
 
 		const pickedCoords = mousePick.getTileCoords()
-		const appealingPath = this.walkPathing.findAppealingPath(pickedCoords)
+		const appealingPath = this.args.walkPathing.findAppealingPath(pickedCoords)
 
 		view.fieldView.updateOverlay(testCoords => {
 
 			// targeting range
-			if (!this.walkPathing.isValidTarget(testCoords)) {
+			if (!this.ability.isValidTarget(testCoords)) {
 				return overlayColourOptions.NONE
 			}
+
+			if (!this.isCasterActiveAndOwned()) {
+				return overlayColourOptions.SOLID_GREY
+			}
 			
-			let colour = this.isCasterActiveAndOwned() ? overlayColourOptions.SOLID_CYAN : overlayColourOptions.SOLID_GREY
+			let colour = overlayColourOptions.SOLID_CYAN
 
 			// part of path
 			appealingPath.forEach(pathCoords => {
@@ -45,7 +46,7 @@ export default class WalkTargetingController extends BaseTargetingController {
 		if (!this.isCasterActiveAndOwned()) { return false } // default click behaviour: select the active unit
 
 		// clicked on a valid tile?
-		if (this.walkPathing.isValidTarget(mousePick.getTileCoords())) {
+		if (this.ability.isValidTarget(mousePick.getTileCoords())) {
 
 			// handle click!
 			//console.log(`TARGET: ${mousePick.getTileCoords()}`)

@@ -75,9 +75,9 @@ export default class TargetingSubController extends BaseSubController {
 		this.selectedAbilityId = abilityId
 		this.removeActiveTargetingUi() // call this first, so everything is cleaned up for TargetingUi constructor created next
 		const ability = this.model.getAbilityById(this.selectedUnitId, this.selectedAbilityId)
-		const { targetingId, abilityArgs } = ability.determineTargetingController()
-		const targetingClass = TargetingControllers[ targetingId ]
-		this.activeTargetingUI = new targetingClass(this.model, this.view, this.selectedUnitId, abilityArgs)
+		const targetingDetails = ability.determineTargetingUI()
+		const targetingClass = TargetingControllers[ targetingDetails.type ]
+		this.activeTargetingUI = new targetingClass(this.model, this.view, this.selectedUnitId, targetingDetails, ability)
 		this.battleController.log(`TargetingController started: `, this.activeTargetingUI)
 	}
 }

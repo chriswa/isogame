@@ -30,7 +30,7 @@ export default class SupervisedBattle {
 		this.simulator = new AIBattleSimulator(this.model, this.resultsQueue)
 
 		_.each(this.userConnections, (userConnection) => {
-			const myTeamId = this.teamIds[userConnection.getUsername()]
+			const myTeamId = this.getTeamIdForUserConnection(userConnection)
 			userConnection.onSupervisedBattleStart(this, { battleBlueprint: this.battleBlueprint, myTeamId })
 		})
 
@@ -56,6 +56,9 @@ export default class SupervisedBattle {
 		const victoryState = this.model.getVictoryState()
 		// unregister with supervisedBattleRegistrar (so users don't get reconnected to this battle, and we can be garbage collected)
 		this.onBattleCompleteCallback(victoryState)
+	}
+	getTeamIdForUserConnection(userConnection) {
+		return this.teamIds[userConnection.getUsername()]
 	}
 	reconnectUser(userConnection) {
 		this.userConnections[userConnection.getUsername()] = userConnection
@@ -95,8 +98,9 @@ export default class SupervisedBattle {
 	}
 	onUserDecision(userConnection, abilityId, target) { // called by userConnection
 		// TODO: validate that it's the correct user
-		this.completeBattleLog.push({ type: 'decision', time: Date.now(), payload: { abilityId, target } })
-		this.simulator.executeDecision(abilityId, target)
+		const requestorTeamId = this.getTeamIdForUserConnection(userConnection)
+		this.completeBattleLog.push({ type: 'decision', time: Date.now(), requestorTeamId, payload: { abilityId, target } })
+		this.simulator.executeDecision(abilityId, target, requestorTeamId)
 		this.advanceSimAndSendResults()
 	}
 }

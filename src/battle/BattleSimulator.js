@@ -40,11 +40,21 @@ export default class BattleSimulator {
 		// queue the result
 		this.resultsQueue.push(result)
 	}
-	executeDecision(abilityId, target) {
-		if (this.model.getVictoryState()) { console.log(`ignoring decision made after the battle is victorious`); return }
-		//if (this.model.getActiveUnit().teamId !== requestorTeamId) { console.log(`ignoring decision made by incorrect team`) }
-		const unitId = this.model.getActiveUnitId()
-		const ability = this.model.getAbilityById(unitId, abilityId)
+	executeDecision(abilityId, target, requestorTeamId) {
+		if (this.model.getVictoryState()) { return console.warn(`(BattleSimulator) ignoring decision made after the battle is victorious`) }
+
+		const activeUnitId = this.model.getActiveUnitId()
+		if (activeUnitId === undefined) { return console.warn(`(BattleSimulator) ignoring illegal decision: activeUnitId not found`) }
+		const activeUnit = this.model.getUnitById(activeUnitId)
+
+		if (activeUnit.teamId !== requestorTeamId) { console.log(`(BattleSimulator) ignoring illegal decision: active unit not owned by requestor's team`) }
+
+		const ability = this.model.getAbilityById(activeUnitId, abilityId)
+		if (ability === undefined) { return console.warn(`(BattleSimulator) ignoring illegal decision: abilityId not found`) }
+
+		if (!ability.isEnabled()) { return console.warn(`(BattleSimulator) ignoring illegal decision: failed ability.isEnabled()`) }
+		if (!ability.isValidTarget(target)) { return console.warn(`(BattleSimulator) ignoring illegal decision: failed ability.isValidTarget(target)`) }
+		
 		ability.execute(target, this.executionHelper) // n.b. calls this.applyResult()
 	}
 

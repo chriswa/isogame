@@ -14,14 +14,14 @@ export default class FaceTargetingController extends BaseTargetingController {
 		//const mousePos = mousePick.getScreenPos()
 		const pickedCoords = mousePick.getTileCoords(true)
 
-		const pickedFacing = v2.getFacing(this.casterCoords, pickedCoords)
+		const pickedFacing = v2.getFacing(this.ability.getUnitCoords(), pickedCoords)
 		view.unitSprites[this.castingUnitId].setFacing(pickedFacing)
 
 		view.fieldView.updateOverlay(testCoords => {
 			let colour = overlayColourOptions.NONE
 			
-			const testDistanceFromCaster = v2.manhattan(this.casterCoords, testCoords)
-			if (testDistanceFromCaster === 1 && v2.getFacing(this.casterCoords, testCoords) === pickedFacing) {
+			const testDistanceFromCaster = v2.manhattan(this.ability.getUnitCoords(), testCoords)
+			if (testDistanceFromCaster === 1 && v2.getFacing(this.ability.getUnitCoords(), testCoords) === pickedFacing) {
 				colour = overlayColourOptions.SOLID_RED
 			}
 
@@ -36,8 +36,8 @@ export default class FaceTargetingController extends BaseTargetingController {
 
 			const tileCoords = mousePick.getTileCoords(true)
 
-			if (!v2.isEqual(this.casterCoords, tileCoords)) {
-				const pickedFacing = v2.getFacing(this.casterCoords, tileCoords)
+			if (!v2.isEqual(this.ability.getUnitCoords(), tileCoords)) {
+				const pickedFacing = v2.getFacing(this.ability.getUnitCoords(), tileCoords)
 
 				decisionCallback(pickedFacing)
 				return true // handled click!

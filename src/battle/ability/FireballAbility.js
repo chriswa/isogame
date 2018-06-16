@@ -1,11 +1,13 @@
 import BaseAbility from './base.js'
 import DamageTypes from '../DamageTypes.js'
+import * as v2 from '../../util/v2.js'
+
 
 export default class FireballAbility extends BaseAbility {
-	calcAbilityArgs() {
+	initArgs(unitArgs) {
 		return {
 			minTargetDistance: 1,
-			maxTargetDistance: this.unitArgs.distance,
+			maxTargetDistance: unitArgs.distance,
 			aoeRange: 1,
 		}
 	}
@@ -23,12 +25,16 @@ export default class FireballAbility extends BaseAbility {
 	getManaCost() {
 		return 2
 	}
-	determineTargetingController() {
-		return { targetingId: 'AOE', abilityArgs: this.abilityArgs }
+	isValidTarget(target) {
+		const casterDistance = v2.manhattan(this.getUnitCoords(), target)
+		return (casterDistance >= this.args.minTargetDistance && casterDistance <= this.args.maxTargetDistance)
+	}
+	determineTargetingUI() {
+		return { type: 'AOE', ...this.args }
 	}
 	execute(target, executionHelper) {
 		executionHelper.result('Spellcast', { unitId: this.unitId, name: `Fireball`, manaCost: this.getManaCost(), target: target })
-		const unitIdsInRange = this.model.findUnitIdsInRange(target, this.abilityArgs.aoeRange)
+		const unitIdsInRange = this.model.findUnitIdsInRange(target, this.args.aoeRange)
 		_.each(unitIdsInRange, unitId => {
 			executionHelper.hurt(unitId, 10, 'fire')
 		})

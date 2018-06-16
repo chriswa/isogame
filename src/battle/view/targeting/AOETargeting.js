@@ -6,9 +6,6 @@ import Grid from '../../../util/Grid.js'
 
 export default class AOETargetingController extends BaseTargetingController {
 	init() {
-		this.minTargetDistance = this.abilityArgs.minTargetDistance
-		this.maxTargetDistance = this.abilityArgs.maxTargetDistance
-		this.aoeRange = this.abilityArgs.aoeRange
 	}
 	render(view, mousePick) {
 
@@ -18,21 +15,20 @@ export default class AOETargetingController extends BaseTargetingController {
 		view.fieldView.updateOverlay(testCoords => {
 			//if (!pickedCoords) { return 0 }
 			let colour = overlayColourOptions.NONE
-			const casterDistance = v2.manhattan(this.casterCoords, testCoords)
 
 			// targeting range
-			if (casterDistance >= this.minTargetDistance && casterDistance <= this.maxTargetDistance) {
+			if (this.ability.isValidTarget(testCoords)) {
 				colour = this.isCasterActiveAndOwned() ? overlayColourOptions.SOLID_CYAN : overlayColourOptions.SOLID_GREY
 			}
 
 			// aoe range
-			const targetDistanceFromCaster = v2.manhattan(this.casterCoords, pickedCoords)
-			if (targetDistanceFromCaster >= this.minTargetDistance && targetDistanceFromCaster <= this.maxTargetDistance) {
+			const targetDistanceFromCaster = v2.manhattan(this.ability.getUnitCoords(), pickedCoords)
+			if (targetDistanceFromCaster >= this.args.minTargetDistance && targetDistanceFromCaster <= this.args.maxTargetDistance) {
 				const targetDistance = v2.manhattan(pickedCoords, testCoords)
 				if (targetDistance === 0) {
 					colour = overlayColourOptions.SOLID_RED
 				}
-				else if (targetDistance <= this.aoeRange) {
+				else if (targetDistance <= this.args.aoeRange) {
 					colour = overlayColourOptions.SOLID_YELLOW
 				}
 			}
@@ -49,8 +45,7 @@ export default class AOETargetingController extends BaseTargetingController {
 			const tileCoords = mousePick.getTileCoords(true)
 
 			// clicked on a valid target tile?
-			const targetDistanceFromCaster = v2.manhattan(this.casterCoords, tileCoords)
-			if (targetDistanceFromCaster >= this.minTargetDistance && targetDistanceFromCaster <= this.maxTargetDistance) {
+			if (this.ability.isValidTarget(tileCoords)) {
 				//console.log(`TARGET: ${tileCoords}`)
 				decisionCallback(tileCoords)
 				return true // handled click!

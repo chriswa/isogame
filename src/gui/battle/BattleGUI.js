@@ -71,7 +71,7 @@ const vm = new Vue({
 			// pre-select either "move"(1) or "face"(0), depending on whether moves remain
 			if (this.selectedUnitId !== undefined) {
 				const moveAbility = battleModel.getAbilityById(this.selectedUnitId, 1)
-				const preSelectedAbilityId = moveAbility.getCastable() ? 1 : 0
+				const preSelectedAbilityId = moveAbility.isEnabled() ? 1 : 0
 				this.selectAbilityId(preSelectedAbilityId)
 			}
 		},

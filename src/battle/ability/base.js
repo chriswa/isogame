@@ -7,14 +7,17 @@ export default class BaseAbility {
 		this.unitId = unitId
 		this.abilityId = abilityId
 		this.unit = this.model.getUnitById(this.unitId)
-		this.unitArgs = this.model.getUnitAbilityArgsById(this.unitId, this.abilityId)
-		this.abilityArgs = this.calcAbilityArgs()
+		const unitArgs = this.model.getUnitAbilityArgsById(this.unitId, this.abilityId)
+		this.args = this.initArgs(unitArgs)
 	}
-	calcAbilityArgs() {
+	initArgs(unitArgs) {
 		return {} // override me!
 	}
 	getUnit() {
 		return this.model.getUnitById(this.unitId)
+	}
+	getUnitCoords() {
+		return this.model.getUnitCoordsById(this.unitId)
 	}
 	getImage() {
 		return 'help' // override me!
@@ -22,7 +25,7 @@ export default class BaseAbility {
 	getTooltip() {
 		return `<h1>Error</h1><p>Abilities should override getTooltip</p>`
 	}
-	getCastable() {
+	isEnabled() {
 		const actionAvailable = !this.model.turn.actionUsed
 		const manaRemaining = this.unit.mana || 0
 		return actionAvailable && manaRemaining >= this.getManaCost()

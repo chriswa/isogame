@@ -21,8 +21,7 @@ export default class LocalBattleAuthority extends EventEmitter3 {
 		this.battleController = new BattleController(this.battleBlueprint, this.myTeamId, this.resultsLog)
 
 		this.battleController.on('decision', ({ abilityId, target }) => {
-			// TODO: make sure it's the player's turn?
-			this.simulator.executeDecision(abilityId, target)
+			this.simulator.executeDecision(abilityId, target, this.myTeamId)
 			this.advanceBattle()
 		})
 

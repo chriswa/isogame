@@ -2,13 +2,12 @@ import BattleModel from '../../BattleModel.js'
 import billboardGlowOptions from '../../../gfx/billboardGlowOptions.js'
 
 export default class BaseTargetingController {
-	constructor(model, view, castingUnitId, abilityArgs = {}) {
+	constructor(model, view, castingUnitId, args, ability) {
 		/** @type BattleModel */
 		this.model = model
 		this.castingUnitId = castingUnitId
-		this.abilityArgs = abilityArgs
-
-		this.casterCoords = this.model.getUnitCoordsById(this.castingUnitId)
+		this.args = args
+		this.ability = ability
 
 		this.init()
 	}
