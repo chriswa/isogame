@@ -28,16 +28,16 @@ export default class MouseController {
 			onGestureMove(deltaPos, deltaAngle, distanceFactor) {
 				this.panPosition(deltaPos)
 				cameraTweener.setZoom(cameraTweener.getZoom() * ((1 / distanceFactor) / 10 + 9/10))
-				camera.rotation[1] -= deltaAngle
-				//accumulatedGestureRotation += deltaAngle
-				//if (accumulatedGestureRotation < -gestureRotationRadianThreshold / 2) {
-				//	accumulatedGestureRotation += gestureRotationRadianThreshold
-				//	cameraTweener.setTargetFacing((cameraTweener.getFacing() - 1) % 4, 'fast')
-				//}
-				//else if (accumulatedGestureRotation > gestureRotationRadianThreshold / 2) {
-				//	accumulatedGestureRotation -= gestureRotationRadianThreshold
-				//	cameraTweener.setTargetFacing((cameraTweener.getFacing() + 1) % 4, 'fast')
-				//}
+				//camera.rotation[1] -= deltaAngle
+				accumulatedGestureRotation += deltaAngle
+				if (accumulatedGestureRotation < -gestureRotationRadianThreshold / 2) {
+					accumulatedGestureRotation += gestureRotationRadianThreshold
+					cameraTweener.setTargetFacing((cameraTweener.getFacing() - 1) % 4, 'fast')
+				}
+				else if (accumulatedGestureRotation > gestureRotationRadianThreshold / 2) {
+					accumulatedGestureRotation -= gestureRotationRadianThreshold
+					cameraTweener.setTargetFacing((cameraTweener.getFacing() + 1) % 4, 'fast')
+				}
 			},
 			onGestureEnd() {
 				const closestFacing = Math.floor(camera.rotation[1] / (Math.PI / 2)) % 4
