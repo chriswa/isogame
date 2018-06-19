@@ -4,7 +4,7 @@ const COMPONENT_NAME = 'Tooltip'
 
 addCssRule(`.${COMPONENT_NAME} {
 	position: absolute;
-	bottom: calc(4vw + 20px);
+	bottom: 100px;
 	right: 10px;
 	max-width: 30vw;
 	min-width: 20vw;

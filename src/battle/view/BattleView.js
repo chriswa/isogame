@@ -10,6 +10,7 @@ import TerrainTypes from '../TerrainTypes.js'
 import Sprite from '../../gfx/Sprite.js'
 import BattleGUI from '../../gui/battle/BattleGUI.js'
 import billboardGlowOptions from '../../gfx/billboardGlowOptions.js'
+import * as magnifier from '../../gfx/magnifier.js'
 
 class MousePick {
 	constructor(tileCoords, unitId, tileCoordsBehindUnit, screenPos) {
@@ -17,6 +18,7 @@ class MousePick {
 		this.unitId = unitId >= 0 ? unitId : undefined // ignore negative pickIds (e.g. shrub obstructions)
 		this.tileCoordsBehindUnit = tileCoordsBehindUnit
 		this.screenPos = screenPos
+		this.magnifierEnabled = false
 	}
 	getTileCoords(ignoreUnitPicking = false) {
 		return ignoreUnitPicking ? this.tileCoordsBehindUnit : this.tileCoords
@@ -137,9 +139,8 @@ export default class BattleView {
 			return new MousePick(undefined, Infinity, undefined, screenPos)
 		}
 
-		// if the user is currently dragging (any mouse button), don't do a mouse pick
-		const isDraggingAnyButton = input.isDraggingAnyButton()
-		if (isDraggingAnyButton) {
+		// if the user is currently dragging (any mouse button or a multi-finger gesture), don't do a mouse pick
+		if (input.isDraggingAnyButton() || input.isMultiGestureActive()) {
 			return new MousePick(undefined, Infinity, undefined, screenPos)
 		}
 
@@ -203,6 +204,12 @@ export default class BattleView {
 		const viewProjectionMatrix = camera.getViewProjectionMatrix()
 		this.fieldView.render(viewProjectionMatrix)
 		this.bbgroup.render(viewProjectionMatrix, this.tt)
+		if (this.magnifierEnabled && input.isTouchActive()) {
+			magnifier.render()
+		}
+		else {
+			magnifier.hide()
+		}
 	}
 	
 }

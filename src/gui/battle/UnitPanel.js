@@ -10,7 +10,7 @@ addCssRule(`.${COMPONENT_NAME} {
 	background-color: #654321;
 	color: white;
 	bottom: 0;
-	height: calc(4vw + 10px);
+	height: 90px;
 	width: 100vw;
 }`)
 
@@ -19,7 +19,7 @@ addCssRule(`.${COMPONENT_NAME} .unitStats {
 	margin-left: 120px;
 	margin-bottom: 5px;
 	margin-top: 5px;
-	height: calc(4vw);
+	height: 80px;
 }`)
 addCssRule(`.${COMPONENT_NAME} .unitAbilities {
 	float: right;
@@ -41,7 +41,7 @@ export default Vue.component(COMPONENT_NAME, {
 	},
 	template: `
 		<div class="${COMPONENT_NAME}">
-			<img class="unitPortrait" :src="portraitSrc">
+			<img class="unitPortrait" :src="portraitSrc" onclick="location.reload()"><!-- reload on click for convenience when testing on mobile -->
 			<div class="unitStats">
 				<UnitStats
 					:unitId="selectedUnitId"

@@ -1,3 +1,5 @@
+const WEBSOCKET_URL = 'ws://' + window.location.hostname + ':9090'
+
 export default new class ServerConnection extends EventEmitter3 {
 	constructor() {
 		super()
@@ -28,7 +30,7 @@ export default new class ServerConnection extends EventEmitter3 {
 			return
 		}
 
-		let openingSocket = new WebSocket('ws://localhost:9090')
+		let openingSocket = new WebSocket(WEBSOCKET_URL)
 
 		openingSocket.onopen = () => {
 			this.socket = openingSocket
@@ -39,6 +41,7 @@ export default new class ServerConnection extends EventEmitter3 {
 		openingSocket.onclose = () => {
 			console.log('(serverConnection) WebSocket closed! Attempting reconnection...')
 			this.socket = undefined
+			this.emit('disconnect')
 			this.connectIfOkay()
 		}
 

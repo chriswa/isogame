@@ -5,7 +5,7 @@ import StatBar from './StatBar.js'
 const COMPONENT_NAME = 'StatBar'
 
 addCssRule(`.${COMPONENT_NAME} {
-	width: 5vw;
+	width: 100px;
 	height: 10px;
 	border: 1px solid white;
 	display: inline-block;

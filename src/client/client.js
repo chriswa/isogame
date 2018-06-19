@@ -6,17 +6,18 @@ import RemoteBattleAuthority from './RemoteBattleAuthority.js'
 import TownGUI from '../gui/town/TownGUI.js'
 import FSM from '../util/FSM.js'
 
+
+setTimeout(() => {
+	//TownGUI.$emit('startLocal')
+}, 1000)
+
+
 // ============
 //  CLIENT FSM
 // ============
 
 let battleAuthority = undefined // undefined if no active battle, otherwise either LocalBattleAuthority or RemoteBattleAuthority
 const clientFSM = new FSM({
-	authenticating: {
-		onEnterState() {
-			console.log(`(clientFSM) authenticating...`)
-		},
-	},
 	locked: {
 		onEnterState() {
 			console.log(`(clientFSM) locked! reload the page`)
@@ -41,7 +42,7 @@ const clientFSM = new FSM({
 		render() { battleAuthority.render() },
 	},
 })
-clientFSM.setState('authenticating') // initial state
+clientFSM.setState('town') // initial state
 
 
 // ================
@@ -101,14 +102,14 @@ function startLocalBattle(localBattleId) {
 	})
 }
 
-const supervisedBattleSystem = new EventEmitter3()
+const serverLayer = new EventEmitter3()
 
-supervisedBattleSystem.on('start', () => {
+serverLayer.on('supervisedBattleStart', () => {
 	if (localBattleAuthority) {
 		localBattleAuthority.stop()
 	}
 })
-supervisedBattleSystem.on('victory', () => {
+serverLayer.on('supervisedBattleEnd', () => {
 	if (localBattleAuthority) {
 		localBattleAuthority.start()
 		battleAuthority = localBattleAuthority
@@ -118,10 +119,16 @@ supervisedBattleSystem.on('victory', () => {
 		clientFSM.setState('town')
 	}
 })
-supervisedBattleSystem.on('localControl', () => { // when we connect or reconnect and there is no supervised battle to resume
+serverLayer.on('localControl', () => { // when we connect or reconnect and there is no supervised battle to resume
 	if (clientFSM.stateName === 'authenticating') { // we don't want to stop a local battle for a temporarily dropped connection
 		clientFSM.setState('town')
 	}
+})
+serverLayer.on('connect', () => {
+	TownGUI.isConnected = true
+})
+serverLayer.on('disconnect', () => {
+	TownGUI.isConnected = false
 })
 
 
@@ -129,10 +136,14 @@ supervisedBattleSystem.on('localControl', () => { // when we connect or reconnec
 //  SERVER CONNECTION
 // ===================
 
+
 let loginPayload = window.localStorage.getItem('loginPayload')
 loginPayload = loginPayload ? JSON.parse(loginPayload) : undefined
 console.log(`loginPayload from localStorage:`, loginPayload)
 
+serverConnection.on('disconnect', () => {
+	serverLayer.emit('disconnect')
+})
 serverConnection.on('log', (payload) => {
 	console.log(`[Server Log]`, payload)
 })
@@ -147,10 +158,12 @@ serverConnection.on('userConnectedElsewhere', (payload) => {
 	clientFSM.setState('locked')
 })
 serverConnection.on('noSupervisedBattle', (payload) => { // login successful and there is no supervised battle to reconnect to (no payload)
-	supervisedBattleSystem.emit('localControl')
+	serverLayer.emit('connect')
+	serverLayer.emit('localControl')
 })
 serverConnection.on('startSupervisedBattle', (payload) => {
-	supervisedBattleSystem.emit('start') // give local battle a chance to cleanly shutdown in preparation of continuing after the supervised battle
+	serverLayer.emit('connect')
+	serverLayer.emit('supervisedBattleStart') // give local battle a chance to cleanly shutdown in preparation of continuing after the supervised battle
 	clientFSM.setState('supervisedBattle')
 	const battleBlueprint = payload.battleBlueprint
 	const previousResults = payload.previousResults
@@ -160,7 +173,7 @@ serverConnection.on('startSupervisedBattle', (payload) => {
 		serverConnection.send('decision', { abilityId, target })
 	})
 	battleAuthority.on('dismiss', () => {
-		supervisedBattleSystem.emit('victory') // either continue the paused local battle or go to town
+		serverLayer.emit('supervisedBattleEnd') // either continue the paused local battle or go to town
 	})
 })
 serverConnection.on('results', (payload) => {

@@ -12,21 +12,54 @@ export default class MouseController {
 		cameraTweener.reset()
 		camera.reset()
 
+		let accumulatedGestureRotation = 0
+		const gestureRotationRadianThreshold = 0.5
+
 		this.inputLayer = {
 			layerOrder: 10,
 			dragThreshold: 4,
 			onMouseDown(pos, button) {
 				return true // capture all mousedown events for dragging (returning true means we will get onClick or onDrag(s) events)
 			},
-			onDrag(deltaPos, button) {
+
+			onGestureStart(pos) {
+				return true // capture all gestures (returning true means we will get future gesture events)
+			},
+			onGestureMove(deltaPos, deltaAngle, distanceFactor) {
+				this.panPosition(deltaPos)
+				cameraTweener.setZoom(cameraTweener.getZoom() * ((1 / distanceFactor) / 10 + 9/10))
+				camera.rotation[1] -= deltaAngle
+				//accumulatedGestureRotation += deltaAngle
+				//if (accumulatedGestureRotation < -gestureRotationRadianThreshold / 2) {
+				//	accumulatedGestureRotation += gestureRotationRadianThreshold
+				//	cameraTweener.setTargetFacing((cameraTweener.getFacing() - 1) % 4, 'fast')
+				//}
+				//else if (accumulatedGestureRotation > gestureRotationRadianThreshold / 2) {
+				//	accumulatedGestureRotation -= gestureRotationRadianThreshold
+				//	cameraTweener.setTargetFacing((cameraTweener.getFacing() + 1) % 4, 'fast')
+				//}
+			},
+			onGestureEnd() {
+				const closestFacing = Math.floor(camera.rotation[1] / (Math.PI / 2)) % 4
+				cameraTweener.setTargetFacing(-closestFacing, 'slow')
+				accumulatedGestureRotation = 0
+			},
+			onTouchClick(pos) {
+				onClickCallback(pos)
+			},
+
+			panPosition(deltaPos) {
+				// FIXME: use proper math instead of fudging stuff
+				//const [xScale, yScale] = camera.getAspectScaleXY()
+				const angle = cameraTweener.getRawFacing()
+				const cx = (-Math.sin(angle) * deltaPos[1] + Math.cos(angle) * deltaPos[0]) / 16 // WHY SIXTEEN?
+				const cz = (Math.sin(angle) * deltaPos[0] + Math.cos(angle) * deltaPos[1]) / 16 // WHY SIXTEEN?
+				const scale = (1 / cameraTweener.getRawZoom()) / 40 // WHY FORTY?!
+				cameraTweener.rawMoveCenter(cx * scale, 0, cz * scale)
+			},
+			onMouseDrag(deltaPos, button) {
 				if (button === 0) { // left mouse button
-					// FIXME: use proper math instead of fudging stuff
-					//const [xScale, yScale] = camera.getAspectScaleXY()
-					const angle = cameraTweener.getRawFacing()
-					const cx = (-Math.sin(angle) * deltaPos[1] + Math.cos(angle) * deltaPos[0]) / 16 // WHY SIXTEEN?
-					const cz = (Math.sin(angle) * deltaPos[0] + Math.cos(angle) * deltaPos[1]) / 16 // WHY SIXTEEN?
-					const scale = (1 / cameraTweener.getRawZoom()) / 40 // WHY FORTY?!
-					cameraTweener.rawMoveCenter(cx * scale, 0, cz * scale)
+					this.panPosition(deltaPos)
 				}
 				else if (button === 1) { // middle mouse button
 					camera.rotation[0] += -deltaPos[1] / 500
@@ -35,12 +68,12 @@ export default class MouseController {
 					camera.rotation[1] += deltaPos[0] / 200
 				}
 			},
-			onDragStart(button) {
+			onMouseDragStart(button) {
 				if (button === 2) { // right mouse button
 					cameraTweener.cancelFacingTween()
 				}
 			},
-			onDragEnd(button) {
+			onMouseDragEnd(button) {
 				if (button === 2) { // right mouse button
 					const closestFacing = Math.floor(camera.rotation[1] / (Math.PI / 2)) % 4
 					cameraTweener.setTargetFacing(-closestFacing, 'slow')

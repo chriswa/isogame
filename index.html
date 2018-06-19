@@ -4,7 +4,11 @@
 		<meta charset="utf-8">
 		<title>isogame</title>
 
+		<link rel="manifest" href="manifest.json">
+		<meta name="viewport" content="width=device-width,user-scalable=no">
+
 		<style>
+
 			#mrdoob-stats-mount > div { left: auto !important; right: 0; } /* reposition mrdoob's stats */
 
 			/* meyer reset reloaded - http://meyerweb.com/eric/thoughts/2007/05/01/reset-reloaded/ */
@@ -28,6 +32,7 @@
 							-ms-user-select: none; /* Internet Explorer/Edge */
 									user-select: none; /* Non-prefixed version, currently
 																				supported by Chrome and Opera */
+				overflow: hidden;
 			}
 
 			#mainCanvas {

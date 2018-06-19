@@ -1,6 +1,9 @@
 import WebSocket from 'ws'
+import http from 'http'
 
-const wsServer = new WebSocket.Server({ port: 9090 })
+const server = http.createServer()
+
+const wsServer = new WebSocket.Server({ server })
 export default wsServer
 
 // manage broken connections with a heartbeat ping
@@ -29,3 +32,6 @@ wsServer.on('connection', (wsConnection) => {
 	})
 })
 
+server.listen(9090, function () {
+	console.log('(websocketServer) Listening on port 9090');
+})

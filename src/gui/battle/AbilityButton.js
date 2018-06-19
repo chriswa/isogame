@@ -6,8 +6,8 @@ const COMPONENT_NAME = 'AbilityButton'
 
 addCssRule(`.${COMPONENT_NAME} {
 	background-color: #000;
-	width: 4vw;
-	height: 4vw;
+	width: 76px;
+	height: 76px;
 	color: white;
 	padding: 5px;
 
@@ -19,6 +19,18 @@ addCssRule(`.${COMPONENT_NAME} {
 	-webkit-font-smoothing: inherit;
 	-moz-osx-font-smoothing: inherit;
 	-webkit-appearance: none;
+}`)
+addCssRule(`@media only screen and (max-width: 1000px) {
+	.${COMPONENT_NAME} {
+		width: 50px;
+		height: 50px;
+	}
+}`)
+addCssRule(`@media only screen and (max-width: 700px) {
+	.${COMPONENT_NAME} {
+		width: 30px;
+		height: 30px;
+	}
 }`)
 addCssRule(`.${COMPONENT_NAME}.selected {
 	border: 2px solid #fff;

@@ -1,13 +1,14 @@
 import addCssRule from './../addCssRule.js'
 
+addCssRule(`#townGui {
+	color: white;
+}`)
 addCssRule(`#townGui h1 {
 	font-size: 300%;
-	color: white;
 	margin: 20px;
 }`)
 addCssRule(`#townGui h2 {
 	font-size: 150%;
-	color: white;
 	margin-bottom: 10px;
 }`)
 addCssRule(`#townGui .section {
@@ -38,6 +39,7 @@ const vm = new Vue({
 	data() {
 		return {
 			isActive: false,
+			isConnected: false,
 			matchMakerSubscriptions: [],
 		}
 	},
@@ -49,16 +51,19 @@ const vm = new Vue({
 					<h2>Local Battles</h2>
 					<button @click="startLocal('Local1')">Local1</button>
 				</div>
-				<div class="section">
+				<div class="section" v-if="!isConnected">
+					<p>Connecting to server...</p>
+				</div>
+				<div class="section" v-if="isConnected">
 					<h2>Challenges (supervised by server)</h2>
 					<button @click="startChallenge('Challenge1')">Challenge1</button>
 				</div>
-				<div class="section">
+				<div class="section" v-if="isConnected">
 					<h2>PVP MatchMaking System</h2>
 					<button @click="matchMakerSubscribe('SIMPLE_PVP')">Subscribe (SIMPLE_PVP)</button>
 					<button @click="matchMakerUnsubscribe('SIMPLE_PVP')">Unsubscribe (SIMPLE_PVP)</button>
 					<button @click="matchMakerUnsubscribeAll">Unsubscribe All</button>
-					</div>
+				</div>
 		</div>
 		</div>
 	`,

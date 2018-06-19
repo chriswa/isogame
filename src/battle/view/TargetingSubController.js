@@ -22,6 +22,7 @@ export default class TargetingSubController extends BaseSubController {
 		BattleGUI.forceUpdateAll()
 		this.battleController.mouseController.activate()
 		this.view.showActiveUnitIndicator(this.model.getActiveUnitId())
+		this.view.magnifierEnabled = true
 	}
 	onStateExit() {
 		this.removeActiveTargetingUi()
@@ -30,6 +31,7 @@ export default class TargetingSubController extends BaseSubController {
 		this.view.resetUnitGlows()
 		this.view.setTopText('')
 		BattleGUI.selectUnitId(undefined)
+		this.view.magnifierEnabled = false
 	}
 	removeActiveTargetingUi() {
 		if (this.activeTargetingUI) {

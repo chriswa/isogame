@@ -13,14 +13,14 @@ const vm = new Vue({
 			battleModelUpdateCounter: 0,
 			selectedUnitId: undefined,
 			selectedAbilityId: undefined,
-			topText: "",
-			tooltipHtml: `
+			topText: '',
+			tooltipHtml: '',/*`
 				<div class="manaCost">30 mana</div>
 				<h1>Hello Tooltip!</h1>
 				<p>Testing 123</p>
-				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque interdum in tellus ac commodo. Duis sed ipsum et purus condimentum suscipit ac et enim. Suspendisse sit amet est ac enim pharetra ullamcorper. Mauris non maximus lectus. Aenean lacinia mauris mi, id pretium nisi fermentum id. Curabitur convallis risus quis facilisis porta. Integer quis eros est. Duis pretium risus vel lorem finibus imperdiet. Integer felis lorem, vehicula sed dapibus sit amet, congue sit amet tellus.</p>
-				<p>Nunc vestibulum fringilla iaculis. Vivamus ut consequat libero, at tempor magna. Sed id turpis congue, dignissim nunc ac, viverra orci. Mauris dignissim augue elementum, egestas libero id, rutrum erat. Nunc at nunc eget risus dictum varius pharetra cursus nulla. Ut tincidunt eu augue sit amet viverra. Mauris vitae venenatis felis.</p>
-			`,
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque interdum in tellus ac commodo. Duis sed ipsum et purus condimentum suscipit ac et enim.</p>
+				<p>Nunc vestibulum fringilla iaculis. Vivamus ut consequat libero, at tempor magna. Sed id turpis congue, dignissim nunc ac, viverra orci.</p>
+			`,*/
 		}
 	},
 	template: `

@@ -1,3 +1,9 @@
+import * as debugCanvas from '../gfx/debugCanvas.js'
+
+
+
+export const hasTouch = 'ontouchstart' in window
+
 export const latestMousePos = twgl.v3.create()
 
 export const eventQueue = []
@@ -34,9 +40,39 @@ document.addEventListener('mouseup', e => {
 	isButtonDown[buttonNumbersToNames[e.button]] = false
 	eventQueue.push({ type: 'mouseup', button: e.button, pos: [e.clientX, e.clientY] })
 })
+
 eventElement.addEventListener('wheel', e => {
 	eventQueue.push({ type: 'wheel', deltaY: e.deltaY, pos: [e.clientX, e.clientY] })
 })
+
+function getTouchesAsArray(e) {
+	const touches = []
+	for (let i = 0; i < e.touches.length; i += 1) {
+		const touch = e.touches[i]
+		touches.push([touch.pageX, touch.pageY])
+	}
+	return touches
+}
+
+eventElement.addEventListener('touchstart', e => {
+	eventQueue.push({ type: 'touchstart', touches: getTouchesAsArray(e) })
+	e.preventDefault()
+})
+document.addEventListener('touchmove', e => {
+	eventQueue.push({ type: 'touchmove', touches: getTouchesAsArray(e) })
+	e.preventDefault()
+})
+eventElement.addEventListener('touchend', e => {
+	eventQueue.push({ type: 'touchend', touches: getTouchesAsArray(e) })
+	e.preventDefault()
+})
+
+//setTimeout(() => {
+//	eventQueue.push({ type: 'touchstart', touches: [[100, 100]]})
+//	eventQueue.push({ type: 'touchstart', touches: [[100, 100], [200, 200]]})
+//	eventQueue.push({ type: 'touchmove', touches: [[100, 100], [205, 195]]})
+//}, 1000)
+
 
 // ------------------------------------------------------------------------
 
@@ -64,10 +100,10 @@ export class InputLayerInterface { // our interface (consumers do not need to in
 		this.layerOrder = 0 // lower numbers are first
 		this.dragThreshold = 4
 	}
-	onMouseDown(pos, button) { return false } // if true, we "capture" the mousedown event and will be called for onClick or onDrag(s)
-	onDrag(deltaPos, button) { }
-	onDragStart(button) { }
-	onDragEnd(button) { }
+	onMouseDown(pos, button) { return false } // if true, we "capture" the mousedown event and will be called for onClick or onMouseDrag(s)
+	onMouseDrag(deltaPos, button) { }
+	onMouseDragStart(button) { }
+	onMouseDragEnd(button) { }
 	onClick(pos, button) { }
 	onWheel(pos, deltaY) { }
 }
@@ -91,9 +127,9 @@ class ButtonState {
 		if (this.isButtonDown && this.targetLayer) {
 			if (this.isDragging) {
 				const deltaPos = [pos[0] - this.startPos[0], pos[1] - this.startPos[1]]
-				this.targetLayer.onDrag(deltaPos, this.button)
+				this.targetLayer.onMouseDrag(deltaPos, this.button)
 				this.isDragging = false
-				this.targetLayer.onDragEnd(this.button)
+				this.targetLayer.onMouseDragEnd(this.button)
 			}
 			else {
 				this.targetLayer.onClick(pos, this.button)
@@ -112,14 +148,14 @@ class ButtonState {
 				const deltaSquared = dx * dx + dy * dy
 				if (deltaSquared >= dragThresholdSquared) {
 					this.isDragging = true
-					this.targetLayer.onDragStart(this.button)
+					this.targetLayer.onMouseDragStart(this.button)
 				}
 			}
 			if (this.isDragging) {
 				const deltaPos = [pos[0] - this.startPos[0], pos[1] - this.startPos[1]]
-				this.startPos[0] = pos[0] // update drag start? this is to support onDrag expecting delta positions
+				this.startPos[0] = pos[0] // update drag start? this is to support onMouseDrag expecting delta positions
 				this.startPos[1] = pos[1] // "
-				this.targetLayer.onDrag(deltaPos, this.button)
+				this.targetLayer.onMouseDrag(deltaPos, this.button)
 			}
 		}
 	}
@@ -138,14 +174,18 @@ const buttonStates = [
 ]
 
 export function update() {
-	_.each(eventQueue, ({ type, button, deltaY, pos }) => {
-		if (type === 'wheel') {
-			_.find(inputLayers, inputLayer => { return inputLayer.active && inputLayer.onWheel(pos, deltaY) }) // stop after the first one returns true
+	_.each(eventQueue, (event) => {
+		const type = event.type
+		if (event.touches) {
+			processTouchEvent(type, event.touches)
+		}
+		else if (type === 'wheel') {
+			_.find(inputLayers, inputLayer => { return inputLayer.active && inputLayer.onWheel(event.pos, event.deltaY) }) // stop after the first one returns true
 		}
 		else {
-			const buttonState = buttonStates[button]
+			const buttonState = buttonStates[event.button]
 			if (buttonState) {
-				buttonState[type](pos)
+				buttonState[type](event.pos)
 			}
 		}
 	})
@@ -156,3 +196,123 @@ export function update() {
 export function isDraggingAnyButton() {
 	return !_.every(buttonStates, (buttonState) => { return !buttonState.isDragging })
 }
+
+// =========
+//  TOUCHES
+// =========
+
+const gestureState = new class {
+	constructor() {
+		this.reset()
+	}
+	reset() {
+		this.targetLayer = undefined
+		this.maxFingerCount = 0
+		this.averagePos = [0, 0]
+		this.averageAngle = 0
+		this.averageDistance = 0
+	}
+	update(touches, callback) {
+		const newAveragePos = [0, 0]
+		let newAverageAngle = 0
+		let newAverageDistance = 0
+		let comboCount = 0
+		if (touches.length > 0) {
+			for (let i1 = 0; i1 < touches.length; i1 += 1) {
+				const touch1 = touches[i1]
+
+				newAveragePos[0] += touch1[0]
+				newAveragePos[1] += touch1[1]
+
+				for (let i2 = i1 + 1; i2 < touches.length; i2 += 1) {
+					const touch2 = touches[i2]
+
+					comboCount += 1
+
+					const dx = touch2[0] - touch1[0]
+					const dy = touch2[1] - touch1[1]
+
+					newAverageAngle += Math.atan2(dy, dx)
+					newAverageDistance += Math.sqrt(dx * dx + dy * dy)
+				}
+			}
+			newAveragePos[0] /= touches.length
+			newAveragePos[1] /= touches.length
+			if (comboCount > 0) {
+				newAverageAngle /= comboCount
+				newAverageDistance /= comboCount
+			}
+		}
+
+		if (callback) {
+			callback(newAveragePos, newAverageAngle, newAverageDistance)
+		}
+
+		this.averagePos = newAveragePos
+		this.averageAngle = newAverageAngle
+		this.averageDistance = newAverageDistance
+	}
+}
+
+export function isMultiGestureActive() {
+	return gestureState.maxFingerCount > 1
+}
+
+export function isTouchActive() {
+	return gestureState.maxFingerCount === 1
+}
+
+
+
+function processTouchEvent(type, touches) {
+	if (type === 'touchstart') {
+		gestureState.maxFingerCount = Math.max(gestureState.maxFingerCount, touches.length)
+		if (gestureState.maxFingerCount === 1) {
+			latestMousePos[0] = touches[0][0]
+			latestMousePos[1] = touches[0][1]
+		}
+		if (gestureState.targetLayer === undefined) {
+			const pos = touches[0]
+			gestureState.targetLayer = _.find(inputLayers, inputLayer => { return inputLayer.active && inputLayer.onGestureStart(pos) })
+		}
+		gestureState.update(touches)
+	}
+	else if (type === 'touchmove') {
+		if (!gestureState.targetLayer) { return }
+		gestureState.maxFingerCount = Math.max(gestureState.maxFingerCount, touches.length)
+		// one finger means show the magnifier
+		if (gestureState.maxFingerCount === 1) {
+			latestMousePos[0] = touches[0][0]
+			latestMousePos[1] = touches[0][1]
+		}
+		// multiple fingers means panning, rotation, and zooming
+		else {
+			gestureState.update(touches, (newAveragePos, newAverageAngle, newAverageDistance) => {
+				const deltaPos = [newAveragePos[0] - gestureState.averagePos[0], newAveragePos[1] - gestureState.averagePos[1]]
+				let deltaAngle = newAverageAngle - gestureState.averageAngle
+				while (deltaAngle >= Math.PI) { deltaAngle -= Math.PI * 2 }
+				while (deltaAngle < -Math.PI) { deltaAngle += Math.PI * 2 }
+				const distanceFactor = gestureState.averageDistance !== 0 ? (newAverageDistance / gestureState.averageDistance) : 1
+
+				gestureState.targetLayer.onGestureMove(deltaPos, deltaAngle, distanceFactor)
+			})
+		}
+	}
+	else if (type === 'touchend') {
+		if (!gestureState.targetLayer) { return }
+		if (touches.length === 0) {
+			if (gestureState.maxFingerCount === 1) {
+				gestureState.targetLayer.onTouchClick(latestMousePos)
+			}
+			else {
+				gestureState.targetLayer.onGestureEnd()
+			}
+			gestureState.reset()
+			latestMousePos[0] = -999 // prevent mousepick from using latestMousePos
+		}
+		else {
+			gestureState.update(touches)
+		}
+	}
+}
+
