@@ -18,6 +18,7 @@ export default class RemoteBattleAuthority extends EventEmitter3 {
 		})
 
 		this.battleController.on('dismiss', () => {
+			this.battleController.destroy()
 			this.emit('dismiss', undefined)
 		})
 

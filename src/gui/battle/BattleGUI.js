@@ -54,6 +54,10 @@ const vm = new Vue({
 			setBattleModel(battleModel_)
 			this.battleModelHack += 1 // force update
 		},
+		hide() {
+			setBattleModel(undefined)
+			this.battleModelHack += 1 // force update
+		},
 		forceUpdateAll() {
 			this.battleModelUpdateCounter += 1
 		},

@@ -63,6 +63,7 @@ export default class BattleController extends EventEmitter3 {
 
 	destroy() { // called by owner
 		this.mouseController.destroy() // it has eventlisteners to clean up
+		BattleGUI.hide()
 	}
 
 	log(arg0, ...args) {
