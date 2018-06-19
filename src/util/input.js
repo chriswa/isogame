@@ -282,8 +282,14 @@ function processTouchEvent(type, touches) {
 		gestureState.maxFingerCount = Math.max(gestureState.maxFingerCount, touches.length)
 		// one finger means show the magnifier
 		if (gestureState.maxFingerCount === 1) {
-			latestMousePos[0] = touches[0][0]
-			latestMousePos[1] = touches[0][1]
+			if (isScreenPosCaptured(touches[0])) { // if the finger strays into GUI, stop showing the magnifier
+				gestureState.reset()
+				latestMousePos[0] = -999 // prevent mousepick from using latestMousePos
+			}
+			else {
+				latestMousePos[0] = touches[0][0]
+				latestMousePos[1] = touches[0][1]
+			}
 		}
 		// multiple fingers means panning, rotation, and zooming
 		else {

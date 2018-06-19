@@ -59,14 +59,18 @@ export default Vue.component(COMPONENT_NAME, {
 	props: ['abilityId', 'isSelected', 'unitId'],
 	data() {
 		return {
+			isTouchStillTargeted: false,
 		}
 	},
 	template: `
 		<button
 			:class="{ ${COMPONENT_NAME}: true, selected: isSelected, enabled: isCastable, disabled: !isCastable }"
-			@click="isCastable && $emit('click')"
+			@click="onClick"
 			@mouseover="onMouseover"
 			@mouseout="onMouseout"
+			@touchstart="onTouchstart"
+			@touchmove="onTouchmove"
+			@touchend="onTouchend"
 			:disabled="!abilityImage"
 		>
 			<img
@@ -76,11 +80,45 @@ export default Vue.component(COMPONENT_NAME, {
 		</button>
 	`,
 	methods: {
+		onClick() {
+			if (this.isCastable) {
+				this.$emit('click')
+			}
+		},
 		onMouseover() {
 			this.$root.$emit('tooltip', this.tooltip)
 		},
 		onMouseout() {
 			this.$root.$emit('tooltip', undefined)
+		},
+		onTouchstart(e) {
+			if (e.touches.length === 1) {
+				this.$root.$emit('tooltip', this.tooltip)
+				this.isTouchStillTargeted = true
+			}
+			else {
+				this.$root.$emit('tooltip', undefined)
+				this.isTouchStillTargeted = false
+			}
+			e.preventDefault()
+		},
+		onTouchmove(e) {
+			const touch0 = e.touches[0]
+			const elementUnderFinger = document.elementFromPoint(touch0.pageX, touch0.pageY)
+			if (elementUnderFinger !== e.target) {
+				this.$root.$emit('tooltip', undefined)
+				this.isTouchStillTargeted = false
+			}
+		},
+		onTouchend(e) {
+			this.$root.$emit('tooltip', undefined)
+			if (this.isTouchStillTargeted) {
+				const touch0 = e.changedTouches[0]
+				const elementUnderFinger = document.elementFromPoint(touch0.pageX, touch0.pageY)
+				if (elementUnderFinger === e.target) {
+					this.onClick()
+				}
+			}
 		},
 	},
 	computed: {

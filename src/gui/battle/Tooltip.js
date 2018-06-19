@@ -7,7 +7,7 @@ addCssRule(`.${COMPONENT_NAME} {
 	bottom: 100px;
 	right: 10px;
 	max-width: 30vw;
-	min-width: 20vw;
+	min-width: 320px;
 
 	padding: 2px;
 	border-radius: 25px;
