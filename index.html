@@ -6,6 +6,7 @@
 
 		<link rel="manifest" href="manifest.json">
 		<meta name="viewport" content="width=device-width,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
 
 		<style>
 
@@ -34,7 +35,7 @@
 																				supported by Chrome and Opera */
 				overflow: hidden;
 			}
-
+			
 			#mainCanvas {
 				width: 100vw;
 				height: 100vh;
@@ -56,6 +57,7 @@
 				width: 100vw;
 				height: 100vh;
 				pointer-events: none; /* never the target of mouse events (parent element, which covers the entire viewport) */
+				overflow: hidden;
 			}
 			.guiRoot > * {
 				pointer-events: auto; /* accept pointer events (child elements) */
@@ -83,6 +85,8 @@
 		<script src="lib/vue-dev@2.5.16.js"></script>
 		<script src="lib/eventemitter3@3.1.0.min.js"></script>
 		
+		<script src="lib/landscapeFullscreen.js"></script>
+
 		<!-- mrdoob stats -->
 		<div id="mrdoob-stats-mount"></div>
 		<script>

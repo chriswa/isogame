@@ -13,11 +13,11 @@ setInterval(() => {
 		if (wsConnection.isAlive === false) {
 			wsConnection.emit('terminate')
 			wsConnection.terminate()
-			clearInterval(interval)
-			return
 		}
-		wsConnection.isAlive = false
-		wsConnection.ping()
+		else {
+			wsConnection.isAlive = false
+			wsConnection.ping()
+		}
 	})
 }, intervalMs)
 
