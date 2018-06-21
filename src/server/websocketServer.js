@@ -16,7 +16,9 @@ setInterval(() => {
 		}
 		else {
 			wsConnection.isAlive = false
-			wsConnection.ping()
+			if (wsConnection.readyState === WebSocket.OPEN) {
+				wsConnection.ping()
+			}
 		}
 	})
 }, intervalMs)

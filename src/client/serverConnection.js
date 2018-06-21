@@ -62,7 +62,7 @@ export default new class ServerConnection extends EventEmitter3 {
 		}
 	}
 	send(type, payload) {
-		if (this.socket) {
+		if (this.socket && this.socket.readyState === WebSocket.OPEN) {
 			this.socket.send(JSON.stringify([type, payload]))
 		}
 	}

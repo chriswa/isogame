@@ -1,3 +1,4 @@
+import WebSocket from 'ws'
 import db from './db.js'
 import EventEmitter from 'events'
 import UserAccount from './UserAccount.js'
@@ -63,7 +64,9 @@ export default class UserAuthenticator extends EventEmitter {
 			...this.newUserRecord,
 		}
 
-		wsConnection.send(JSON.stringify(['updateLoginPayload', { username, password }]))
+		if (wsConnection.readyState === WebSocket.OPEN) {
+			wsConnection.send(JSON.stringify(['updateLoginPayload', { username, password }]))
+		}
 
 		this.finalizeLogin(wsConnection, username, userRecord)
 	}
@@ -94,7 +97,9 @@ export default class UserAuthenticator extends EventEmitter {
 	}
 	closeWithError(wsConnection, error) {
 		console.error(`(UserAuthenticator) closeWithError: ${error}`)
-		wsConnection.send(JSON.stringify(['error', error]))
-		wsConnection.close()
+		if (wsConnection.readyState === WebSocket.OPEN) {
+			wsConnection.send(JSON.stringify(['error', error]))
+			wsConnection.close()
+		}
 	}
 }

@@ -32,13 +32,13 @@ export async function resolve(specifier, parentModuleURL = baseURL, defaultResol
   const isESM = (specifier[0] === '.' || specifier[0] === '/') // naive?
   
   if (isESM) {
-    const finalPath = (new URL(specifier, parentModuleURL).pathname).replace(/^\//, '')
+    const finalPath = (new URL(specifier, parentModuleURL).pathname).replace(/^\/(\w:\/)/, '$1')
     if (!fs.existsSync(finalPath)) {
-      console.log(chalk.red(    `(mjs-loader) import failure!`))
+      console.log(chalk.red(`(mjs-loader) import failure!`))
       console.log(chalk.magenta(`               ${parentModuleURL.toString()}`))
-      console.log(chalk.red(    `             attempted to import`))
+      console.log(chalk.yellow(`             attempted to import`))
       console.log(chalk.magenta(`               ${specifier}`))
-      console.log(chalk.red(    `             which was not found at`))
+      console.log(chalk.yellow(`             which was not found at`))
       console.log(chalk.magenta(`               ${finalPath}`))
     }
     return {

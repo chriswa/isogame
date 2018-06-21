@@ -1,4 +1,4 @@
-import BattleSimulator from "./BattleSimulator.js"
+import BattleSimulator from './BattleSimulator.js'
 
 export default class AIBattleSimulator extends BattleSimulator {
 
