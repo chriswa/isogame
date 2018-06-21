@@ -1,4 +1,3 @@
-import WebSocket from 'ws'
 import wsServer from './websocketServer.js'
 import UserAuthenticator from './UserAuthenticator.js'
 import UserConnection from './UserConnection.js'
@@ -17,10 +16,8 @@ userAuthenticator.on('authenticated', ({ wsConnection, userAccount }) => {
 	const previousConnection = userConnections[userAccount.username]
 	if (previousConnection) {
 		console.error(chalk.cyan(`(userWebsocketServer) user ${userAccount.username} is already connected! terminating previous connection`))
-		if (previousConnection.readyState === WebSocket.OPEN) {
-			previousConnection.send('userConnectedElsewhere') // tell previous client not to try to automatically reconnect!
-			previousConnection.disconnect()
-		}
+		previousConnection.send('userConnectedElsewhere', undefined) // tell previous client not to try to automatically reconnect!
+		previousConnection.disconnect()
 	}
 
 	userConnections[userAccount.username] = new UserConnection(wsConnection, userAccount)

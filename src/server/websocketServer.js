@@ -25,6 +25,11 @@ setInterval(() => {
 
 wsServer.on('connection', (wsConnection) => {
 	wsConnection.isAlive = true
+	wsConnection.safeSendObject = (obj) => {
+		if (wsConnection.readyState === WebSocket.OPEN) {
+			wsConnection.send(JSON.stringify(obj))
+		}
+	}
 	wsConnection.on('pong', () => {
 		wsConnection.isAlive = true
 	})

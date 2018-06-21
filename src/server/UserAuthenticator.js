@@ -1,4 +1,3 @@
-import WebSocket from 'ws'
 import db from './db.js'
 import EventEmitter from 'events'
 import UserAccount from './UserAccount.js'
@@ -64,10 +63,8 @@ export default class UserAuthenticator extends EventEmitter {
 			...this.newUserRecord,
 		}
 
-		if (wsConnection.readyState === WebSocket.OPEN) {
-			wsConnection.send(JSON.stringify(['log', `Welcome, new user! Assigning automatic username and password.`]))
-			wsConnection.send(JSON.stringify(['updateLoginPayload', { username, password }]))
-		}
+		wsConnection.safeSendObject(['log', `Welcome, new user! Assigning automatic username and password.`])
+		wsConnection.safeSendObject(['updateLoginPayload', { username, password }])
 
 		this.finalizeLogin(wsConnection, username, userRecord)
 	}
@@ -79,9 +76,7 @@ export default class UserAuthenticator extends EventEmitter {
 		// authenticate password
 		if (!userRecord || userRecord.password !== password) {
 
-			if (wsConnection.readyState === WebSocket.OPEN) {
-				wsConnection.send(JSON.stringify(['updateLoginPayload', undefined]))
-			}
+			wsConnection.safeSendObject(['updateLoginPayload', undefined])
 
 			return this.closeWithError(wsConnection, "invalid username or password")
 		}
@@ -103,9 +98,7 @@ export default class UserAuthenticator extends EventEmitter {
 	}
 	closeWithError(wsConnection, error) {
 		console.error(`(UserAuthenticator) closeWithError: ${error}`)
-		if (wsConnection.readyState === WebSocket.OPEN) {
-			wsConnection.send(JSON.stringify(['error', error]))
-			wsConnection.close()
-		}
+		wsConnection.safeSendObject(['error', error])
+		wsConnection.close()
 	}
 }

@@ -1,4 +1,3 @@
-import WebSocket from 'ws'
 import version from './version.js'
 import UserAccount from './UserAccount.js'
 import matchMaker from './matchMaker.js'
@@ -114,8 +113,6 @@ export default class UserConnection {
 		this.supervisedBattle = undefined
 	}
 	send(type, payload) {
-		if (this.wsConnection.readyState === WebSocket.OPEN) {
-			this.wsConnection.send(JSON.stringify([ type, payload ]))
-		}
+		this.wsConnection.safeSendObject([type, payload])
 	}
 }
