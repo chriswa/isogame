@@ -77,6 +77,11 @@ export default class UserAuthenticator extends EventEmitter {
 
 		// authenticate password
 		if (!userRecord || userRecord.password !== password) {
+
+			if (wsConnection.readyState === WebSocket.OPEN) {
+				wsConnection.send(JSON.stringify(['updateLoginPayload', undefined]))
+			}
+
 			return this.closeWithError(wsConnection, "invalid username or password")
 		}
 
