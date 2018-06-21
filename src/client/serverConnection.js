@@ -39,10 +39,12 @@ export default new class ServerConnection extends EventEmitter3 {
 		}
 
 		openingSocket.onclose = () => {
-			console.log('(serverConnection) WebSocket closed! Attempting reconnection...')
+			console.log('(serverConnection) WebSocket closed! Attempting reconnection after timeout...')
 			this.socket = undefined
 			this.emit('disconnect')
-			this.connectIfOkay()
+			setTimeout(() => {
+				this.connectIfOkay()
+			}, 1000)
 		}
 
 		openingSocket.onerror = (error) => {

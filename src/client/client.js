@@ -141,6 +141,9 @@ let loginPayload = window.localStorage.getItem('loginPayload')
 loginPayload = loginPayload ? JSON.parse(loginPayload) : undefined
 console.log(`loginPayload from localStorage:`, loginPayload)
 
+serverConnection.on('error', (payload) => {
+	console.error(`[Server Error]`, payload)
+})
 serverConnection.on('disconnect', () => {
 	serverLayer.emit('disconnect')
 })
