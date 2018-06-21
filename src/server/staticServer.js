@@ -3,7 +3,7 @@ import http from 'http'
 import path from 'path'
 import url from 'url'
 
-const PORT = 8080
+const PORT = 80
 
 const server = http.createServer(function (req, res) {
 	//console.log((new Date()) + ' Received req for ' + req.url)

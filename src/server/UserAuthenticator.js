@@ -65,6 +65,7 @@ export default class UserAuthenticator extends EventEmitter {
 		}
 
 		if (wsConnection.readyState === WebSocket.OPEN) {
+			wsConnection.send(JSON.stringify(['log', `Welcome, new user! Assigning automatic username and password.`]))
 			wsConnection.send(JSON.stringify(['updateLoginPayload', { username, password }]))
 		}
 
