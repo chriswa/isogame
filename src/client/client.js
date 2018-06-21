@@ -152,6 +152,7 @@ serverConnection.on('log', (payload) => {
 })
 serverConnection.on('updateLoginPayload', (payload) => {
 	console.log(`[Server] localStorage loginPayload updated from server:`, payload)
+	serverConnection.setLoginPayload(payload)
 	window.localStorage.setItem('loginPayload', JSON.stringify(payload))
 })
 serverConnection.on('userConnectedElsewhere', (payload) => {
