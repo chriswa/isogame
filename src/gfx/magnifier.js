@@ -31,21 +31,58 @@ ctx.beginPath()
 ctx.arc(canvas.width / 2, canvas.height / 2, canvas.width / 2 - 4, 0, 2 * Math.PI, false)
 ctx.clip()
 
-
-//ctx.globalCompositeOperation = 'source-in'
+//ctx.globalCompositeOperation = 'copy'
 
 export function render() {
 	ctx.fillStyle = 'white'
 	ctx.fillRect(0, 0, canvas.width, canvas.height)
 	const mousePos = input.latestMousePos
-	canvas.style.top = mousePos[1] - (canvas.height + 20) + 'px'
-	canvas.style.left = mousePos[0] - (canvas.width / 2) + 'px'
+	canvas.style.display = 'block'
+	canvas.style.top = (mousePos[1] - (canvas.height + 20)) + 'px'
+	canvas.style.left = (mousePos[0] - (canvas.width / 2)) + 'px'
 	const halfSourceSize = Math.floor(sourceSize / 2)
-	ctx.drawImage(gfx.gl.canvas, mousePos[0] - halfSourceSize, mousePos[1] - halfSourceSize, sourceSize, sourceSize, 0, 0, canvas.width, canvas.height)
+
+	let sx = mousePos[0] - halfSourceSize
+	let sy = mousePos[1] - halfSourceSize
+	let sw = sourceSize
+	let sh = sourceSize
+	let dx = 0
+	let dy = 0
+	let dw = canvas.width
+	let dh = canvas.height
+
+	// on ios, we can't attempt to drawImage from outside of the bounds of the canvas
+	const leftMargin = 0 - sx
+	if (leftMargin > 0) {
+		sx = 0
+		sw -= leftMargin
+		dx += leftMargin * (canvas.width / sourceSize)
+		dw -= leftMargin * (canvas.width / sourceSize)
+	}
+	const rightMargin = sx + sw - gfx.gl.canvas.width
+	if (rightMargin > 0) {
+		sw -= rightMargin
+		dw -= rightMargin * (canvas.width / sourceSize)
+	}
+	const topMargin = 0 - sy
+	if (topMargin > 0) {
+		sy = 0
+		sh -= topMargin
+		dy += topMargin * (canvas.height / sourceSize)
+		dh -= topMargin * (canvas.height / sourceSize)
+	}
+	const bottomMargin = sy + sh - gfx.gl.canvas.height
+	if (bottomMargin > 0) {
+		sh -= bottomMargin
+		dh -= bottomMargin * (canvas.height / sourceSize)
+	}	
+
+	ctx.drawImage(gfx.gl.canvas, sx, sy, sw, sh, dx, dy, dw, dh)
+	
 	ctx.fillStyle = 'black'
 	ctx.fillText('+', canvas.width / 2 - 2, canvas.height / 2 + 4)
 }
 
 export function hide() {
-	canvas.style.top = '-1000px'
+	canvas.style.display = 'none'
 }
