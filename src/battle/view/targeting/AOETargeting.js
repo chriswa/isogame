@@ -7,11 +7,19 @@ import Grid from '../../../util/Grid.js'
 export default class AOETargetingController extends BaseTargetingController {
 	init() {
 	}
+	getValidPickedUnitCoords(mousePick) {
+		const pickedUnitId = mousePick.getUnitId()
+		const pickedUnitCoords = this.model.getUnitCoordsById(pickedUnitId) // or undefined
+		const isPickedUnitValid = this.ability.isValidTarget(pickedUnitCoords)
+		return isPickedUnitValid ? pickedUnitCoords : undefined
+	}
 	render(view, mousePick) {
+		const validPickedUnitCoords = this.getValidPickedUnitCoords(mousePick)
 
-		this.updateUnitGlows(view, undefined) // caster is solid white, mouseover unit is flashing white-black
+		const redFlashUnitId = validPickedUnitCoords ? mousePick.getUnitId() : undefined
+		this.updateUnitGlows(view, undefined, redFlashUnitId)
 
-		const pickedCoords = mousePick.getTileCoords(true)
+		const pickedCoords = validPickedUnitCoords ? validPickedUnitCoords : mousePick.getTileCoords(true)
 		view.fieldView.updateOverlay(testCoords => {
 			//if (!pickedCoords) { return 0 }
 			let colour = overlayColourOptions.NONE
@@ -39,18 +47,17 @@ export default class AOETargetingController extends BaseTargetingController {
 	}
 	onClick(mousePick, decisionCallback) {
 		if (!this.isCasterActiveAndOwned()) { return false } // default click behaviour: select the active unit
-		// clicked on a tile?
-		if (mousePick.hasTileCoords(true)) {
 
-			const tileCoords = mousePick.getTileCoords(true)
+		const validPickedUnitCoords = this.getValidPickedUnitCoords(mousePick)
+		const pickedCoords = validPickedUnitCoords ? validPickedUnitCoords : mousePick.getTileCoords(true)
 
-			// clicked on a valid target tile?
-			if (this.ability.isValidTarget(tileCoords)) {
-				//console.log(`TARGET: ${tileCoords}`)
-				decisionCallback(tileCoords)
-				return true // handled click!
-			}
+		// clicked on a valid target tile?
+		if (this.ability.isValidTarget(pickedCoords)) {
+			//console.log(`TARGET: ${pickedCoords}`)
+			decisionCallback(pickedCoords)
+			return true // handled click!
 		}
+
 		return false // click not handled, allow default click behaviour (i.e. select unit clicked on, or select default active unit)
 	}
 }

@@ -27,10 +27,11 @@ export default class BaseTargetingController {
 	isCasterActiveAndOwned() {
 		return this.model.isItMyTurn() && this.model.getActiveUnitId() == this.castingUnitId
 	}
-	updateUnitGlows(view, targetUnitId) {
+	updateUnitGlows(view, pulseWhiteUnitId, pulseRedUnitId) {
 		view.updateUnitGlows(unitId => {
 			if (unitId === this.castingUnitId) { return billboardGlowOptions.SOLID_WHITE }
-			else if (unitId === targetUnitId) { return billboardGlowOptions.PULSE_WHITE_BLACK }
+			else if (unitId === pulseWhiteUnitId) { return billboardGlowOptions.PULSE_WHITE_BLACK }
+			else if (unitId === pulseRedUnitId) { return billboardGlowOptions.PULSE_RED_YELLOW }
 			else { return billboardGlowOptions.NONE }
 		})
 	}

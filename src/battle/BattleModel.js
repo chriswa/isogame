@@ -39,7 +39,7 @@ export default class BattleModel {
 	}
 	getUnitCoordsById(unitId) {
 		const unit = this.getUnitById(unitId)
-		return unit.pos
+		return unit ? unit.pos : undefined
 	}
 	isItMyTurn() {
 		const activeUnit = this.getUnitById(this.getActiveUnitId())

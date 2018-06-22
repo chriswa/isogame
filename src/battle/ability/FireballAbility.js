@@ -26,6 +26,7 @@ export default class FireballAbility extends BaseAbility {
 		return 2
 	}
 	isValidTarget(target) {
+		if (!target) { return false }
 		const casterDistance = v2.manhattan(this.getUnitCoords(), target)
 		return (casterDistance >= this.args.minTargetDistance && casterDistance <= this.args.maxTargetDistance)
 	}

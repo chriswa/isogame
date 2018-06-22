@@ -59,6 +59,9 @@ const fragmentShaderSource = `precision mediump float;
 		else if (v_glowColour == ${billboardGlowOptions.PULSE_RED_BLACK}.0) {
 			glowcolour += u_glowStrength * vec4(1.0, 0.0, 0.0, 0.0);
 		}
+		else if (v_glowColour == ${billboardGlowOptions.PULSE_RED_YELLOW}.0) {
+			glowcolour += vec4(1.0, 0.0, 0.0, 0.0) + (1.0 - u_glowStrength) * vec4(0.0, 1.0, 0.0, 0.0);
+		}
 
 		vec4 texcolour = texture2D(u_texture, v_texcoord);
 		float alpha = texcolour.a;
