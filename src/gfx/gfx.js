@@ -39,3 +39,7 @@ export function startLoop(callback) {
 	}
 	requestAnimationFrame(mainLoop)
 }
+
+export function insertBeforeGLCanvas(el) {
+	gl.canvas.parentNode.insertBefore(el, gl.canvas.nextSibling)
+}

@@ -18,7 +18,7 @@ canvas.style.height = `${canvas.height}px`
 
 hide()
 
-document.body.insertBefore(canvas, gfx.gl.canvas.nextSibling)
+gfx.insertBeforeGLCanvas(canvas)
 
 
 ctx.beginPath()
