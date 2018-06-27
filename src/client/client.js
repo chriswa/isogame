@@ -172,7 +172,8 @@ serverConnection.on('startSupervisedBattle', (payload) => {
 	const battleBlueprint = payload.battleBlueprint
 	const previousResults = payload.previousResults
 	const myTeamId = payload.myTeamId
-	battleAuthority = new RemoteBattleAuthority(battleBlueprint, myTeamId, previousResults)
+	const timerDetails = payload.timerDetails
+	battleAuthority = new RemoteBattleAuthority(battleBlueprint, myTeamId, timerDetails, previousResults)
 	battleAuthority.on('decision', ({ abilityId, target }) => {
 		serverConnection.send('decision', { abilityId, target })
 	})
@@ -180,8 +181,10 @@ serverConnection.on('startSupervisedBattle', (payload) => {
 		serverLayer.emit('supervisedBattleEnd') // either continue the paused local battle or go to town
 	})
 })
-serverConnection.on('results', (payload) => {
-	battleAuthority.addResults(payload) // assuming battleAuthority is still a RemoteBattleAuthority!
+serverConnection.on('resultsAndTimer', (payload) => {
+	const { results, timerDetails } = payload
+	battleAuthority.addResults(results) // assuming battleAuthority is still a RemoteBattleAuthority!
+	battleAuthority.setTurnClock(timerDetails)
 })
 serverConnection.setLoginPayload(loginPayload)
 serverConnection.connect()

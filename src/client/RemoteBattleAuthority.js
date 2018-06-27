@@ -1,9 +1,8 @@
-import AIBattleSimulator from '../battle/AIBattleSimulator.js'
 import BattleModel from '../battle/BattleModel.js'
 import BattleController from '../battle/view/BattleController.js'
 
 export default class RemoteBattleAuthority extends EventEmitter3 {
-	constructor(battleBlueprint, myTeamId, previousResults, onDecisionCallback) {
+	constructor(battleBlueprint, myTeamId, timerDetails, previousResults, onDecisionCallback) {
 		super()
 
 		this.battleBlueprint = _.cloneDeep(battleBlueprint)
@@ -22,12 +21,17 @@ export default class RemoteBattleAuthority extends EventEmitter3 {
 			this.emit('dismiss', undefined)
 		})
 
+		this.battleController.setTurnClock(timerDetails)
+
 	}
 	addResults(results) {
 		while (results.length) {
 			const result = results.shift()
 			this.battleController.addResult(result)
 		}
+	}
+	setTurnClock(timerDetails) {
+		this.battleController.setTurnClock(timerDetails)
 	}
 	update(dt) {
 		this.battleController.update(dt)

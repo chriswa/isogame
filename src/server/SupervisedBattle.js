@@ -2,6 +2,10 @@ import * as sampleBattleGenerator from './../battle/sampleBattleGenerator.js'
 import AIBattleSimulator from './../battle/AIBattleSimulator.js'
 import BattleModel from './../battle/BattleModel.js'
 import UserConnection from './UserConnection.js'
+import TurnTimer from './TurnTimer.js'
+import NullTurnTimer from './NullTurnTimer.js'
+
+const turnTimerMs = 1000 * 60
 
 function createBattleBlueprintFromDescriptor(battleDescriptor, userConnections) {
 	// TODO: depending on battleDescriptor, take some data from userConnections (e.g. if it's pvp, look for a hunting team config for this match type)
@@ -12,7 +16,7 @@ function createBattleBlueprintFromDescriptor(battleDescriptor, userConnections) 
 const INACTIVITY_TIMEOUT_SECONDS = 60 * 5
 
 export default class SupervisedBattle {
-	constructor(battleDescriptor, userConnections, onBattleCompleteCallback) {
+	constructor(battleDescriptor, userConnections, isTurnTimed, onBattleCompleteCallback) {
 		this.battleDescriptor = battleDescriptor
 		/** @type {Array<UserConnection>} */
 		this.userConnections = _.fromPairs(_.map(userConnections, (userConnection) => [ userConnection.getUsername(), userConnection ])) // { 'username0': uc0 }
@@ -23,6 +27,15 @@ export default class SupervisedBattle {
 		this.resultsQueue = []
 
 		this.setInactivityTimeout()
+
+		const turnTimerClass = isTurnTimed ? TurnTimer : NullTurnTimer
+		this.turnTimer = new turnTimerClass(turnTimerMs)
+		this.turnTimer.on('timeout', (teamId) => {
+			console.log(`(SupervisedBattle) TurnTimer timeout! teamId = ${teamId} - terminating battle!`)
+			this.simulator.applyResult({ type: 'Victory', victoryState: { winningTeamId: teamId, reason: 'TurnTimeout' } })
+			this.sendQueuedResultsAndTimer()
+			this.terminate()
+		})
 
 		this.battleBlueprint = createBattleBlueprintFromDescriptor(battleDescriptor, userConnections)
 
@@ -47,12 +60,13 @@ export default class SupervisedBattle {
 		this.timeout = setTimeout(() => {
 			console.log(`(SupervisedBattle) inactivity timeout! terminating battle.`)
 			this.simulator.applyResult({ type: 'Victory', victoryState: { winningTeamId: undefined, reason: 'InactivityTimeout' } })
-			this.sendQueuedResults()
+			this.sendQueuedResultsAndTimer()
 			this.terminate()
 		}, INACTIVITY_TIMEOUT_SECONDS * 1000)
 	}
 	terminate() {
 		this.clearInactivityTimeout()
+		this.turnTimer.destroy()
 		const victoryState = this.model.getVictoryState()
 		// unregister with supervisedBattleRegistrar (so users don't get reconnected to this battle, and we can be garbage collected)
 		this.onBattleCompleteCallback(victoryState)
@@ -69,22 +83,34 @@ export default class SupervisedBattle {
 				previousResults.push(payload)
 			}
 		})
-		userConnection.onSupervisedBattleStart(this, { battleBlueprint: this.battleBlueprint, myTeamId, previousResults })
+		const timerDetails = this.turnTimer.getTimerDetails()
+		userConnection.onSupervisedBattleStart(this, { battleBlueprint: this.battleBlueprint, myTeamId, timerDetails, previousResults })
 	}
 	advanceSimAndSendResults() {
 		//console.log(`(SupervisedBattle) advanceSimAndSendResults`)
 		this.simulator.advanceWithAI()
-		this.sendQueuedResults()
+		const freeTimeMs = this.sumAnimationTimeMs(this.resultsQueue)
+		this.turnTimer.start(this.simulator.getActiveTeamId(), freeTimeMs)
+		this.setInactivityTimeout()
+		this.sendQueuedResultsAndTimer()
 		const victoryState = this.model.getVictoryState()
 		if (victoryState) {
 			console.log(`(SupervisedBattle) victory! terminating battle.`)
 			this.terminate()
 		}
 	}
-	sendQueuedResults() {
+	sumAnimationTimeMs(results) {
+		let animationTimeMs = 0
+		_.each(this.resultsQueue, (result) => {
+			animationTimeMs += 100 // TODO: this should come from Result class, after Animation and Applier have been recombined!
+		})
+		return animationTimeMs
+	}
+	sendQueuedResultsAndTimer() {
+		const timerDetails = this.turnTimer.getTimerDetails()
 		_.each(this.userConnections, (userConnection) => {
-			if (userConnection) { // when a user is disconnected, this.userConnections is { 'username0': undefined }
-				userConnection.onSupervisedBattleResults(this.resultsQueue)
+			if (userConnection) { // when a user is disconnected, this.userConnections is { 'username0': undefined }; skip disconnected users
+				userConnection.onSupervisedBattleResults(this.resultsQueue, timerDetails)
 			}
 		})
 		_.each(this.resultsQueue, (result) => {

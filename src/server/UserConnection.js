@@ -85,7 +85,8 @@ export default class UserConnection {
 		}
 		// n.b. UserConnection.onSupervisedBattleStart will call matchMaker.unsubscribeAll
 		const battleDescriptor = { type: 'challenge', challengeId: payload.challengeId }
-		supervisedBattleRegistrar.startBattle(battleDescriptor, [this], (victoryState) => {
+		const isTurnTimed = false
+		supervisedBattleRegistrar.startBattle(battleDescriptor, [this], isTurnTimed, (victoryState) => {
 			console.log(`(UserConnection) battle complete: TODO: update user's campaign state, depending on victoryState: ${JSON.stringify(victoryState)}`)
 		})
 	}
@@ -106,8 +107,8 @@ export default class UserConnection {
 		matchMaker.unsubscribeAll(this)
 		this.send('startSupervisedBattle', payload)
 	}
-	onSupervisedBattleResults(results) {
-		this.send('results', results)
+	onSupervisedBattleResults(results, timerDetails) {
+		this.send('resultsAndTimer', { results, timerDetails })
 	}
 	onSupervisedBattleComplete() {
 		this.supervisedBattle = undefined

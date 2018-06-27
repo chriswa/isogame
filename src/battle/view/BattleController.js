@@ -4,6 +4,7 @@ import MouseController from './MouseController.js'
 import FieldBuilder from '../FieldBuilder.js'
 import FieldView from './FieldView.js'
 import ResultAppliers from '../ResultAppliers.js'
+import TurnClock from './TurnClock.js'
 
 import ResultPlayingSubController from './ResultPlayingSubController.js'
 import TargetingSubController from './TargetingSubController.js'
@@ -26,6 +27,8 @@ export default class BattleController extends EventEmitter3 {
 	constructor(battleBlueprint, myTeamId, previousResults) {
 		super()
 
+		console.log(battleBlueprint)
+		
 		// convert the fieldDescriptor (e.g. { type: "randomwoods", seed: 123 } into a view and model
 		const fieldBuilder = new FieldBuilder(battleBlueprint.fieldDescriptor)
 		const fieldView = new FieldView(...fieldBuilder.getFieldViewCtorArgs())
@@ -59,11 +62,19 @@ export default class BattleController extends EventEmitter3 {
 			VICTORY: new VictorySubController(this),
 		}
 		this.onResultsComplete() // start with either TARGETING or VICTORY
+
+		this.turnClock = new TurnClock(this.model.myTeamId)
 	}
 
 	destroy() { // called by owner
 		this.mouseController.destroy() // it has eventlisteners to clean up
 		BattleGUI.hide()
+	}
+
+	setTurnClock(timerDetails) {
+		if (timerDetails === undefined) { return }
+		const { currentTime, direction, freeTime, maxTime } = timerDetails // see TurnTimer.getTimerDetails
+		this.turnClock.setFromServer(currentTime, freeTime, maxTime, direction)
 	}
 
 	log(arg0, ...args) {

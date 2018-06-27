@@ -17,7 +17,7 @@ export default new class SupervisedBattleRegistrar {
 			return false
 		}
 	}
-	startBattle(battleDescriptor, userConnections, onBattleComplete) { // called by matchMaker (for pvp) or UserConnection (for single-player challenges)
+	startBattle(battleDescriptor, userConnections, isTurnTimed, onBattleComplete) { // called by matchMaker (for pvp) or UserConnection (for single-player challenges)
 		const usernamesVerbose = _.map(userConnections, (uc) => { return `"${uc.getUsername()}"` }).join(', ')
 
 		// prepare a callback to remove registry entries later
@@ -34,7 +34,7 @@ export default new class SupervisedBattleRegistrar {
 			onBattleComplete(victoryState)
 		}
 		// create a SupervisedBattle, which will call userConnection.onSupervisedBattleStart
-		const battle = new SupervisedBattle(battleDescriptor, userConnections, onBattleComplete2)
+		const battle = new SupervisedBattle(battleDescriptor, userConnections, isTurnTimed, onBattleComplete2)
 		// add userConnections to registry by username
 		_.each(userConnections, (userConnection) => {
 			const username = userConnection.getUsername()

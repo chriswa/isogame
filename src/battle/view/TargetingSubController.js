@@ -10,12 +10,14 @@ export default class TargetingSubController extends BaseSubController {
 		this.activeTargetingUI = undefined
 	}
 	update(dt) {
+		this.battleController.turnClock.update(dt)
 	}
 	render() {
 		if (this.activeTargetingUI) {
 			const mousePick = this.view.mousePick()
 			this.activeTargetingUI.render(this.view, mousePick)
 		}
+		this.battleController.turnClock.render()
 	}
 	onStateEnter() {
 		this.selectUnit(undefined)

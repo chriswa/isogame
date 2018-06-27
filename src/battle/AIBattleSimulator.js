@@ -20,7 +20,7 @@ export default class AIBattleSimulator extends BattleSimulator {
 	makeAIDecision(activeUnitId, activeUnit) {
 		//this.executeDecision(2, activeUnit.pos) // cast fireball on self
 		const newFacing = (activeUnit.facing + 1) % 4 // turn right
-		this.executeDecision(0, newFacing) // abilityId 0 is always supposed to be the Face ability!
+		this.executeDecision(0, newFacing, activeUnit.teamId) // abilityId 0 is always supposed to be the Face ability!
 	}
 	
 }

@@ -29,7 +29,7 @@ export default class BattleSimulator {
 		if (activeUnitId === undefined) { return console.warn(`(BattleSimulator) ignoring illegal decision: activeUnitId not found`) }
 		const activeUnit = this.model.getUnitById(activeUnitId)
 
-		if (activeUnit.teamId !== requestorTeamId) { console.log(`(BattleSimulator) ignoring illegal decision: active unit not owned by requestor's team`) }
+		if (activeUnit.teamId !== requestorTeamId) { return console.log(`(BattleSimulator) ignoring illegal decision: active unit not owned by requestor's team`) }
 
 		const ability = this.model.getAbilityById(activeUnitId, abilityId)
 		if (ability === undefined) { return console.warn(`(BattleSimulator) ignoring illegal decision: abilityId not found`) }
@@ -38,6 +38,10 @@ export default class BattleSimulator {
 		if (!ability.isValidTarget(target)) { return console.warn(`(BattleSimulator) ignoring illegal decision: failed ability.isValidTarget(target)`) }
 		
 		ability.execute(target, this.executionHelper) // n.b. calls this.applyResult()
+	}
+	getActiveTeamId() {
+		const activeUnit = this.model.getUnitById(this.model.turn.activeUnitId)
+		return activeUnit ? activeUnit.teamId : undefined
 	}
 
 
