@@ -88,6 +88,7 @@ export default class UserConnection {
 		const isTurnTimed = false
 		supervisedBattleRegistrar.startBattle(battleDescriptor, [this], isTurnTimed, (victoryState) => {
 			console.log(`(UserConnection) battle complete: TODO: update user's campaign state, depending on victoryState: ${JSON.stringify(victoryState)}`)
+			// n.b. do not use `this` here, since the user may have disconnected and potentially also reconnected. (should use this.getUsername() only!?)
 		})
 	}
 	handleMessageDecision(msg) { // called from messageHandlers['decision']

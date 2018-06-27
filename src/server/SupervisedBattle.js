@@ -69,7 +69,7 @@ export default class SupervisedBattle {
 		this.turnTimer.destroy()
 		const victoryState = this.model.getVictoryState()
 		// unregister with supervisedBattleRegistrar (so users don't get reconnected to this battle, and we can be garbage collected)
-		this.onBattleCompleteCallback(victoryState)
+		this.onBattleCompleteCallback(victoryState, this.userConnections)
 	}
 	getTeamIdForUserConnection(userConnection) {
 		return this.teamIds[userConnection.getUsername()]

@@ -21,11 +21,12 @@ export default new class SupervisedBattleRegistrar {
 		const usernamesVerbose = _.map(userConnections, (uc) => { return `"${uc.getUsername()}"` }).join(', ')
 
 		// prepare a callback to remove registry entries later
-		const onBattleComplete2 = (victoryState) => {
-			_.each(userConnections, (userConnection) => {
-				const username = userConnection.getUsername()
+		const onBattleComplete2 = (victoryState, latestUserConnections) => {
+			_.each(latestUserConnections, (userConnection, username) => {
 				delete this.usernamesToBattles[username]
-				userConnection.onSupervisedBattleComplete()
+				if (userConnection) {
+					userConnection.onSupervisedBattleComplete()
+				}
 			})
 
 			this.battleCount -= 1

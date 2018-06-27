@@ -44,7 +44,7 @@ const matchMaker = new class MatchMaker {
 		const battleDescriptor = { type: 'pvp', matchType }
 		const isTurnTimed = true
 		supervisedBattleRegistrar.startBattle(battleDescriptor, [userConnection0, userConnection1], isTurnTimed, (victoryState) => {
-			console.log(`(matchMaker) battle complete: TODO: update users' ELOs from victoryState: ${JSON.stringify(victoryState)}`)
+			console.log(`(matchMaker) battle complete: TODO: update users' ELOs from victoryState: ${JSON.stringify(victoryState)} (but don't use userConnections, since they may have disconnected, and potentially also reconnected)`)
 		})
 	}
 
