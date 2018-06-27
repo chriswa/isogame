@@ -108,7 +108,16 @@ export default class TurnClock {
 	}
 	update(dt) {
 		if (this.isRunning && this.isActive) {
-			this.value += (dt) * this.direction
+			if (this.freeTime > 0) {
+				this.freeTime -= dt
+				if (this.freeTime < 0) {
+					dt = -this.freeTime
+				}
+				else {
+					dt = 0
+				}
+			}
+			this.value += dt * this.direction
 			this.value = Math.max(this.value, -this.maxTime)
 			this.value = Math.min(this.value, this.maxTime)
 		}

@@ -102,7 +102,7 @@ export default class SupervisedBattle {
 	sumAnimationTimeMs(results) {
 		let animationTimeMs = 0
 		_.each(this.resultsQueue, (result) => {
-			animationTimeMs += 100 // TODO: this should come from Result class, after Animation and Applier have been recombined!
+			animationTimeMs += 1000 // TODO: this should come from Result class, after Animation and Applier have been recombined!
 		})
 		return animationTimeMs
 	}

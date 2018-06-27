@@ -54,11 +54,21 @@ export default class TurnTimer extends EventEmitter {
 		}
 	}
 	getTimerDetails() {
-		// TODO: this may be called long after the timer has been started, so it needs to respond with the current time, not the time from when the timer was last started!
+		const elapsedTime = Date.now() - this.startTime - this.freeTime
+		let currentTime = this.value
+		let freeTime = 0
+		if (elapsedTime <= 0) {
+			freeTime = -elapsedTime
+		}
+		else {
+			freeTime = 0
+			currentTime = this.value + this.direction * elapsedTime
+		}
+
 		return {
-			currentTime: this.value,
+			currentTime: currentTime,
 			direction: this.direction,
-			freeTime: this.freeTime,
+			freeTime: freeTime,
 			maxTime: this.millisecs,
 		}
 	}
