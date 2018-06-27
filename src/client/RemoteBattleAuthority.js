@@ -8,7 +8,7 @@ export default class RemoteBattleAuthority extends EventEmitter3 {
 		this.battleBlueprint = _.cloneDeep(battleBlueprint)
 		this.myTeamId = myTeamId
 
-		this.model = BattleModel.createFromBlueprint(_.cloneDeep(this.battleBlueprint))
+		this.model = BattleModel.createFromBlueprint(_.cloneDeep(this.battleBlueprint), this.myTeamId)
 
 		this.battleController = new BattleController(this.battleBlueprint, this.myTeamId, previousResults)
 

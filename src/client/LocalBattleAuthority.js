@@ -9,11 +9,11 @@ export default class LocalBattleAuthority extends EventEmitter3 {
 		this.resultsQueue = []
 		this.resultsLog = []
 
-		this.battleBlueprint = _.cloneDeep(battleBlueprint)
-		this.model = BattleModel.createFromBlueprint(_.cloneDeep(this.battleBlueprint))
-		this.simulator = new AIBattleSimulator(this.model, this.resultsQueue)
-
 		this.myTeamId = 0
+
+		this.battleBlueprint = _.cloneDeep(battleBlueprint)
+		this.model = BattleModel.createFromBlueprint(_.cloneDeep(this.battleBlueprint), this.myTeamId)
+		this.simulator = new AIBattleSimulator(this.model, this.resultsQueue)
 
 		this.start()
 	}

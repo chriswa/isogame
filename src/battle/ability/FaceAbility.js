@@ -15,7 +15,7 @@ export default class FaceAbility extends BaseAbility {
 	}
 	isEnabled() {
 		// you can always end your own turn (but you can't pretend to end anyone else's)
-		return this.unitId === this.model.getActiveUnitId() /////// && this.model.isItMyTurn() ???
+		return this.unitId === this.model.getActiveUnitId() // && this.model.isItMyTurn()
 	}
 	isValidTarget(target) {
 		return target === 0 || target === 1 || target === 2 || target === 3
