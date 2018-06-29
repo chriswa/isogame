@@ -5,7 +5,7 @@ export const canvas = document.createElement('canvas')
 export const ctx = canvas.getContext('2d')
 
 const canvasSize = 120
-const sourceSize = 180
+const sourceSize = 80
 
 canvas.width = canvasSize
 canvas.height = canvasSize
