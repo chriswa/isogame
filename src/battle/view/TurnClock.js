@@ -28,7 +28,8 @@ const fragmentShaderSource = `precision mediump float;
 		float distSqr = v_texcoord.x * v_texcoord.x + v_texcoord.y * v_texcoord.y;
 		vec4 colour;
 		if (distSqr > 1.0) {
-			colour = vec4(1.0, 1.0, 1.0, 0.0);
+			discard;
+			//colour = vec4(1.0, 1.0, 1.0, 0.0);
 		}
 		else if (distSqr > (0.91 * 0.91)) {
 			colour = vec4(0.0, 0.0, 0.0, 1.0);
@@ -49,14 +50,15 @@ const fragmentShaderSource = `precision mediump float;
 
 const programInfo = twgl.createProgramInfo(gl, [vertexShaderSource, fragmentShaderSource])
 
+const z = -1
 const bufferInfo = twgl.createBufferInfoFromArrays(gl, {
-	a_position: [0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0,], // just a quad
+	a_position: [0, 1, z, 0, 0, z, 1, 0, z, 1, 1, z,], // just a quad
 	a_texcoord: [-1, 1, 1, 1, 1, -1, -1, -1,],
 	indices: [0, 1, 2, 0, 2, 3,],
 })
 
 const margin = 10
-const size = 60
+const size = 40
 
 function renderClock(portion) {
 
