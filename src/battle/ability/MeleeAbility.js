@@ -31,7 +31,7 @@ export default class MeleeAbility extends BaseAbility {
 	}
 	determineTargetingUI() {
 		return {
-			type: 'AOE',
+			type: 'AOE', // TODO: this isn't the best
 			minTargetDistance: 1,
 			maxTargetDistance: 1,
 			aoeRange: 0,
