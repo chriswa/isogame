@@ -3,7 +3,7 @@ import BattleView from './BattleView.js'
 import MouseController from './MouseController.js'
 import FieldBuilder from '../FieldBuilder.js'
 import FieldView from './FieldView.js'
-import ResultAppliers from '../ResultAppliers.js'
+import ResultFactory from '../ResultFactory.js'
 import TurnClock from './TurnClock.js'
 
 import ResultPlayingSubController from './ResultPlayingSubController.js'
@@ -38,9 +38,9 @@ export default class BattleController extends EventEmitter3 {
 
 		// fast forward previousResults
 		if (previousResults) {
-			_.each(previousResults, result => {
-				const resultApplier = ResultAppliers[result.type]
-				resultApplier(this.model, result)
+			_.each(previousResults, resultData => {
+				const result = ResultFactory(resultData, this.model)
+				result.updateModel()
 			})
 		}
 

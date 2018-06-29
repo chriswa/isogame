@@ -4,6 +4,7 @@ import BattleModel from './../battle/BattleModel.js'
 import UserConnection from './UserConnection.js'
 import TurnTimer from './TurnTimer.js'
 import NullTurnTimer from './NullTurnTimer.js'
+import ResultFactory from '../battle/ResultFactory.js'
 
 const turnTimerMs = 1000 * 60
 
@@ -101,8 +102,9 @@ export default class SupervisedBattle {
 	}
 	sumAnimationTimeMs(results) {
 		let animationTimeMs = 0
-		_.each(this.resultsQueue, (result) => {
-			animationTimeMs += 1000 // TODO: this should come from Result class, after Animation and Applier have been recombined!
+		_.each(this.resultsQueue, (resultData) => {
+			const result = ResultFactory(resultData, this.simulator.model)
+			animationTimeMs += result.getAnimationDurationMs()
 		})
 		return animationTimeMs
 	}

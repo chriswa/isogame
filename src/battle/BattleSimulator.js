@@ -1,4 +1,4 @@
-import ResultAppliers from './ResultAppliers.js'
+import ResultFactory from './ResultFactory.js'
 import Abilities from './Abilities.js'
 import ExecutionHelper from './ExecutionHelper.js'
 
@@ -10,17 +10,17 @@ export default class BattleSimulator {
 			this.applyResult(result)
 		})
 	}
-	applyResult(result) { // called from Ability.execute (and this.advance)
+	applyResult(resultData) { // called from Ability.execute (and this.advance)
 		// check if this result should be cancelled/ignored (e.g. if the battle is already victorious)
 		if (this.model.getVictoryState()) {
-			console.log(`ignoring applyResult added after the battle is victorious`, result)
+			console.log(`ignoring applyResult added after the battle is victorious`, resultData)
 			return
 		}
 		// immediately update the model with the result
-		const resultApplier = ResultAppliers[result.type]
-		resultApplier(this.model, result)
+		const result = ResultFactory(resultData, this.model)
+		result.updateModel()
 		// queue the result
-		this.resultsQueue.push(result)
+		this.resultsQueue.push(resultData)
 	}
 	executeDecision(abilityId, target, requestorTeamId) {
 		if (this.model.getVictoryState()) { return console.warn(`(BattleSimulator) ignoring decision made after the battle is victorious`) }

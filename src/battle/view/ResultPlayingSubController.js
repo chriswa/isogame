@@ -1,13 +1,11 @@
 import BaseSubController from './BaseSubController.js'
-import ResultAppliers from '../ResultAppliers.js'
-import ResultAnimations from '../ResultAnimations.js'
+import ResultFactory from '../ResultFactory.js'
 
 export default class ResultPlayingSubController extends BaseSubController {
 	constructor(battleController) {
 		super(battleController)
 		this.queuedResults = []
-		this.activePlayerAnimation = undefined
-		this.activePlayerModelUpdater = undefined
+		this.activeResult = undefined
 	}
 	addResult(result) {
 		this.queuedResults.push(result)
@@ -21,26 +19,21 @@ export default class ResultPlayingSubController extends BaseSubController {
 	}
 	startNextResult() {
 		if (this.queuedResults.length) {
-			const activeResult = this.queuedResults.shift()
-			const resultAnimation = ResultAnimations[activeResult.type]
-			const resultApplier = ResultAppliers[activeResult.type]
-			this.activePlayerAnimation = new resultAnimation(this.model, this.view, activeResult)
-			this.activePlayerModelUpdater = () => {
-				this.battleController.log(`resultAnimation model updater called: `, activeResult)
-				resultApplier(this.model, activeResult)
-			}
-			this.battleController.log(`ResultAnimation started: `, this.activePlayerAnimation)
+			const activeResultData = this.queuedResults.shift()
+			this.activeResult = ResultFactory(activeResultData, this.model)
+			this.activeResult.startAnimation(this.view)
+			this.battleController.log(`Result started: `, this.activeResult)
 		}
 		else {
-			this.activePlayerAnimation = undefined
+			this.activeResult = undefined
 		}
 	}
 	update(dt) {
 		let remainingDt = dt
-		while (this.activePlayerAnimation) {
+		while (this.activeResult) {
 
 			// update the animation
-			remainingDt = this.activePlayerAnimation.update(remainingDt)
+			remainingDt = this.activeResult.updateAnimation(this.view, remainingDt)
 
 			// if the animation used all the time, it's not done yet, so we're done for now
 			if (!remainingDt) {
@@ -48,16 +41,17 @@ export default class ResultPlayingSubController extends BaseSubController {
 			}
 
 			// the animation is complete, update the model and move on to the next result (if there is one)
-			this.activePlayerModelUpdater()
+			this.battleController.log(`resultAnimation model updater called: `, this.activeResultData)
+			this.activeResult.updateModel()
 			this.startNextResult()
 		}
 
 		// check for end of results
-		if (!this.activePlayerAnimation) {
+		if (!this.activeResult) {
 			this.battleController.onResultsComplete()
 		}
 	}
 	render() {
-		this.activePlayerAnimation.render()
+		//this.activeResult.renderAnimation()
 	}
 }
