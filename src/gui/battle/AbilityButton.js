@@ -1,6 +1,5 @@
 import { battleModel } from './battleModel.js'
 import addCssRule from './../addCssRule.js'
-import Abilities from '../../battle/Abilities.js'
 
 const COMPONENT_NAME = 'AbilityButton'
 

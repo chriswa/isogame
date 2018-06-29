@@ -1,5 +1,4 @@
 import ResultFactory from './ResultFactory.js'
-import Abilities from './Abilities.js'
 import ExecutionHelper from './ExecutionHelper.js'
 
 export default class BattleSimulator {

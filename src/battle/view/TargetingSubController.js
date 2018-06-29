@@ -1,5 +1,5 @@
 import BaseSubController from './BaseSubController.js'
-import TargetingControllers from './TargetingControllers.js'
+import TargetingControllerFactory from './TargetingControllerFactory.js'
 import BattleGUI from '../../gui/battle/BattleGUI.js'
 
 export default class TargetingSubController extends BaseSubController {
@@ -80,8 +80,7 @@ export default class TargetingSubController extends BaseSubController {
 		this.removeActiveTargetingUi() // call this first, so everything is cleaned up for TargetingUi constructor created next
 		const ability = this.model.getAbilityById(this.selectedUnitId, this.selectedAbilityId)
 		const targetingDetails = ability.determineTargetingUI()
-		const targetingClass = TargetingControllers[ targetingDetails.type ]
-		this.activeTargetingUI = new targetingClass(this.model, this.view, this.selectedUnitId, targetingDetails, ability)
+		this.activeTargetingUI = TargetingControllerFactory(targetingDetails.type, this.model, this.view, this.selectedUnitId, targetingDetails, ability)
 		this.battleController.log(`TargetingController started: `, this.activeTargetingUI)
 	}
 }

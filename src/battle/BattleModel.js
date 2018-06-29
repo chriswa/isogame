@@ -1,6 +1,6 @@
 import * as v2 from '../util/v2.js'
 import FieldBuilder from './FieldBuilder.js'
-import Abilities from './Abilities.js'
+import AbilityFactory from './AbilityFactory.js'
 
 export default class BattleModel {
 
@@ -52,7 +52,7 @@ export default class BattleModel {
 	}
 	getAbilityById(unitId, abilityId) {
 		const unitAbility = this.getUnitAbilityArgsById(unitId, abilityId)
-		const ability = unitAbility ? new Abilities[unitAbility.abilityType](this, unitId, abilityId) : undefined
+		const ability = unitAbility ? AbilityFactory(unitAbility.abilityType, this, unitId, abilityId) : undefined
 		return ability
 	}
 	findUnitIdAtPos(pos) {

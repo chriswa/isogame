@@ -48,7 +48,8 @@ export function build(battleDescriptor) {
 		abilities: {
 			0: { abilityType: "Face", },
 			1: { abilityType: "Walk", distance: 7, },
-			2: { abilityType: "Fireball", distance: 5, },
+			2: { abilityType: "Melee", power: 5, },
+			3: { abilityType: "Fireball", distance: 5, },
 		}
 	})
 
@@ -61,7 +62,8 @@ export function build(battleDescriptor) {
 		abilities: {
 			0: { abilityType: "Face", },
 			1: { abilityType: "Walk", distance: 5, },
-			2: { abilityType: "Fireball", distance: 5, },
+			2: { abilityType: "Melee", power: 5, },
+			//3: { abilityType: "Fireball", distance: 5, },
 		}
 	})
 
