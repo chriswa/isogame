@@ -8,7 +8,7 @@ const def = {
 	LEAFYBUSH: { spriteName: 'leafybush', },
 	ROCK1: { spriteName: 'rock1', },
 	ROCK2: { spriteName: 'rock2', },
-	STICK: { obstructWalking: true, spriteName: 'stick', hasFacing: true, }, // hasFacing will append '-n', '-e', etc
+	STICK: { spriteName: 'stick', hasFacing: true, }, // hasFacing will append '-n', '-e', etc
 }
 
 export default def

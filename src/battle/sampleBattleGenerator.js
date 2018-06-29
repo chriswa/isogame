@@ -28,19 +28,25 @@ class Builder {
 	}
 	isValid() {
 		// can every unit path to every other unit (allow units to path through each other for this test)
-		return true
-	}
-	isPVP() {
-		return this.battleDescriptor.type === 'pvp'
+		const anyUnit = _.values(this.model.units)[0]
+		const startPos = anyUnit.pos
+		const maxDistance = Infinity
+		const ignoreOccupyingUnits = true
+		const walkPathing = new WalkPathing(this.model, startPos, maxDistance, ignoreOccupyingUnits)
+		let canAllUnitsPath = true
+		_.each(this.model.units, (unit, unitId) => {
+			const distance = walkPathing.getWalkDistance(unit.pos)
+			if (distance === undefined) {
+				canAllUnitsPath = false
+			}
+		})
+		return canAllUnitsPath
 	}
 	addUnit(unit) {
 		const unitId = this.nextUnitId
 		this.nextUnitId += 1
 		this.model.units[unitId] = unit
 	}
-}
-
-function validate(battleBlueprint) {
 }
 
 export function build(battleDescriptor) {
@@ -52,6 +58,7 @@ export function build(battleDescriptor) {
 		if (builder.isValid()) {
 			return builder.buildBattleBlueprint()
 		}
+		console.log(`[sampleBattleBuilder] battle failed validation (not all units can path to each other), trying again with a new seed`)
 		buildCount += 1
 		if (buildCount > 10) { throw new Error(`[sampleBattleGenerator] 10+ failed builds, incredibly bad luck or bug?`) }
 	}
@@ -59,7 +66,8 @@ export function build(battleDescriptor) {
 
 function buildAttempt(battleDescriptor, seed) {
 
-
+	const isPVP = battleDescriptor.type === 'pvp'
+	const team1AIType = isPVP ? undefined : 1
 	const builder = new Builder(battleDescriptor, seed)
 
 	builder.addUnit({
@@ -78,7 +86,7 @@ function buildAttempt(battleDescriptor, seed) {
 
 	builder.addUnit({
 		teamId: 1,
-		aiType: builder.isPVP() ? undefined : 1,
+		aiType: team1AIType,
 		name: _.sample(sampleNames), spriteSet: "goblin_purple", pos: [7, 9], facing: 1, hp: 7, hpMax: 7, mana: 4, manaMax: 4, nextTurnTime: 69, turnbreaker: 0.873465,
 		buffs: {
 		},
