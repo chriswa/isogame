@@ -30,7 +30,8 @@ addCssRule(`.${COMPONENT_NAME} .unitPortrait {
 	position: absolute;
 	left: 0;
 	bottom: 0;
-	zoom: 2;
+	width: 112px;
+	height: 112px;
 }`)
 
 export default Vue.component(COMPONENT_NAME, {

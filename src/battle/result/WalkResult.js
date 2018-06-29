@@ -1,9 +1,14 @@
 import BaseResult from './base.js'
 import * as v2 from './../../util/v2.js'
 
+// n.b. WalkAbility can target far away, but WalkResults are for one square only!
+
 export default class WalkResult extends BaseResult {
 	updateModel() {
 		const unit = this.model.getUnitById(this.result.unitId)
+
+		unit.facing = v2.getFacing(unit.pos, this.result.target) // face the target
+
 		v2.copy(this.result.target, unit.pos)
 		this.model.turn.movementUsed = (this.model.turn.movementUsed || 0) + 1
 	}

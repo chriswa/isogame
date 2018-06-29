@@ -25,7 +25,7 @@ export default Vue.component(COMPONENT_NAME, {
 			<div @mouseover="onMouseover('Mana')" @mouseout="onMouseout">
 				<StatBar fgColor="#039" bgColor="#013" :amount="unit.mana" :max="unit.manaMax"></StatBar>
 			</div>
-			<div v-if="isActiveUnit">...</div>
+			<div v-if="isActiveUnit">Active unit</div>
 			<div v-else>Next turn in {{ nextTurnDelta }}</div>
 		</div>
 	`,

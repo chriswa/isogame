@@ -1,14 +1,15 @@
 import BattleModel from './BattleModel.js'
 import FieldBuilder from './FieldBuilder.js'
+import WalkPathing from './WalkPathing.js'
 
 const sampleNames = 'Agmund Amleth Asgeir Bertil Bjarte Borphlum Byggvir Dagur Denkli Diederik Dominic Edgo Egon Einherjar Eirik Elof Erland Fenris Fixandu Gjurd Gorla Grendoz Grompl Halvdan Haukur Helheimr Helva Homlur Ignaas Ingefred Isak Jervis Kari Klemenz Kormorflo Leif Lodewijk Lorbo Lund Malto Mikko Morta Nestor Olander Ormur Ragnvald Remur Sigfinnur Smlorg Somerled Sven Tapani Toivo Torstein Trencha Tryggvi Ull Ulrik Urho Valdimar Valgrind Verdl Vihtori Vixja Wendig Wendirgl'.split(' ')
 
 class Builder {
-	constructor(battleDescriptor) {
+	constructor(battleDescriptor, seed) {
 		this.battleDescriptor = battleDescriptor
 		this.fieldDescriptor = {
 			type: "randomwoods",
-			seed: 123,
+			seed: seed,
 		}
 		const myTeamId = undefined
 		this.model = BattleModel.createFromBlueprint({
@@ -18,6 +19,17 @@ class Builder {
 		}, myTeamId)
 		this.nextUnitId = 0
 	}
+	buildBattleBlueprint() {
+		return {
+			fieldDescriptor: this.fieldDescriptor,
+			units: this.model.units,
+			turn: {},
+		}
+	}
+	isValid() {
+		// can every unit path to every other unit (allow units to path through each other for this test)
+		return true
+	}
 	isPVP() {
 		return this.battleDescriptor.type === 'pvp'
 	}
@@ -26,18 +38,29 @@ class Builder {
 		this.nextUnitId += 1
 		this.model.units[unitId] = unit
 	}
-	build() {
-		return {
-			fieldDescriptor: this.fieldDescriptor,
-			units: this.model.units,
-			turn: {},
-		}
-	}
+}
+
+function validate(battleBlueprint) {
 }
 
 export function build(battleDescriptor) {
+	// try random seeds until we get a builder that validates
+	let buildCount = 0
+	while (true) {
+		let seed = Math.floor(Math.random() * Math.pow(2, 32))
+		let builder = buildAttempt(battleDescriptor, seed)
+		if (builder.isValid()) {
+			return builder.buildBattleBlueprint()
+		}
+		buildCount += 1
+		if (buildCount > 10) { throw new Error(`[sampleBattleGenerator] 10+ failed builds, incredibly bad luck or bug?`) }
+	}
+}
 
-	const builder = new Builder(battleDescriptor)
+function buildAttempt(battleDescriptor, seed) {
+
+
+	const builder = new Builder(battleDescriptor, seed)
 
 	builder.addUnit({
 		teamId: 0,
@@ -67,5 +90,5 @@ export function build(battleDescriptor) {
 		}
 	})
 
-	return builder.build()
+	return builder
 }

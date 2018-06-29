@@ -5,7 +5,7 @@ import * as v2 from '../../util/v2.js'
 
 export default class MeleeAbility extends BaseAbility {
 	initArgs(unitArgs) {
-		return {
+		this.args = {
 			power: unitArgs.power,
 		}
 	}

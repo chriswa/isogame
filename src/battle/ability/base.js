@@ -8,10 +8,10 @@ export default class BaseAbility {
 		this.abilityId = abilityId
 		this.unit = this.model.getUnitById(this.unitId)
 		const unitArgs = this.model.getUnitAbilityArgsById(this.unitId, this.abilityId)
-		this.args = this.initArgs(unitArgs)
+		this.initArgs(unitArgs)
 	}
 	initArgs(unitArgs) {
-		return {} // override me!
+		this.args = {} // override me!
 	}
 	getUnit() {
 		return this.model.getUnitById(this.unitId)

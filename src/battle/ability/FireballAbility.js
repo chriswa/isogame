@@ -5,7 +5,7 @@ import * as v2 from '../../util/v2.js'
 
 export default class FireballAbility extends BaseAbility {
 	initArgs(unitArgs) {
-		return {
+		this.args = {
 			minTargetDistance: 1,
 			maxTargetDistance: unitArgs.distance,
 			aoeRange: 1,

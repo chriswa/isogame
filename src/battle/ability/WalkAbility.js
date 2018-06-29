@@ -6,7 +6,7 @@ export default class WalkAbility extends BaseAbility {
 		const distance = unitArgs.distance - (this.model.getActiveUnitId() === this.unitId ? (this.model.turn.movementUsed || 0) : 0)
 		const walkPathing = new WalkPathing(this.model, this.getUnitCoords(), distance)
 
-		return {
+		this.args = {
 			maxDistance: unitArgs.distance,
 			distance,
 			walkPathing,

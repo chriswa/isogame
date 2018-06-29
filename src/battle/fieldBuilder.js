@@ -1,4 +1,5 @@
 import FBM from '../util/FBM.js'
+import * as TerrainTypes from './TerrainTypes.js'
 
 export default class FieldBuilder {
 	constructor(fieldDescriptor) {
@@ -16,7 +17,8 @@ export default class FieldBuilder {
 
 function quantize(v) {
 	//return Math.floor(v * 8) / 3
-	return (v * 5 - 3)
+	//return (v * 5 - 3)
+	return (v * 3 - 2)
 }
 
 function build(fieldDescriptor) {
@@ -42,11 +44,9 @@ function build(fieldDescriptor) {
 
 			let terrainTypeId = 'DIRT'
 			const staticSample = staticFbm.sample(x, z)
-			if (staticSample > 0.7) {
-				terrainTypeId = 'BUSH'
-			}
-			else if (staticSample > 0.6) {
-				terrainTypeId = 'STICK'
+			if (staticSample > 0.1) {
+				//terrainTypeId = _.sample('BUSH,DEADBUSH,SMALLTREE,LEAFYBUSH,ROCK1,ROCK2,STICK,BIGTREE'.split(','))
+				terrainTypeId = _.sample('BUSH,BUSH,DEADBUSH,SMALLTREE,LEAFYBUSH,LEAFYBUSH,ROCK1,ROCK1,ROCK2,ROCK2,STICK,BIGTREE'.split(','))
 			}
 
 			tileData.push({

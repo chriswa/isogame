@@ -25,7 +25,12 @@ export default class AIBattleSimulator extends BattleSimulator {
 		//const newFacing = (activeUnit.facing + 1) % 4 // turn right
 		//this.executeDecision(0, newFacing, activeUnit.teamId) // abilityId 0 is always supposed to be the Face ability!
 
-		const movesLeft = 5 // TODO: this should be calculated from the activeUnit's move ability!
+		const FACE_ABILITY_ID = 0
+		const MOVE_ABILITY_ID = 1
+		const MELEE_ABILITY_ID = 2
+
+		const moveAbility = this.model.getAbilityById(activeUnitId, MOVE_ABILITY_ID)
+		const movesLeft = moveAbility.args.maxDistance
 
 		const startCoords = activeUnit.pos
 		const maxDistance = Infinity
@@ -55,8 +60,8 @@ export default class AIBattleSimulator extends BattleSimulator {
 		const immediateOptions = _.filter(meleeOptions, option => option.distance <= movesLeft)
 		if (immediateOptions.length) {
 			const chosenOption = _.sample(immediateOptions) // choose one at random
-			this.executeDecision(1, chosenOption.pos, activeUnit.teamId) // 1 is always supposed to be the movement ability
-			this.executeDecision(2, chosenOption.unit.pos, activeUnit.teamId) // assume 2 is a melee ability
+			this.executeDecision(MOVE_ABILITY_ID, chosenOption.pos, activeUnit.teamId)
+			this.executeDecision(MELEE_ABILITY_ID, chosenOption.unit.pos, activeUnit.teamId)
 		}
 
 		// ... otherwise, move toward a nearby target
@@ -65,12 +70,34 @@ export default class AIBattleSimulator extends BattleSimulator {
 			if (closestOption) {
 				const path = walkPathing.findAppealingPath(closestOption.pos)
 				const farthestPos = path[movesLeft - 1]
-				this.executeDecision(1, farthestPos, activeUnit.teamId) // 1 is always supposed to be the movement ability
+				this.executeDecision(MOVE_ABILITY_ID, farthestPos, activeUnit.teamId)
+			}
+
+			// ... can't path to any target positions, so wander aimlessly
+			else {
+				console.log(`[AIBattleSimulator] - wander aimlessly?`)
+				const randomPositions = []
+				v2.eachInRange(activeUnit.pos, 1, movesLeft, (nearbyPos) => {
+					const walkDistance = walkPathing.getWalkDistance(nearbyPos)
+					if (walkDistance !== undefined && walkDistance <= movesLeft) {
+						randomPositions.push(v2.clone(nearbyPos))
+					}
+				})
+				if (randomPositions.length) {
+					this.executeDecision(MOVE_ABILITY_ID, _.sample(randomPositions), activeUnit.teamId)
+				}
+				
+				// ... can't move at all!
+				else {
+					// pass
+					console.log(`[AIBattleSimulator] - unit can't move!`)
+				}
 			}
 		}
 
 		// face!
-		this.executeDecision(0, 3, activeUnit.teamId) // abilityId 0 is always supposed to be the Face ability!
+		const lastFacing = activeUnit.facing
+		this.executeDecision(FACE_ABILITY_ID, lastFacing, activeUnit.teamId)
 	}
 	
 }

@@ -2,7 +2,7 @@ import BaseAbility from './base.js'
 
 export default class FaceAbility extends BaseAbility {
 	initArgs(unitArgs) {
-		return {}
+		this.args = {}
 	}
 	getImage() {
 		return 'cycle'

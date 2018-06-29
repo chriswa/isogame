@@ -1,17 +1,23 @@
 import BaseResult from './base.js'
+import * as v2 from './../../util/v2.js'
 
 export default class SpellcastResult extends BaseResult {
 	updateModel() {
-		this.model.turn.actionUsed = true
+		const unit = this.model.getUnitById(this.result.unitId)
+
+		unit.facing = v2.getFacing(unit.pos, this.result.target) // face the target
+
 		if (this.result.manaCost) {
-			const unit = this.model.getUnitById(this.result.unitId)
 			unit.mana -= this.result.manaCost
 		}
+		this.model.turn.actionUsed = true
 	}
 	getAnimationDurationMs() {
 		return 500
 	}
 	animationStart(view) {
+		const startPosV2 = this.model.units[this.result.unitId].pos
+		view.unitSprites[this.result.unitId].setFacing(v2.getFacing(startPosV2, this.result.target))
 		view.unitSprites[this.result.unitId].startAnimation('CAST')
 		view.setTopText(JSON.stringify(this.result))
 		view.centerOnUnitId(this.result.unitId)

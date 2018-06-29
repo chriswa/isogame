@@ -76,6 +76,11 @@ export default Vue.component(COMPONENT_NAME, {
 				v-if="abilityImage"
 				:src="abilityImage"
 			>
+			` + /* add spacer for firefox vertical alignment issue */ `
+			<img
+				v-else
+				src="assets/spacer.png"
+			>
 		</button>
 	`,
 	methods: {
