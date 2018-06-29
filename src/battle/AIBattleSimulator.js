@@ -51,8 +51,6 @@ export default class AIBattleSimulator extends BattleSimulator {
 			}
 		})
 
-		console.log(meleeOptions)
-
 		// if anyone is within range, attack them this turn
 		const immediateOptions = _.filter(meleeOptions, option => option.distance <= movesLeft)
 		if (immediateOptions.length) {
