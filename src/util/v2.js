@@ -18,6 +18,10 @@ export function create(x = 0, y = 0) {
 	return [x, y]
 }
 
+export function clone(a) {
+	return [a[0], a[1]]
+}
+
 export function copy(a, b) {
 	b = b || []
 	b[0] = a[0]
@@ -41,5 +45,19 @@ export function getFacing(a, b) {
 	}
 	else {
 		return dz < 0 ? 0 : 2
+	}
+}
+
+export function eachInRange(a, minDist, maxDist, callback) {
+	const b = [0, 0]
+	for (let dy = -maxDist; dy <= maxDist; dy += 1) {
+		b[1] = a[1] + dy
+		const xMaxDist = maxDist - Math.abs(dy)
+		for (let dx = -xMaxDist; dx <= xMaxDist; dx += 1) {
+			if (Math.abs(dx) + Math.abs(dy) >= minDist) {
+				b[0] = a[0] + dx
+				callback(b)
+			}
+		}
 	}
 }
