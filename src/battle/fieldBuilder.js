@@ -18,7 +18,7 @@ export default class FieldBuilder {
 function quantize(v) {
 	//return Math.floor(v * 8) / 3
 	//return (v * 5 - 3)
-	return (v * 3 - 2)
+	return Math.floor(v * 6 - 2) / 2
 }
 
 function build(fieldDescriptor) {
@@ -29,7 +29,7 @@ function build(fieldDescriptor) {
 	const fbm = new FBM(seed, 6, 2, 0.2, 2, 0.07)
 	const staticFbm = new FBM(seed, 1, 2, 0.2, 2, 0.87)
 
-	const fieldWidth = 32 // max is 104?
+	const fieldWidth = 64 // max is 104?
 	const tileData = []
 	for (let z = 0; z < fieldWidth; z += 1) {
 		for (let x = 0; x < fieldWidth; x += 1) {
@@ -44,7 +44,7 @@ function build(fieldDescriptor) {
 
 			let terrainTypeId = 'DIRT'
 			const staticSample = staticFbm.sample(x, z)
-			if (staticSample > 0.1) {
+			if (staticSample > 0.2) {
 				//terrainTypeId = _.sample('BUSH,DEADBUSH,SMALLTREE,LEAFYBUSH,ROCK1,ROCK2,STICK,BIGTREE'.split(','))
 				terrainTypeId = _.sample('BUSH,BUSH,DEADBUSH,SMALLTREE,LEAFYBUSH,LEAFYBUSH,ROCK1,ROCK1,ROCK2,ROCK2,STICK,BIGTREE'.split(','))
 			}

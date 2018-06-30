@@ -47,7 +47,7 @@ export default class BattleView {
 		/** @type BattleModel */
 		this.model = battleModel
 
-		this.bbgroup = new BillboardGroup("assets/sprites.png", 1000, SpriteData)
+		this.bbgroup = new BillboardGroup("assets/sprites.png", SpriteData)
 
 		// create sprite for bouncing turn indicator
 		this.indicatorBillboard = this.bbgroup.acquire()

@@ -1,6 +1,7 @@
 import * as v2 from '../util/v2.js'
 import FieldBuilder from './FieldBuilder.js'
 import AbilityFactory from './AbilityFactory.js'
+import Grid from '../util/Grid.js';
 
 export default class BattleModel {
 
@@ -18,6 +19,7 @@ export default class BattleModel {
 
 	constructor(data) {
 		this.data = data
+		this.field.grid = new Grid(this.field.size, this.field.size, this.field.squares)
 	}
 	get field() { return this.data.field }
 	get units() { return this.data.units }

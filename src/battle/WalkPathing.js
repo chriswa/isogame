@@ -5,7 +5,7 @@ import TerrainTypes from './TerrainTypes.js'
 export default class WalkPathing {
 	constructor(model, startCoords, maxDistance, ignoreOccupyingUnits = false) {
 		this.model = model
-		const fieldGrid = new Grid(this.model.field.size, this.model.field.size, this.model.field.squares)
+		const fieldGrid = this.model.field.grid
 		this.dijkstra = new Dijkstra(fieldGrid.width, fieldGrid.height, startCoords, (coords) => {
 			const terrainWalkCost = TerrainTypes[fieldGrid.getCell(coords).terrainTypeId].walkCost
 			const occupyingUnitId = this.model.findUnitIdAtPos(coords)

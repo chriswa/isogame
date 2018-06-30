@@ -186,7 +186,9 @@ class Billboard {
 
 export default class BillboardGroup {
 
-	constructor(textureSrc, maxCount, spriteData) {
+	constructor(textureSrc, spriteData, maxCount) {
+		if (!maxCount) { maxCount = gfx.quadIndexBufferMaxQuads }
+
 		this.textureAlphaBitArray = undefined
 		this.texture = loadTexture(textureSrc, (texture, source) => {
 			this.textureAlphaBitArray = getAlphaBitArrayFromTexture(texture, source)
