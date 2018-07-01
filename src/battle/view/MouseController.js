@@ -9,7 +9,9 @@ export default class MouseController {
 		this.view = view
 		this.onClickCallback = onClickCallback
 
-		cameraTweener.reset()
+		this.fieldSize = [this.view.fieldView.size, this.view.fieldView.size]
+
+		cameraTweener.reset(this.fieldSize)
 		camera.reset()
 
 		let accumulatedGestureRotation = 0

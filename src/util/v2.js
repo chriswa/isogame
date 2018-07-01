@@ -18,6 +18,13 @@ export function create(x = 0, y = 0) {
 	return [x, y]
 }
 
+export function add(a, b, dst) {
+	if (dst === undefined) { dst = create() }
+	dst[0] = a[0] + b[0]
+	dst[1] = a[1] + b[1]
+	return dst
+}
+
 export function clone(a) {
 	return [a[0], a[1]]
 }

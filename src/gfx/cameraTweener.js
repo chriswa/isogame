@@ -1,5 +1,6 @@
 import * as camera from './camera.js'
 import easings from '../util/easings.js'
+import * as v2 from '../util/v2.js'
 
 const defaultEasing = easings.outCubic
 
@@ -43,7 +44,8 @@ class Tween {
 }
 
 
-export function reset() {
+export function reset(fieldSize_) {
+	v2.copy(fieldSize_, fieldSize)
 	targetFacing = 0
 	targetZoom = -4
 	setCameraScaleFromZoom(targetZoom)
@@ -106,6 +108,8 @@ export function cancelFacingTween() {
 // ZOOM
 // ----
 
+const minZoom = -5
+const maxZoom = -3
 let targetZoom = -4
 let currentZoom
 setCameraScaleFromZoom(targetZoom)
@@ -135,6 +139,8 @@ const zoomTween = new Tween({
 
 export function setZoom(targetZoom_) {
 	targetZoom = targetZoom_
+	if (targetZoom < minZoom) { targetZoom = minZoom }
+	if (targetZoom > maxZoom) { targetZoom = maxZoom }
 	const zoomStart = currentZoom
 	const zoomEnd = targetZoom
 	const zoomDelta = zoomEnd - zoomStart
@@ -146,6 +152,7 @@ export function setZoom(targetZoom_) {
 // POSITION
 // --------
 
+let fieldSize = [1, 1] // clamp position within rectangle
 const targetCenter = twgl.v3.create()
 let isPosLerping = false
 
@@ -155,23 +162,35 @@ const posDelta = twgl.v3.create()
 const zeroVector = twgl.v3.create()
 const workV3 = twgl.v3.create()
 
+function clampPosition(pos) {
+	if (-pos[0] < 0) { pos[0] = 0 }
+	if (-pos[0] > fieldSize[0]) { pos[0] = -fieldSize[0] }
+	if (-pos[1] < -10) { pos[1] = 10 }
+	if (-pos[1] > 10) { pos[1] = -10 }
+	if (-pos[2] < 0) { pos[2] = 0 }
+	if (-pos[2] > fieldSize[1]) { pos[2] = -fieldSize[1] }
+}
+
 export function rawMoveCenter(dx, dy, dz) {
 	isPosLerping = false
 	posTween.halt()
 	camera.position[0] += dx
 	camera.position[1] += dy
 	camera.position[2] += dz
+	clampPosition(camera.position)
 }
 
 export function lerpToPos(pos) {
 	posTween.halt()
 	twgl.v3.negate(pos, targetCenter)
+	clampPosition(targetCenter)
 	isPosLerping = true
 }
 
 export function setTargetCenter(targetCenter_) {
 	isPosLerping = false
 	twgl.v3.negate(targetCenter_, targetCenter)
+	clampPosition(targetCenter)
 	twgl.v3.copy(camera.position, posStart)
 	twgl.v3.subtract(targetCenter, posStart, posDelta) // set posDelta
 	const distance = twgl.v3.distance(posDelta, zeroVector)
