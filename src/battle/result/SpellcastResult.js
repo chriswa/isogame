@@ -10,6 +10,11 @@ export default class SpellcastResult extends BaseResult {
 		if (this.result.manaCost) {
 			unit.mana -= this.result.manaCost
 		}
+
+		if (!this.result.allowMovementAfter) {
+			this.model.turn.moveDisallowed = true
+		}
+
 		this.model.turn.actionUsed = true
 	}
 	getAnimationDurationMs() {

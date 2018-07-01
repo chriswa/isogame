@@ -60,7 +60,9 @@ export default class AIBattleSimulator extends BattleSimulator {
 		const immediateOptions = _.filter(meleeOptions, option => option.distance <= movesLeft)
 		if (immediateOptions.length) {
 			const chosenOption = _.sample(immediateOptions) // choose one at random
-			this.executeDecision(MOVE_ABILITY_ID, chosenOption.pos, activeUnit.teamId)
+			if (v2.manhattan(chosenOption.pos, startCoords) > 0) {
+				this.executeDecision(MOVE_ABILITY_ID, chosenOption.pos, activeUnit.teamId)
+			}
 			this.executeDecision(MELEE_ABILITY_ID, chosenOption.unit.pos, activeUnit.teamId)
 		}
 

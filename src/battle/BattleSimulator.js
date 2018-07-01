@@ -22,19 +22,19 @@ export default class BattleSimulator {
 		this.resultsQueue.push(resultData)
 	}
 	executeDecision(abilityId, target, requestorTeamId) {
-		if (this.model.getVictoryState()) { return console.warn(`(BattleSimulator) ignoring decision made after the battle is victorious`) }
+		if (this.model.getVictoryState()) { console.warn(`(BattleSimulator) ignoring decision made after the battle is victorious`); debugger; return }
 
 		const activeUnitId = this.model.getActiveUnitId()
-		if (activeUnitId === undefined) { return console.warn(`(BattleSimulator) ignoring illegal decision: activeUnitId not found`) }
+		if (activeUnitId === undefined) { console.warn(`(BattleSimulator) ignoring illegal decision: activeUnitId not found`); debugger; return }
 		const activeUnit = this.model.getUnitById(activeUnitId)
 
-		if (activeUnit.teamId !== requestorTeamId) { return console.log(`(BattleSimulator) ignoring illegal decision: active unit not owned by requestor's team`) }
+		if (activeUnit.teamId !== requestorTeamId) { console.log(`(BattleSimulator) ignoring illegal decision: active unit not owned by requestor's team`); debugger; return }
 
 		const ability = this.model.getAbilityById(activeUnitId, abilityId)
-		if (ability === undefined) { return console.warn(`(BattleSimulator) ignoring illegal decision: abilityId not found`) }
+		if (ability === undefined) { console.warn(`(BattleSimulator) ignoring illegal decision: abilityId not found`); debugger; return }
 
-		if (!ability.isEnabled()) { return console.warn(`(BattleSimulator) ignoring illegal decision: failed ability.isEnabled()`) }
-		if (!ability.isValidTarget(target)) { return console.warn(`(BattleSimulator) ignoring illegal decision: failed ability.isValidTarget(target)`) }
+		if (!ability.isEnabled()) { console.warn(`(BattleSimulator) ignoring illegal decision: failed ability.isEnabled()`); debugger; return }
+		if (!ability.isValidTarget(target)) { console.warn(`(BattleSimulator) ignoring illegal decision: failed ability.isValidTarget(target)`); debugger; return }
 		
 		ability.execute(target, this.executionHelper) // n.b. calls this.applyResult()
 	}

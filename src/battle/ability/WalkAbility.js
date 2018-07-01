@@ -3,7 +3,14 @@ import WalkPathing from './../WalkPathing.js'
 
 export default class WalkAbility extends BaseAbility {
 	initArgs(unitArgs) {
-		const distance = unitArgs.distance - (this.model.getActiveUnitId() === this.unitId ? (this.model.turn.movementUsed || 0) : 0)
+		let distance = unitArgs.distance
+		if (this.model.getActiveUnitId() === this.unitId) {
+			distance -= this.model.turn.movementUsed || 0
+		}
+		if (this.model.turn.moveDisallowed) {
+			distance = 0
+		}
+
 		const walkPathing = new WalkPathing(this.model, this.getUnitCoords(), distance)
 
 		this.args = {
