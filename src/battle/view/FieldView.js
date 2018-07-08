@@ -7,9 +7,11 @@ const vb = twgl.v3.create()
 const vc = twgl.v3.create()
 
 export default class FieldView {
-	constructor(size, tileData, meshData) {
-		this.size = size
-		this.tileData = tileData
+	constructor(fieldBuilderViewData) {
+		this.size = fieldBuilderViewData.size
+		this.tileData = fieldBuilderViewData.tileData
+		const meshData = fieldBuilderViewData.meshData
+
 		this.overlayPositionData = meshData.overlayPositionData // Float32Array, quad style (e.g. v0,v1,v2,v3)
 		this.decorRenderer = new FieldDecorRenderer(meshData.decorPositionData, meshData.decorTexcoordData, meshData.decorCenterData)
 		this.overlayRenderer = new FieldOverlayRenderer(meshData.overlayPositionData, meshData.overlayCenterData)

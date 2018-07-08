@@ -7,7 +7,7 @@ export default class BattleModel {
 
 	static createFromBlueprint(battleBlueprint, myTeamId = undefined) {
 		
-		const fieldBuilder = new FieldBuilder(battleBlueprint.fieldDescriptor)
+		const fieldBuilder = FieldBuilder(battleBlueprint.fieldDescriptor)
 		const fieldModel = fieldBuilder.getModel()
 		
 		return new BattleModel({

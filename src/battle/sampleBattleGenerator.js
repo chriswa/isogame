@@ -2,6 +2,7 @@ import BattleModel from './BattleModel.js'
 import FieldBuilder from './FieldBuilder.js'
 import WalkPathing from './WalkPathing.js'
 import TerrainType from './TerrainTypes.js'
+import * as v2 from '../util/v2.js'
 
 const sampleNames = 'Agmund Amleth Asgeir Bertil Bjarte Borphlum Byggvir Dagur Denkli Diederik Dominic Edgo Egon Einherjar Eirik Elof Erland Fenris Fixandu Gjurd Gorla Grendoz Grompl Halvdan Haukur Helheimr Helva Homlur Ignaas Ingefred Isak Jervis Kari Klemenz Kormorflo Leif Lodewijk Lorbo Lund Malto Mikko Morta Nestor Olander Ormur Ragnvald Remur Sigfinnur Smlorg Somerled Sven Tapani Toivo Torstein Trencha Tryggvi Ull Ulrik Urho Valdimar Valgrind Verdl Vihtori Vixja Wendig Wendirgl'.split(' ')
 
@@ -11,7 +12,12 @@ class Builder {
 		this.fieldDescriptor = {
 			type: "randomwoods",
 			seed: seed,
+			isPVP: this.isPVP(),
 		}
+
+		const fieldBuilder = FieldBuilder(this.fieldDescriptor)
+		this.fieldMetrics = fieldBuilder.getMetrics()
+
 		const myTeamId = undefined
 		this.model = BattleModel.createFromBlueprint({
 			fieldDescriptor: this.fieldDescriptor,
@@ -20,12 +26,21 @@ class Builder {
 		}, myTeamId)
 		this.nextUnitId = 0
 	}
+	isPVP() {
+		return this.battleDescriptor.type === 'pvp'
+	}
 	buildBattleBlueprint() {
 		return {
 			fieldDescriptor: this.fieldDescriptor,
 			units: this.model.units,
 			turn: {},
 		}
+	}
+	isPosWalkable(pos) {
+		const square = this.model.field.grid.getCell(pos)
+		if (!square) { return false }
+		const terrainType = TerrainType[square.terrainTypeId]
+		return !!terrainType.walkCost
 	}
 	isValid() {
 		// can every unit path to every other unit (allow units to path through each other for this test)
@@ -37,9 +52,7 @@ class Builder {
 		let retval = true
 		_.each(this.model.units, (unit, unitId) => {
 			// if any unit occupies a square which is not walkable, the battle is not valid
-			const square = this.model.field.grid.getCell(unit.pos)
-			const terrainType = TerrainType[square.terrainTypeId]
-			if (!terrainType.walkCost) {
+			if (!this.isPosWalkable(unit.pos)) {
 				retval = false
 			}
 			// if any unit cannot path to another unit, the battle is not valid
@@ -92,17 +105,41 @@ function buildAttempt(battleDescriptor, seed) {
 
 	const builder = new Builder(battleDescriptor, seed)
 
-	new UnitBuilder(0).spriteSet('human_red').where([11, 11], 0).ability({ abilityType: "Fireball", distance: 4 }).add(builder)
-	new UnitBuilder(1).spriteSet('goblin_purple').where([7, 9], 0).buff({ buffType: "Poison", power: 1, turnsRemaining: 2, }).add(builder)
+	placeFourUnitTeam(builder, 0)
 
-	const isPVP = battleDescriptor.type === 'pvp'
-	builder.setUnitAIForTeamId(1, 1) // this must be done after all units have been added
+	if (builder.isPVP()) {
+		placeFourUnitTeam(builder, 1)
+	}
+	else {
+		const teamId = 1
+		const teamCenter = builder.fieldMetrics.teamStarts[teamId].center
+		const teamFacing = builder.fieldMetrics.teamStarts[teamId].facing
+		for (let i = 0; i < 6; i += 1) {
+			new UnitBuilder(builder, teamId).spriteSet('goblin_purple').near(teamCenter, [3, 10], teamFacing).buff({ buffType: "Poison", power: 1, turnsRemaining: 2, }).done()
+		}
+		builder.setUnitAIForTeamId(teamId, 1) // this must be done after all units have been added
+	}
+
+	// TESTING
+	//console.log(`[sampleBattleGenerator] buildAttempt: enabling AI for team 0 for testing!`)
+	//builder.setUnitAIForTeamId(0, 1) // this must be done after all units have been added
+
 	builder.rollInitiative()
 	return builder
 }
 
+function placeFourUnitTeam(builder, teamId) {
+	const teamCenter = builder.fieldMetrics.teamStarts[teamId].center
+	const teamFacing = builder.fieldMetrics.teamStarts[teamId].facing
+	new UnitBuilder(builder, teamId).spriteSet('human_red').at(v2.add(teamCenter, v2.facingToDelta(teamFacing + 0)), teamFacing).done()
+	new UnitBuilder(builder, teamId).spriteSet('human_purple').at(v2.add(teamCenter, v2.facingToDelta(teamFacing + 1)), teamFacing).ability({ abilityType: "Fireball", distance: 4 }).done()
+	new UnitBuilder(builder, teamId).spriteSet('human_blue').at(v2.add(teamCenter, v2.facingToDelta(teamFacing + 2)), teamFacing).done()
+	new UnitBuilder(builder, teamId).spriteSet('human_green').at(v2.add(teamCenter, v2.facingToDelta(teamFacing + 3)), teamFacing).done()
+}
+
 class UnitBuilder {
-	constructor(teamId) {
+	constructor(builder, teamId) {
+		this.builder = builder
 		this.details = {
 			teamId: teamId,
 			aiType: undefined,
@@ -130,13 +167,25 @@ class UnitBuilder {
 	hp(hp) { this.details.hp = hp; this.details.hpMax = hp; return this }
 	mana(mana) { this.details.mana = mana; this.details.manaMax = mana; return this }
 	spriteSet(spriteSet) { this.details.spriteSet = spriteSet; return this }
-	where(pos, facing) { this.details.pos = pos; this.details.facing = facing; return this }
+	at(pos, facing) { this.details.pos = pos; this.details.facing = facing; return this }
+	near(centerPos, range, facing) {
+		if (facing === undefined) { facing = Math.floor(Math.random() * 4) }
+		const pos = [0, 0]
+		while (true) {
+			pos[0] = centerPos[0] + Math.floor(Math.random() * range[0] * 2) - range[0]
+			pos[1] = centerPos[1] + Math.floor(Math.random() * range[1] * 2) - range[1]
+			if (this.builder.isPosWalkable(pos)) { break }
+		}
+		this.details.pos = pos
+		this.details.facing = facing
+		return this
+	}
 	//teamId(teamId) { this.details.teamId = teamId; return this }
 	walkRange(distance) { this.details.abilities['1'].distance = distance; return this }
 	meleePower(power) { this.details.abilities['2'].power = power; return this }
 	ability(abilityDetails) { this.details.abilities[this.abilityNextId++] = abilityDetails; return this }
 	buff(buffDetails) { this.details.buffs[this.buffNextId++] = buffDetails; return this }
-	add(builder) {
-		builder.addUnit(this.details)
+	done() {
+		this.builder.addUnit(this.details)
 	}
 }

@@ -55,6 +55,22 @@ export function getFacing(a, b) {
 	}
 }
 
+export function facingToDelta(facing, range = 1) {
+	facing = (facing + 4) % 4
+	if (facing === 0) {
+		return [0, -range]
+	}
+	else if (facing === 1) {
+		return [range, 0]
+	}
+	else if (facing === 2) {
+		return [0, range]
+	}
+	else if (facing === 3) {
+		return [-range, 0]
+	}
+}
+
 export function eachInRange(a, minDist, maxDist, callback) {
 	const b = [0, 0]
 	for (let dy = -maxDist; dy <= maxDist; dy += 1) {

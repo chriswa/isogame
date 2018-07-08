@@ -30,8 +30,8 @@ export default class BattleController extends EventEmitter3 {
 		console.log(battleBlueprint)
 		
 		// convert the fieldDescriptor (e.g. { type: "randomwoods", seed: 123 } into a view and model
-		const fieldBuilder = new FieldBuilder(battleBlueprint.fieldDescriptor)
-		const fieldView = new FieldView(...fieldBuilder.getFieldViewCtorArgs())
+		const fieldBuilder = FieldBuilder(battleBlueprint.fieldDescriptor)
+		const fieldView = new FieldView(fieldBuilder.getFieldViewData())
 
 		// Battle Model
 		this.model = BattleModel.createFromBlueprint(battleBlueprint, myTeamId)
