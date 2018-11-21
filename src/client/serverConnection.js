@@ -1,4 +1,7 @@
-const WEBSOCKET_URL = 'ws://' + window.location.hostname + ':9090'
+let WEBSOCKET_URL = 'ws://' + window.location.hostname + ':9090'
+if (!!window.location.hostname.match(/git/)) {
+	WEBSOCKET_URL = 'wss://pi.chriswa.com:9090'
+}
 
 export default new class ServerConnection extends EventEmitter3 {
 	constructor() {
