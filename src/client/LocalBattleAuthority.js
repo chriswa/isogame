@@ -1,57 +1,43 @@
 import AIBattleSimulator from '../battle/AIBattleSimulator.js'
-import BattleModel from '../battle/BattleModel.js'
-import BattleController from '../battle/view/BattleController.js'
+import BaseBattleAuthority from './BaseBattleAuthority.js'
 
-export default class LocalBattleAuthority extends EventEmitter3 {
+const localTeamId = 0
+
+export default class LocalBattleAuthority extends BaseBattleAuthority {
 	constructor(battleBlueprint) {
-		super()
+		super(battleBlueprint, localTeamId)
 
 		this.resultsQueue = []
 		this.resultsLog = []
 
-		this.myTeamId = 0
-
-		this.battleBlueprint = _.cloneDeep(battleBlueprint)
-		this.model = BattleModel.createFromBlueprint(_.cloneDeep(this.battleBlueprint), this.myTeamId)
 		this.simulator = new AIBattleSimulator(this.model, this.resultsQueue)
 
 		this.start()
 	}
-	start() {
-		this.battleController = new BattleController(this.battleBlueprint, this.myTeamId, this.resultsLog)
+	start() { // also called by Client after a supervised battle ends, to resume the paused local battle
+		this.initBattleController(this.resultsLog)
 
 		this.battleController.on('decision', ({ abilityId, target }) => {
 			this.simulator.executeDecision(abilityId, target, this.myTeamId)
-			this.advanceBattle()
+			this._advanceBattle()
 		})
 
-		this.battleController.on('dismiss', () => {
-			this.battleController.destroy()
-			this.emit('dismiss', undefined)
-		})
-
-		this.advanceBattle()
+		this._advanceBattle()
 	}
-	stop() {
+	stop() { // called by Client when a supervised battle starts, to paused the local battle
 		this.battleController.destroy()
 		this.battleController = undefined
 	}
-	advanceBattle() {
+	_advanceBattle() {
 		this.simulator.advanceWithAI()
-		this.sendQueuedResults()
+		this._sendQueuedResults()
 	}
-	sendQueuedResults() {
+	_sendQueuedResults() {
 		while (this.resultsQueue.length) {
 			const result = this.resultsQueue.shift()
 			this.resultsLog.push(result)
 			this.battleController.addResult(result)
 		}
-	}
-	update(dt) {
-		this.battleController.update(dt)
-	}
-	render() {
-		this.battleController.render()
 	}
 }
 

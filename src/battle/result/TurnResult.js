@@ -2,14 +2,14 @@ import BaseResult from './base.js'
 
 export default class TurnResult extends BaseResult {
 	updateModel() {
-		if (this.result.clear) {
+		if (this.resultData.clear) {
 			this.model.data.turn = {}
 		}
-		if (this.result.activeUnitId) {
-			this.model.turn.activeUnitId = this.result.activeUnitId
+		if (this.resultData.activeUnitId) {
+			this.model.turn.activeUnitId = this.resultData.activeUnitId
 		}
-		if (this.result.stage) {
-			this.model.turn.stage = this.result.stage
+		if (this.resultData.stage) {
+			this.model.turn.stage = this.resultData.stage
 		}
 	}
 	getAnimationDurationMs(view) {

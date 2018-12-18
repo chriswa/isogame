@@ -2,21 +2,21 @@ import BaseResult from './base.js'
 
 export default class DeathResult extends BaseResult {
 	updateModel() {
-		delete this.model.units[this.result.unitId]
+		delete this.model.units[this.resultData.unitId]
 	}
 	getAnimationDurationMs() {
 		return 500
 	}
 	animationStart(view) {
-		view.unitSprites[this.result.unitId].startAnimation('CAST')
+		view.unitSprites[this.resultData.unitId].startAnimation('CAST')
 		view.setTopText(`Slain`)
-		view.centerOnUnitId(this.result.unitId)
+		view.centerOnUnitId(this.resultData.unitId)
 	}
 	//onPartial(ratio) {
 	//}
 	animationUpdate(view, normalizedT) {
 	}
 	animationComplete(view) {
-		view.removeUnitSprite(this.result.unitId)
+		view.removeUnitSprite(this.resultData.unitId)
 	}
 }

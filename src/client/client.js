@@ -7,11 +7,6 @@ import TownGUI from '../gui/town/TownGUI.js'
 import FSM from '../util/FSM.js'
 
 
-setTimeout(() => {
-	//TownGUI.$emit('startLocal')
-}, 1000)
-
-
 // ============
 //  CLIENT FSM
 // ============
@@ -33,11 +28,7 @@ const clientFSM = new FSM({
 			TownGUI.isActive = false
 		},
 	},
-	localBattle: {
-		update(dt) { battleAuthority.update(dt) },
-		render() { battleAuthority.render() },
-	},
-	supervisedBattle: {
+	battle: {
 		update(dt) { battleAuthority.update(dt) },
 		render() { battleAuthority.render() },
 	},
@@ -91,7 +82,7 @@ TownGUI.$on('matchMakerUnsubscribeAll', () => {
 let localBattleAuthority = undefined
 
 function startLocalBattle(localBattleId) {
-	clientFSM.setState('localBattle')
+	clientFSM.setState('battle')
 	const battleDescriptor = { type: 'local', localBattleId }
 	const battleBlueprint = sampleBattleGenerator.build(battleDescriptor)
 	battleAuthority = new LocalBattleAuthority(battleBlueprint)
@@ -113,7 +104,7 @@ serverLayer.on('supervisedBattleEnd', () => {
 	if (localBattleAuthority) {
 		localBattleAuthority.start()
 		battleAuthority = localBattleAuthority
-		clientFSM.setState('localBattle')
+		clientFSM.setState('battle')
 	}
 	else {
 		clientFSM.setState('town')
@@ -168,7 +159,7 @@ serverConnection.on('noSupervisedBattle', (payload) => { // login successful and
 serverConnection.on('startSupervisedBattle', (payload) => {
 	serverLayer.emit('connect')
 	serverLayer.emit('supervisedBattleStart') // give local battle a chance to cleanly shutdown in preparation of continuing after the supervised battle
-	clientFSM.setState('supervisedBattle')
+	clientFSM.setState('battle')
 	const battleBlueprint = payload.battleBlueprint
 	const previousResults = payload.previousResults
 	const myTeamId = payload.myTeamId

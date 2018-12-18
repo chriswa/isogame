@@ -10,11 +10,11 @@ export default class FieldView {
 	constructor(fieldBuilderViewData) {
 		this.size = fieldBuilderViewData.size
 		this.tileData = fieldBuilderViewData.tileData
-		const meshData = fieldBuilderViewData.meshData
+		const vertexData = fieldBuilderViewData.vertexData
 
-		this.overlayPositionData = meshData.overlayPositionData // Float32Array, quad style (e.g. v0,v1,v2,v3)
-		this.decorRenderer = new FieldDecorRenderer(meshData.decorPositionData, meshData.decorTexcoordData, meshData.decorCenterData)
-		this.overlayRenderer = new FieldOverlayRenderer(meshData.overlayPositionData, meshData.overlayCenterData)
+		this.overlayPositionData = vertexData.overlayPositionData // Float32Array, quad style (e.g. v0,v1,v2,v3)
+		this.decorRenderer = new FieldDecorRenderer(vertexData.decorPositionData, vertexData.decorTexcoordData, vertexData.decorCenterData)
+		this.overlayRenderer = new FieldOverlayRenderer(vertexData.overlayPositionData, vertexData.overlayCenterData)
 	}
 	updateOverlay(callback) {
 		const overlayBuffer = this.overlayRenderer.getColourData()

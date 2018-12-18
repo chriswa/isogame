@@ -1,10 +1,10 @@
 import BattleModel from '../BattleModel.js'
 
 export default class BaseResult {
-	constructor(model, result) {
+	constructor(model, resultData) {
 		/** @type BattleModel */
 		this.model = model
-		this.result = result
+		this.resultData = resultData
 
 		this.animationCurrentTime = 0
 		this.animationDuration = 0

@@ -25,7 +25,7 @@ class BaseFieldBuilder {
 		}
 	}
 	buildTileData() { throw new Error('abstract method') }
-	drawMeshes() { throw new Error('abstract method') }
+	buildVertexData() { throw new Error('abstract method') }
 	getMetrics() {
 		return this.fieldMetrics
 	}
@@ -39,13 +39,13 @@ class BaseFieldBuilder {
 		return {
 			size: this.size,
 			tileData: this.tileData,
-			meshData: this.drawMeshes(),
+			vertexData: this.buildVertexData(),
 		}
 	}
 }
 
 class BasicProceduralFieldBuilder extends BaseFieldBuilder {
-	drawMeshes() {
+	buildVertexData() {
 		const decorPositionData = []
 		const decorTexcoordData = []
 		const decorCenterData = []
