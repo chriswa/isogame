@@ -11,31 +11,8 @@ import Sprite from '../../gfx/Sprite.js'
 import BattleGUI from '../../gui/battle/BattleGUI.js'
 import billboardGlowOptions from '../../gfx/billboardGlowOptions.js'
 import * as magnifier from '../../gfx/magnifier.js'
-
-class MousePick {
-	constructor(tileCoords, unitId, tileCoordsBehindUnit, screenPos) {
-		this.tileCoords = tileCoords
-		this.unitId = unitId >= 0 ? unitId : undefined // ignore negative pickIds (e.g. shrub obstructions)
-		this.tileCoordsBehindUnit = tileCoordsBehindUnit
-		this.screenPos = screenPos
-		this.magnifierEnabled = false
-	}
-	getTileCoords(ignoreUnitPicking = false) {
-		return ignoreUnitPicking ? this.tileCoordsBehindUnit : this.tileCoords
-	}
-	getUnitId() {
-		return this.unitId 
-	}
-	hasUnit() {
-		return this.unitId !== undefined
-	}
-	hasTileCoords(ignoreUnitPicking = false) {
-		return !!(this.getTileCoords(ignoreUnitPicking))
-	}
-	getScreenPos() {
-		return this.screenPos
-	}
-}
+import MousePick from './MousePick.js'
+import FloatingIndicator from './FloatingIndicator.js'
 
 export default class BattleView {
 
@@ -50,12 +27,10 @@ export default class BattleView {
 		this.bbgroup = new BillboardGroup("assets/sprites.png", SpriteData)
 
 		// create sprite for bouncing turn indicator
-		this.indicatorBillboard = this.bbgroup.acquire()
-		this.indicatorBillboard.setSpriteName('drop_indicator')
-		this.indicatorBillboard.setGlow(1)
-		this.indicatorBillboardBaseHeight = 0
+		this.turnIndicator = new FloatingIndicator(this.bbgroup.acquire())
 
 		// create sprites for each unit
+		/** @type Object.<string, Sprite> */
 		this.unitSprites = {}
 		for (let unitId in this.model.units) {
 			const unitModel = this.model.units[unitId]
@@ -87,11 +62,8 @@ export default class BattleView {
 		}
 	}
 
-	removeUnitSprite(unitId) {
-		const unitSprite = this.unitSprites[unitId]
-		this.bbgroup.release(unitSprite.billboard)
-		delete this.unitSprites[unitId]
-	}
+	// Tile Queries
+	// ============
 
 	getYForTileCenter([x, z]) {
 		const tileData = this.fieldView.tileData[this.fieldView.size * z + x]
@@ -102,21 +74,45 @@ export default class BattleView {
 		return [x, y, z]
 	}
 
+	// Unit Sprites
+	// ============
+
+	removeUnitSprite(unitId) {
+		const unitSprite = this.unitSprites[unitId]
+		this.bbgroup.release(unitSprite.billboard)
+		delete this.unitSprites[unitId]
+	}
+	resetUnitGlows() {
+		this.updateUnitGlows(unitId => { return billboardGlowOptions.NONE })
+	}
+	updateUnitGlows(callback) {
+		for (let unitId in this.unitSprites) {
+			const unitSprite = this.unitSprites[unitId]
+			const glowValue = callback(unitId)
+			unitSprite.setGlow(glowValue)
+		}
+	}
+
+	// Misc GUI
+	// ========
+
+	setWaiting(isWaiting) { } // called by BattleController to show that we're waiting for a response from the server
 	setTopText(text) {
 		BattleGUI.setTopText(text)
 	}
-
 	showActiveUnitIndicator(unitId) {
 		if (unitId === undefined) { return }
 		const unit = this.model.getUnitById(unitId)
 		const worldPos = this.getWorldCoordsForTileCenter(unit.pos, -2.2)
-		this.indicatorBillboard.setPosition(worldPos)
-		this.indicatorBillboardBaseHeight = worldPos[1]
-		this.indicatorBillboard.show()
+		this.turnIndicator.showAtWorldPos(worldPos)
 	}
 	hideActiveUnitIndicator() {
-		this.indicatorBillboard.hide()
+		this.turnIndicator.hide()
 	}
+
+	// Camera and Mouse
+	// ================
+
 	centerOnUnitId(unitId) {
 		const unit = this.model.getUnitById(unitId)
 		this.centerOnPos(this.getWorldCoordsForTileCenter(unit.pos))
@@ -127,10 +123,7 @@ export default class BattleView {
 	lerpCameraToPos(pos) {
 		cameraTweener.lerpToPos(pos)
 	}
-
-	setWaiting(isWaiting) { } // called by BattleController to show that we're waiting for a response from the server
-	
-	mousePick(allowUnits = true) {
+	mousePick(canPickUnits = true) {
 		const screenPos = input.latestMousePos
 
 		// if the mouse is "captured" by a GUI element above the canvas, don't do a mouse pick
@@ -148,7 +141,7 @@ export default class BattleView {
 		let [pickedTileCoords, tileDistance] = this.fieldView.rayPick(origin, direction)
 		const pickedTileCoordsBehindUnit = pickedTileCoords // callers can use this to ignore unit picking
 		let pickedUnitId, unitDistance
-		if (allowUnits) {
+		if (canPickUnits) {
 			[pickedUnitId, unitDistance] = this.bbgroup.screenPick(screenPos)
 			// if both tile and unit are picked, choose only the closest, setting the other to undefined
 			//console.log(tileDistance, unitDistance)
@@ -157,24 +150,15 @@ export default class BattleView {
 				//	pickedUnitId = undefined
 				//}
 				//else {
-					pickedTileCoords = undefined
+				pickedTileCoords = undefined
 				//}
 			}
 		}
 		return new MousePick(pickedTileCoords, pickedUnitId, pickedTileCoordsBehindUnit, screenPos)
 	}
 
-	resetUnitGlows() {
-		this.updateUnitGlows(unitId => { return billboardGlowOptions.NONE })
-	}
-	updateUnitGlows(callback) {
-		for (let unitId in this.unitSprites) {
-			const unitSprite = this.unitSprites[unitId]
-			const glowValue = callback(unitId)
-			unitSprite.setGlow(glowValue)
-		}
-	}
-
+	// Update and Render
+	// =================
 
 	update(dt) {
 		this.tt += dt
@@ -194,10 +178,7 @@ export default class BattleView {
 			billboard.setSpriteName(spriteName)
 		}
 
-		const indicatorPos = this.indicatorBillboard.getPosition()
-		const bouncesPerSecond = 2
-		indicatorPos[1] = this.indicatorBillboardBaseHeight - Math.abs(Math.sin(bouncesPerSecond * this.tt / 1000 * Math.PI * 2 / 2))
-		this.indicatorBillboard.setPosition(indicatorPos)
+		this.turnIndicator.update(this.tt)
 	}
 
 	render() {

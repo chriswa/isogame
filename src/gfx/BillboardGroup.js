@@ -149,6 +149,7 @@ class Billboard {
 		this.setSpriteName(this.spriteName)
 	}
 	setSpriteName(name) {
+		if (this.spriteName === name) { return }
 		this.spriteName = name
 		const sprite = this.spriteData.sprites[name]
 		if (!sprite) { throw new Error(`no such sprite: "${name}"`) }
